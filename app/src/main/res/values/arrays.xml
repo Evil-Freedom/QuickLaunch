@@ -1,0 +1,15 @@
+<resources>
+    <string-array name="trigger_types">
+        <item>定时</item>
+        <item>充电时</item>
+        <item>连接WiFi</item>
+        <item>连接蓝牙</item>
+    </string-array>
+
+    <string-array name="repeat_modes">
+        <item>每天</item>
+        <item>工作日</item>
+        <item>周末</item>
+        <item>一次性</item>
+    </string-array>
+</resources>
