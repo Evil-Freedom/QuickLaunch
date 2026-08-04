@@ -8,4 +8,14 @@
         <item name="colorPrimaryDark">@color/green_dark</item>
         <item name="colorAccent">@color/green</item>
     </style>
+
+    <!-- 透明中转页专用：一闪而过绝不留白，合盖外屏触发时也无缝。
+         windowIsTranslucent 在 targetSdk 35+ 下自动豁免边到边强制，无需消费 Insets。 -->
+    <style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorPrimary">@color/green</item>
+    </style>
 </resources>

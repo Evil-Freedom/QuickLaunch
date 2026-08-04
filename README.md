@@ -21,6 +21,18 @@
 
 ---
 
+## 折叠屏外屏兼容（razr 10 Ultra / Galaxy Fold 等）
+
+合盖状态下从**外屏**也能正常自动启动目标 App，关键设计：
+
+- `util/DisplayPicker.kt`：运行时枚举所有屏幕，**只认「唯一一块亮着的屏」**这一条判据决定投到哪块屏，**不做机型型号白名单**（Google 官方反对设备白名单，且对两种外屏系统实现都成立：外屏是独立 Display 的型号直接选中，外屏复用主屏只换分辨率的型号自动走默认路径）。
+- `LaunchProxyActivity.kt`：透明中转页。触发时先拉起它——它合盖时本身就在外屏上跑，由它启动的目标 App 默认继承同一块屏，再配合 `DisplayPicker` 的 `setLaunchDisplayId` 显式投屏，双保险。
+- 透明中转页顺带解决三件事：绕过后台启动限制、息屏点亮屏幕（`setTurnScreenOn`）、锁屏之上弹出（`setShowWhenLocked`）。
+
+按运行时屏幕状态决策，因此车机副屏、HDMI 外接等场景同样覆盖。
+
+---
+
 ## 编译
 
 ### 方式一：GitHub Actions（推荐，无需本地环境）
@@ -81,9 +93,11 @@ app/src/main/java/com/workbuddy/quicklaunch/
 │   ├── WifiReceiver.kt          WiFi 触发（含网络回调注册）
 │   └── BluetoothReceiver.kt     蓝牙触发
 ├── service/LaunchService.kt     前台服务拉起目标 App + 通知兜底
+├── LaunchProxyActivity.kt       透明中转页：选屏 + 点亮屏幕 + 绕过锁屏 + 外屏继承
 └── util/
     ├── Scheduler.kt             闹钟排程与下次触发时间计算
-    └── AppListLoader.kt         读取可启动应用列表
+    ├── AppListLoader.kt         读取可启动应用列表
+    └── DisplayPicker.kt         折叠屏选屏（按运行时屏幕状态决策，非机型白名单）
 
 app/src/test/java/.../SchedulerTest.kt   时间计算逻辑单元测试
 ```

@@ -15,12 +15,14 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.workbuddy.quicklaunch.LaunchProxyActivity
 
 /**
- * 前台服务：真正去拉起目标 App。
+ * 前台服务：保证触发瞬间进程存活，并把启动动作交给 LaunchProxyActivity。
  *
- * Android 10+ 起后台不能随意 startActivity，可靠的豁免途径是「悬浮窗权限」(SYSTEM_ALERT_WINDOW)。
- * 已授权则直接拉起；未授权或被厂商 ROM 拦截时，退回全屏通知让用户一点即开。
+ * 真正的拉起工作全在中转页里做（选屏 / 点亮屏幕 / 绕过锁屏），这里只负责两条通路：
+ * - 有悬浮窗权限时直接启动中转页，最快
+ * - 没有时靠通知的 fullScreenIntent 让系统去拉，属于官方豁免途径
  */
 class LaunchService : Service() {
 
@@ -36,17 +38,11 @@ class LaunchService : Service() {
 
         startForegroundCompat(Notifier.build(this, pkg, appName, ongoing = true))
 
-        val launched = runCatching {
-            packageManager.getLaunchIntentForPackage(pkg)?.let {
-                startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                true
-            } ?: false
-        }.getOrDefault(false)
+        val launched = Settings.canDrawOverlays(this) &&
+            runCatching { startActivity(LaunchProxyActivity.intent(this, pkg)) }.isSuccess
 
-        // 没有悬浮窗权限时 startActivity 常被系统静默丢弃，统一补一条可点击的通知兜底
-        if (!launched || !Settings.canDrawOverlays(this)) {
-            Notifier.fallback(this, pkg, appName)
-        }
+        // 没有悬浮窗权限时 startActivity 会被系统静默丢弃，统一补一条全屏通知兜底
+        if (!launched) Notifier.fallback(this, pkg, appName)
 
         stopSelf()
         return START_NOT_STICKY
@@ -56,7 +52,7 @@ class LaunchService : Service() {
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
         } else 0
-        ServiceCompat.startForeground(this, Notifier.NOTIF_ID, n, type)
+        runCatching { ServiceCompat.startForeground(this, Notifier.NOTIF_ID, n, type) }
     }
 
     companion object {
@@ -78,25 +74,26 @@ class LaunchService : Service() {
     }
 }
 
-/** 通知构建与兜底启动，前台服务和异常分支共用同一套，避免两处重复。 */
+/** 通知构建与兜底启动。前台服务和各异常分支共用同一套，避免多处重复。 */
 object Notifier {
     const val NOTIF_ID = 1001
     private const val CHANNEL_ID = "quicklaunch_launch"
 
     fun build(context: Context, pkg: String, appName: String, ongoing: Boolean): Notification {
         ensureChannel(context)
-        val launch = context.packageManager.getLaunchIntentForPackage(pkg)
-            ?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        val pi = launch?.let {
-            PendingIntent.getActivity(context, pkg.hashCode(), it, PendingIntent.FLAG_IMMUTABLE)
-        }
+        // 指向中转页而非目标 App，保证点通知启动时同样走选屏与点亮屏幕的逻辑
+        val pi = PendingIntent.getActivity(
+            context, pkg.hashCode(),
+            LaunchProxyActivity.intent(context, pkg),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("正在启动 $appName")
             .setContentText("若未自动打开，点此立即启动")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(pi)
-            .setFullScreenIntent(pi, true)   // 锁屏/后台时争取直接弹出
+            .setFullScreenIntent(pi, true)   // 系统级豁免：允许直接拉起 Activity
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(ongoing)
