@@ -1,8 +1,11 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
+    <!--
+      targetSdk 35+ 起 android:statusBarColor / navigationBarColor 已失效（系统强制边到边），
+      这里不再设置，改由 Activity 中消费 WindowInsets 来避让状态栏与导航栏。
+    -->
     <style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/green</item>
         <item name="colorPrimaryDark">@color/green_dark</item>
         <item name="colorAccent">@color/green</item>
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
     </style>
 </resources>

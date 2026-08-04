@@ -2,25 +2,43 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 开机自启后重新排程定时任务 -->
+    <!-- 开机自启后重新排程定时任务与网络回调 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- 前台服务：用于在后台真正拉起目标 App -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Android 14+ 声明 specialUse 类型的前台服务必须同时申请此权限，否则运行时 SecurityException -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <!-- Android 13+ 通知权限 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- WiFi 条件监听 -->
+    <!-- 通知兜底时使用全屏 Intent，保证锁屏也能弹出 -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- 关键：Android 10+ 后台启动 Activity 的可靠豁免途径，无此权限自动拉起会被系统静默丢弃 -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- WiFi 条件监听（registerNetworkCallback 需要） -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <!-- 蓝牙条件监听 -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <!-- 精确闹钟（Android 12+） -->
+    <!-- 精确闹钟：SCHEDULE_EXACT_ALARM 需用户手动授权，USE_EXACT_ALARM（Android 13+）免授权 -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <!-- 唤醒与忽略电池优化（建议） -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- 唤醒与忽略电池优化 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!--
+      targetSdk 30+ 的包可见性限制：不声明 queries 就查不到其它应用，
+      应用选择列表会是空的、getLaunchIntentForPackage 也会返回 null。
+      只声明 LAUNCHER 意图即可（比 QUERY_ALL_PACKAGES 更克制，也不会被应用商店拒审）。
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -28,7 +46,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.QuickLaunch"
-        tools:targetApi="31">
+        tools:targetApi="34">
 
         <activity
             android:name=".MainActivity"
@@ -49,10 +67,10 @@
         <service
             android:name=".service.LaunchService"
             android:exported="false"
-            android:foregroundServiceType="specialUse"
-            tools:ignore="ForegroundServiceType">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="automation_launch" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="用户自定义规则触发时自动启动指定应用" />
         </service>
 
         <!-- 定时触发（显式 PendingIntent，无需导出） -->
@@ -60,7 +78,12 @@
             android:name=".receiver.AlarmReceiver"
             android:exported="false" />
 
-        <!-- 开机完成：重新注册定时任务 -->
+        <!-- WiFi 触发：由 registerNetworkCallback 的显式 PendingIntent 唤起，不需要 intent-filter -->
+        <receiver
+            android:name=".receiver.WifiReceiver"
+            android:exported="false" />
+
+        <!-- 开机完成：重新注册定时任务与网络回调 -->
         <receiver
             android:name=".receiver.BootReceiver"
             android:exported="true">
@@ -69,7 +92,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 充电触发 -->
+        <!-- 充电触发：ACTION_POWER_CONNECTED 属系统豁免广播，静态注册有效 -->
         <receiver
             android:name=".receiver.PowerConnectionReceiver"
             android:exported="true">
@@ -78,17 +101,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- WiFi 连接触发 -->
-        <receiver
-            android:name=".receiver.WifiReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- 蓝牙连接触发 -->
+        <!-- 蓝牙触发：ACL_CONNECTED 同属豁免广播 -->
         <receiver
             android:name=".receiver.BluetoothReceiver"
             android:exported="true">

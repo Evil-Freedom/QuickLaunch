@@ -1,6 +1,9 @@
 package com.workbuddy.quicklaunch
 
 import android.Manifest
+import android.app.AlarmManager
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -8,38 +11,45 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
-import android.widget.Toast
+import android.view.View
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ActivityMainBinding
+import com.workbuddy.quicklaunch.receiver.WifiReceiver
 import com.workbuddy.quicklaunch.util.Scheduler
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var db: AppDatabase
-    private lateinit var adapter: AutomationAdapter
+    private val adapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyInsets()
 
         db = AppDatabase.get(this)
-        requestNotifyPermission()
-        requestIgnoreBattery()
+        WifiReceiver.register(this)
 
-        adapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
         binding.recycler.layoutManager = LinearLayoutManager(this)
         binding.recycler.adapter = adapter
-
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, CreateAutomationActivity::class.java))
         }
+
+        checkPermissionsOnce()
     }
 
     override fun onResume() {
@@ -47,11 +57,21 @@ class MainActivity : AppCompatActivity() {
         refresh()
     }
 
+    /** targetSdk 35+ 起系统强制边到边显示，不消费 insets 内容会被状态栏和导航栏压住。 */
+    private fun applyInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val bars: Insets = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
+    }
+
     private fun refresh() {
         val items = db.automationDao().getAll()
-        adapter = AutomationAdapter(items, ::onToggle, ::onDelete)
-        binding.recycler.adapter = adapter
-        binding.tvEmpty.visibility = if (items.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        adapter.submit(items)
+        binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun onToggle(a: Automation, checked: Boolean) {
@@ -68,35 +88,68 @@ class MainActivity : AppCompatActivity() {
         refresh()
     }
 
-    private fun requestNotifyPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    1
-                )
-            }
-        }
-    }
+    // ---------- 权限与厂商限制引导 ----------
 
     /**
-     * 引导用户把本应用加入电池优化白名单，否则后台定时/事件可能被系统杀掉。
+     * 只在首次启动时集中引导一次，避免每次打开都往设置页跳。
+     * 用户跳过后可在系统设置里自行开启，不再打扰。
      */
-    private fun requestIgnoreBattery() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    private fun checkPermissionsOnce() {
+        val sp = getSharedPreferences("quicklaunch", Context.MODE_PRIVATE)
+        if (sp.getBoolean("guided", false)) return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1
+            )
+        }
+
+        val missing = buildList {
+            if (!Settings.canDrawOverlays(this@MainActivity)) {
+                add("悬浮窗权限 —— 后台自动拉起应用的必备条件，不开则只能靠点通知启动")
+            }
             val pm = getSystemService(POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                try {
-                    startActivity(
-                        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                            .setData(Uri.parse("package:$packageName"))
-                    )
-                } catch (_: Exception) {
-                    Toast.makeText(this, "请在设置中关闭本应用的电池优化", Toast.LENGTH_LONG).show()
-                }
+                add("忽略电池优化 —— 否则休眠时定时任务会被系统推迟或杀掉")
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val am = getSystemService(ALARM_SERVICE) as AlarmManager
+                if (!am.canScheduleExactAlarms()) add("精确闹钟 —— 否则定时触发会有几分钟误差")
+            }
+            add("自启动 / 后台弹出界面 —— Motorola myui 等厂商 ROM 需在「应用管理」中单独放行")
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("需要开启以下权限")
+            .setMessage(missing.joinToString("\n\n• ", prefix = "• "))
+            .setPositiveButton("去设置") { _, _ ->
+                sp.edit().putBoolean("guided", true).apply()
+                openSettings()
+            }
+            .setNegativeButton("以后再说") { _, _ ->
+                sp.edit().putBoolean("guided", true).apply()
+            }
+            .show()
+    }
+
+    /** 依次尝试跳转，跳不动就退回本应用的系统设置详情页（myui 等 ROM 常缺其中某些页面）。 */
+    private fun openSettings() {
+        val uri = Uri.parse("package:$packageName")
+        val targets = listOf(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        )
+        for (action in targets) {
+            try {
+                startActivity(Intent(action, uri))
+                return
+            } catch (_: ActivityNotFoundException) {
+                // 该机型不支持此设置页，尝试下一个
+            } catch (_: SecurityException) {
             }
         }
     }
