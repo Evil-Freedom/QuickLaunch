@@ -19,6 +19,12 @@ class SchedulerTest {
         triggerType = TriggerType.TIME, timeHour = h, timeMinute = m, repeatMode = mode
     )
 
+    private fun randomRule(mode: String, ws: Int, we: Int) = Automation(
+        name = "t", targetPackage = "p", targetAppName = "n",
+        triggerType = TriggerType.TIME, timeHour = 0, timeMinute = 0,
+        repeatMode = mode, randomWindow = true, windowStartMin = ws, windowEndMin = we
+    )
+
     private fun calOf(ms: Long) = Calendar.getInstance().apply { timeInMillis = ms }
 
     @Test
@@ -55,5 +61,43 @@ class SchedulerTest {
             val delta = Scheduler.nextTriggerTime(rule(mode)) - System.currentTimeMillis()
             assertTrue("$mode 推得太远: ${delta / 3600_000}h", delta < 8 * 24 * 3600_000L)
         }
+    }
+
+    @Test
+    fun `随机窗口触发时刻落在窗口内且为未来`() {
+        val ws = 8 * 60 + 30
+        val we = 8 * 60 + 50
+        val t = Scheduler.nextTriggerTime(randomRule("daily", ws, we))
+        val c = calOf(t)
+        val mins = c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE)
+        assertTrue("时刻 $mins 不在窗口 [$ws,$we]", mins in ws..we)
+        assertEquals(0, c.get(Calendar.SECOND))
+        assertTrue("算出了过去时间", t > System.currentTimeMillis())
+    }
+
+    @Test
+    fun `随机窗口工作日落在周一到周五`() {
+        val d = calOf(Scheduler.nextTriggerTime(randomRule("weekdays", 510, 530)))
+            .get(Calendar.DAY_OF_WEEK)
+        assertTrue("落到了周末: $d", d != Calendar.SATURDAY && d != Calendar.SUNDAY)
+    }
+
+    @Test
+    fun `随机窗口每次重排时刻不同`() {
+        // 重复任务每次重排都重新随机，抽样多次应出现不同分钟
+        val minutes = (1..30).map {
+            calOf(Scheduler.nextTriggerTime(randomRule("daily", 510, 530))).get(Calendar.MINUTE)
+        }.toSet()
+        assertTrue("随机窗口每次都一样，未生效", minutes.size > 1)
+    }
+
+    @Test
+    fun `随机窗口末边界包含结束时刻`() {
+        // 结束时刻 530(8:50) 在 200 次抽样中应至少出现一次
+        val hit = (1..200).any {
+            val c = calOf(Scheduler.nextTriggerTime(randomRule("daily", 510, 530)))
+            c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE) == 530
+        }
+        assertTrue("随机窗口从未抽到结束时刻 8:50", hit)
     }
 }

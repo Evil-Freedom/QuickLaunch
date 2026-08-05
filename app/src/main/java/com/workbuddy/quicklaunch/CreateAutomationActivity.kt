@@ -25,6 +25,11 @@ class CreateAutomationActivity : AppCompatActivity() {
     private var selectedAppName: String? = null
     private var hour = 8
     private var minute = 0
+    private var randomWindow = false
+    private var winStartHour = 8
+    private var winStartMinute = 30
+    private var winEndHour = 8
+    private var winEndMinute = 50
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -58,12 +63,29 @@ class CreateAutomationActivity : AppCompatActivity() {
         binding.btnTime.setOnClickListener { showTimePicker() }
         binding.btnSave.setOnClickListener { save() }
 
+        // 随机窗口：勾选后显示起止时间，并隐藏固定时间按钮（二者互斥）
+        binding.cbRandom.setOnCheckedChangeListener { _, checked ->
+            randomWindow = checked
+            binding.layoutRandom.visibility = if (checked) android.view.View.VISIBLE else android.view.View.GONE
+            binding.btnTime.visibility = if (checked) android.view.View.GONE else android.view.View.VISIBLE
+        }
+        binding.btnWinStart.setOnClickListener { showWindowPicker(true) }
+        binding.btnWinEnd.setOnClickListener { showWindowPicker(false) }
+        updateWindowLabels()
+
         updateTriggerUi(binding.spinnerTrigger.selectedItemPosition)
     }
 
     private fun updateTriggerUi(pos: Int) {
         val isTime = pos == 0
         binding.layoutTime.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
+        binding.cbRandom.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
+        if (!isTime) {
+            binding.layoutRandom.visibility = android.view.View.GONE
+            binding.btnTime.visibility = android.view.View.VISIBLE
+            binding.cbRandom.isChecked = false
+            randomWindow = false
+        }
         binding.layoutBt.visibility =
             if (pos == 3) android.view.View.VISIBLE else android.view.View.GONE
     }
@@ -79,12 +101,31 @@ class CreateAutomationActivity : AppCompatActivity() {
         binding.btnTime.text = String.format("%02d:%02d", hour, minute)
     }
 
+    private fun updateWindowLabels() {
+        binding.btnWinStart.text = String.format("%02d:%02d", winStartHour, winStartMinute)
+        binding.btnWinEnd.text = String.format("%02d:%02d", winEndHour, winEndMinute)
+    }
+
     private fun showTimePicker() {
         TimePickerDialog(this, { _, h, m ->
             hour = h
             minute = m
             updateTimeLabel()
         }, hour, minute, true).show()
+    }
+
+    private fun showWindowPicker(isStart: Boolean) {
+        val (h, m) = if (isStart) winStartHour to winStartMinute else winEndHour to winEndMinute
+        TimePickerDialog(this, { _, pickedH, pickedM ->
+            if (isStart) {
+                winStartHour = pickedH
+                winStartMinute = pickedM
+            } else {
+                winEndHour = pickedH
+                winEndMinute = pickedM
+            }
+            updateWindowLabels()
+        }, h, m, true).show()
     }
 
     private fun pickApp() {
@@ -118,6 +159,12 @@ class CreateAutomationActivity : AppCompatActivity() {
             else -> "daily"
         }
 
+        val rawStart = winStartHour * 60 + winStartMinute
+        val rawEnd = winEndHour * 60 + winEndMinute
+        val (wsMin, weMin) = if (randomWindow) {
+            Math.min(rawStart, rawEnd) to Math.max(rawStart, rawEnd)
+        } else (0 to 0)
+
         val a = Automation(
             name = name,
             targetPackage = pkg,
@@ -126,6 +173,9 @@ class CreateAutomationActivity : AppCompatActivity() {
             timeHour = hour,
             timeMinute = minute,
             repeatMode = repeatKey,
+            randomWindow = randomWindow,
+            windowStartMin = wsMin,
+            windowEndMin = weMin,
             bluetoothName = binding.etBtName.text.toString().trim()
         )
 

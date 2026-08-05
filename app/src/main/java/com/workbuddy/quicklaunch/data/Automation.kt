@@ -21,5 +21,11 @@ data class Automation(
     val repeatMode: String = "daily",
     val bluetoothName: String = "",
     val enabled: Boolean = true,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    /** 随机时间：true 时忽略 timeHour/timeMinute，改在 [windowStartMin, windowEndMin] 当天分钟区间里随机取触发时刻 */
+    val randomWindow: Boolean = false,
+    /** 随机窗口起始，当天分钟数（例如 8:30 => 510） */
+    val windowStartMin: Int = 0,
+    /** 随机窗口结束，当天分钟数（例如 8:50 => 530） */
+    val windowEndMin: Int = 0
 )
