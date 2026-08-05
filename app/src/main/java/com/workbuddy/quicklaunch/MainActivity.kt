@@ -28,6 +28,7 @@ import com.workbuddy.quicklaunch.receiver.WifiReceiver
 import com.workbuddy.quicklaunch.service.KeepAliveService
 import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.RootUtils
+import com.workbuddy.quicklaunch.util.ScreenOnOverlay
 import com.workbuddy.quicklaunch.util.Scheduler
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.Executors
@@ -65,6 +66,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refresh()
+        // 从悬浮窗授权页回来时权限可能刚变，重新对齐开关状态
+        syncAntiSleepUi()
     }
 
     override fun onDestroy() {
@@ -106,47 +109,79 @@ class MainActivity : AppCompatActivity() {
     // ---------- 防外屏息屏（root） ----------
 
     /**
-     * 开关初始状态：先显示已保存的状态，再异步探测 root。
-     * 没 root 就把开关灰掉并说明原因，有 root 才放开可点。
+     * 开关是否可用取决于悬浮窗权限（常亮悬浮窗是主力机制），不取决于 root。
+     * root 只用来顺手把系统超时也顶高，属于加分项，异步探测完再更新副标题。
      */
     private fun setupAntiSleep() {
-        binding.swAntiSleep.isChecked = AntiSleep.isEnabled(this)
-        binding.swAntiSleep.isEnabled = false
-        binding.tvAntiSleep.text = "防外屏息屏 —— 正在检测 root…"
+        syncAntiSleepUi()
 
         io.execute {
             val rooted = RootUtils.hasRoot()
             runOnUiThread {
-                if (isFinishing || isDestroyed) return@runOnUiThread
-                binding.swAntiSleep.isEnabled = rooted
+                if (isFinishing || isDestroyed || !ScreenOnOverlay.canDraw(this)) return@runOnUiThread
                 binding.tvAntiSleep.text =
-                    if (rooted) "防外屏息屏（屏幕常亮）" else "防外屏息屏 —— 未检测到 root，不可用"
-                if (rooted) bindAntiSleepSwitch() else binding.swAntiSleep.isChecked = false
+                    if (rooted) "防外屏息屏（屏幕常亮，已叠加 root 增强）" else "防外屏息屏（屏幕常亮）"
             }
         }
     }
 
+    /** 按当前权限与保存的开关状态刷新这一行 UI（不触发开关回调）。 */
+    private fun syncAntiSleepUi() {
+        if (!::binding.isInitialized) return
+        val granted = ScreenOnOverlay.canDraw(this)
+        binding.tvAntiSleep.text =
+            if (granted) "防外屏息屏（屏幕常亮）" else "防外屏息屏 —— 需要悬浮窗权限"
+        binding.swAntiSleep.setOnCheckedChangeListener(null)
+        binding.swAntiSleep.isChecked = AntiSleep.isEnabled(this) && granted
+        binding.swAntiSleep.isEnabled = true
+        bindAntiSleepSwitch()
+    }
+
     private fun bindAntiSleepSwitch() {
         binding.swAntiSleep.setOnCheckedChangeListener { view, checked ->
+            if (checked && !ScreenOnOverlay.canDraw(this)) {
+                // 没权限直接开不了，回滚开关并把用户送到授权页
+                resetAntiSleepSwitch(false)
+                Snackbar.make(binding.root, "需要悬浮窗权限才能防止外屏息屏", Snackbar.LENGTH_LONG)
+                    .setAction("去授权") { requestOverlayPermission() }
+                    .show()
+                return@setOnCheckedChangeListener
+            }
+
             view.isEnabled = false
             val app = applicationContext
             io.execute {
                 val ok = if (checked) AntiSleep.enable(app) else AntiSleep.disable(app)
+                // 悬浮窗挂在常驻服务上，Activity 退出后才好继续生效
+                if (checked) KeepAliveService.start(app)
                 runOnUiThread {
                     if (isFinishing || isDestroyed) return@runOnUiThread
                     view.isEnabled = true
                     if (ok) {
-                        val tip = if (checked) "已开启：屏幕（含外屏）保持常亮" else "已关闭：熄屏超时已还原"
+                        val tip = if (checked) "已开启：屏幕（含外屏）保持常亮" else "已关闭：恢复系统默认息屏"
                         Snackbar.make(binding.root, tip, Snackbar.LENGTH_SHORT).show()
                     } else {
-                        // 写失败多半是授权被拒，回滚 UI 状态避免和实际不一致
-                        view.setOnCheckedChangeListener(null)
-                        view.isChecked = !checked
-                        bindAntiSleepSwitch()
-                        Snackbar.make(binding.root, "执行失败，请确认已在 root 管理器中授权", Snackbar.LENGTH_LONG).show()
+                        resetAntiSleepSwitch(!checked)
+                        Snackbar.make(binding.root, "开启失败，请检查悬浮窗权限是否被系统撤回", Snackbar.LENGTH_LONG).show()
                     }
                 }
             }
+        }
+    }
+
+    /** 改开关状态但不触发回调，避免回滚时递归。 */
+    private fun resetAntiSleepSwitch(checked: Boolean) {
+        binding.swAntiSleep.setOnCheckedChangeListener(null)
+        binding.swAntiSleep.isChecked = checked
+        binding.swAntiSleep.isEnabled = true
+        bindAntiSleepSwitch()
+    }
+
+    private fun requestOverlayPermission() {
+        runCatching {
+            startActivity(
+                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+            )
         }
     }
 

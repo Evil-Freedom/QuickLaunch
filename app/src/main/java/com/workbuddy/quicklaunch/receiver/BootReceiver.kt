@@ -24,10 +24,13 @@ class BootReceiver : BroadcastReceiver() {
         AppDatabase.get(context).automationDao().getEnabledByType(TriggerType.TIME)
             .forEach { Scheduler.schedule(context, it) }
         WifiReceiver.register(context)
+        // 保活服务起来后会自行挂载防息屏悬浮窗，这里不直接碰窗口
         KeepAliveService.start(context)
 
-        // root 命令耗时且可能等待授权，广播主线程只有 10 秒，必须异步
+        // root 改系统超时耗时且可能等授权，广播主线程只有 10 秒，必须异步
         val app = context.applicationContext
-        thread(isDaemon = true) { AntiSleep.reapply(app) }
+        if (AntiSleep.isEnabled(app)) {
+            thread(isDaemon = true) { AntiSleep.reapplyTimeoutOnly(app) }
+        }
     }
 }
