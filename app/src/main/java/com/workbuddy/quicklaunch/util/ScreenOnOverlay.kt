@@ -67,9 +67,15 @@ object ScreenOnOverlay {
             (displays.joinToString { "#${it.displayId}(state=${it.state})" }) +
             " 已挂=${views.keys}")
         if (can) {
+            val byId = displays.associateBy { it.displayId }
             val lit = displays.filter { it.state == Display.STATE_ON }.map { it.displayId }.toSet()
-            // 已灭的屏先摘掉，避免残留窗口拖住其它显示组
-            views.keys.toList().filterNot { it in lit }.forEach { remove(it) }
+            // 仅移除「当前可枚举且确为灭屏」的窗口。不可枚举的屏（如后台态 Motorola
+            // 对第三方 App 隐藏外屏 displayId=1，或合盖态）保持不变，避免误删正在保活
+            // 的悬浮窗——该窗口一旦挂上就持续压住对应 powerGroup，即便 App 退后台。
+            views.keys.toList().forEach { id ->
+                val d = byId[id]
+                if (d != null && d.state != Display.STATE_ON) remove(id)
+            }
             // 亮着但还没挂的补上
             displays.filter { it.displayId in lit && it.displayId !in views }
                 .forEach { attach(context, it) }

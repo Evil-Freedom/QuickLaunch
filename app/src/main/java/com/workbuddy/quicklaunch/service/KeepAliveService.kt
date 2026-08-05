@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
@@ -34,6 +35,9 @@ import com.workbuddy.quicklaunch.util.ScreenOnOverlay
 class KeepAliveService : Service() {
 
     private val handler = Handler(Looper.getMainLooper())
+
+    /** 屏幕常亮兜底锁：退后台悬浮窗被系统隐藏时，由前台服务持有，不受窗口可见性限制。 */
+    private var wakeLock: PowerManager.WakeLock? = null
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = scheduleSync()
@@ -74,6 +78,7 @@ class KeepAliveService : Service() {
                 .unregisterDisplayListener(displayListener)
         }
         runCatching { unregisterReceiver(screenReceiver) }
+        releaseWakeLock()
         ScreenOnOverlay.clear(this)
         super.onDestroy()
     }
@@ -88,12 +93,46 @@ class KeepAliveService : Service() {
     }
 
     private val syncTask = Runnable {
-        // 后台即防息屏：服务在跑 + 有悬浮窗权限 + 用户没手动关 → 自动挂常亮窗。
+        // 后台即防息屏：服务在跑 + 有悬浮窗权限 + 用户没手动关 → 自动挂常亮窗 + 持锁。
         // 不再依赖显式开关，开关仅作为「手动关闭」覆盖项。
         val disabled = AntiSleep.isDisabled(this)
         val can = ScreenOnOverlay.canDraw(this)
         Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can")
-        if (can && !disabled) ScreenOnOverlay.sync(this) else ScreenOnOverlay.clear(this)
+        if (can && !disabled) {
+            ScreenOnOverlay.sync(this)
+            acquireWakeLock()
+        } else {
+            ScreenOnOverlay.clear(this)
+            releaseWakeLock()
+        }
+    }
+
+    /**
+     * 屏幕常亮兜底：前台态由悬浮窗 FLAG_KEEP_SCREEN_ON 直接压住外屏 powerGroup；
+     * 退后台后悬浮窗可能被系统隐藏/移除（Motorola 对后台 App 隐藏外屏枚举），
+     * 改用前台服务持有的屏幕 WakeLock，不受窗口可见性限制，外屏照样常亮。
+     * 与悬浮窗并存互不冲突，前台时双保险，后台时靠此兜底。
+     */
+    @Suppress("DEPRECATION")
+    private fun acquireWakeLock() {
+        if (wakeLock?.isHeld == true) return
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = pm.newWakeLock(
+            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ON_AFTER_RELEASE,
+            "QuickLaunch:antiSleep"
+        ).apply {
+            setReferenceCounted(false)
+            acquire() // 无超时常驻，直到 releaseWakeLock
+        }
+        Log.i("QL-AntiSleep", "WakeLock 已持有(屏幕常亮兜底)")
+    }
+
+    private fun releaseWakeLock() {
+        wakeLock?.takeIf { it.isHeld }?.let {
+            it.release()
+            Log.i("QL-AntiSleep", "WakeLock 已释放")
+        }
+        wakeLock = null
     }
 
     private fun buildNotify(): Notification {
