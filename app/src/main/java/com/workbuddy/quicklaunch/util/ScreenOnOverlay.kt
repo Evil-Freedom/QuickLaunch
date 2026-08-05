@@ -50,11 +50,23 @@ object ScreenOnOverlay {
     fun sync(context: Context) = onMain {
         val can = canDraw(context)
         val dm = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
-        val displays = dm?.displays
+        // 合盖态下 Motorola 对第三方 App 隐藏外屏（displayId=1，物理端口 131，
+        // 独立 display group），DisplayManager.getDisplays() 只返回内屏，导致外屏
+        // 常亮窗永远挂不上。这里显式补 getDisplay(1) 与 PRESENTATION 类别，
+        // 确保外屏被枚举到（该机型外屏 displayId 固定为 1）。
+        val displays = mutableListOf<Display>().apply {
+            dm?.displays?.let { all -> addAll(all) }
+            dm?.getDisplay(1)?.let { ext ->
+                if (none { d -> d.displayId == ext.displayId }) add(ext)
+            }
+            dm?.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
+                ?.filter { p -> none { d -> d.displayId == p.displayId } }
+                ?.let { addAll(it) }
+        }
         Log.i(TAG, "sync: canDraw=$can displays=" +
-            (displays?.joinToString { "#${it.displayId}(state=${it.state})" } ?: "null") +
+            (displays.joinToString { "#${it.displayId}(state=${it.state})" }) +
             " 已挂=${views.keys}")
-        if (can && displays != null) {
+        if (can) {
             val lit = displays.filter { it.state == Display.STATE_ON }.map { it.displayId }.toSet()
             // 已灭的屏先摘掉，避免残留窗口拖住其它显示组
             views.keys.toList().filterNot { it in lit }.forEach { remove(it) }
