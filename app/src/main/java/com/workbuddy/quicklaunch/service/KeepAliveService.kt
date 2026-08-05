@@ -88,9 +88,12 @@ class KeepAliveService : Service() {
     }
 
     private val syncTask = Runnable {
-        val on = AntiSleep.isEnabled(this)
-        Log.i("QL-AntiSleep", "syncTask 触发, 开关=$on")
-        if (on) ScreenOnOverlay.sync(this) else ScreenOnOverlay.clear(this)
+        // 后台即防息屏：服务在跑 + 有悬浮窗权限 + 用户没手动关 → 自动挂常亮窗。
+        // 不再依赖显式开关，开关仅作为「手动关闭」覆盖项。
+        val disabled = AntiSleep.isDisabled(this)
+        val can = ScreenOnOverlay.canDraw(this)
+        Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can")
+        if (can && !disabled) ScreenOnOverlay.sync(this) else ScreenOnOverlay.clear(this)
     }
 
     private fun buildNotify(): Notification {

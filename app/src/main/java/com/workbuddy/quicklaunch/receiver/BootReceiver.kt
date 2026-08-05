@@ -27,10 +27,10 @@ class BootReceiver : BroadcastReceiver() {
         // 保活服务起来后会自行挂载防息屏悬浮窗，这里不直接碰窗口
         KeepAliveService.start(context)
 
-        // root 改系统超时耗时且可能等授权，广播主线程只有 10 秒，必须异步
+        // root 改系统超时耗时且可能等授权，广播主线程只有 10 秒，必须异步。
+        // reapplyTimeoutOnly 内部已按「用户是否手动关」自判，开机即补上兜底，
+        // 与悬浮窗权限无关（悬浮窗由刚拉起的服务负责），无需等授权。
         val app = context.applicationContext
-        if (AntiSleep.isEnabled(app)) {
-            thread(isDaemon = true) { AntiSleep.reapplyTimeoutOnly(app) }
-        }
+        thread(isDaemon = true) { AntiSleep.reapplyTimeoutOnly(app) }
     }
 }

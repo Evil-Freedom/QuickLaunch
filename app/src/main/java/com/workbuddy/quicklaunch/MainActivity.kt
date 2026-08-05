@@ -68,6 +68,11 @@ class MainActivity : AppCompatActivity() {
         refresh()
         // 从悬浮窗授权页回来时权限可能刚变，重新对齐开关状态
         syncAntiSleepUi()
+        // 后台即防息屏：授权已就绪且未手动关时，让常驻服务重新同步一次，
+        // 确保悬浮窗在「不拨开关」的情况下也能自动挂上。
+        if (ScreenOnOverlay.canDraw(this) && !AntiSleep.isDisabled(this)) {
+            KeepAliveService.start(this)
+        }
     }
 
     override fun onDestroy() {
