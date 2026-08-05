@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -87,8 +88,9 @@ class KeepAliveService : Service() {
     }
 
     private val syncTask = Runnable {
-        if (AntiSleep.isEnabled(this)) ScreenOnOverlay.sync(this)
-        else ScreenOnOverlay.clear(this)
+        val on = AntiSleep.isEnabled(this)
+        Log.i("QL-AntiSleep", "syncTask 触发, 开关=$on")
+        if (on) ScreenOnOverlay.sync(this) else ScreenOnOverlay.clear(this)
     }
 
     private fun buildNotify(): Notification {

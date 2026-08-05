@@ -48,17 +48,19 @@ object ScreenOnOverlay {
      * 屏幕开关、折叠展开后重复调用即可，内部做了幂等。
      */
     fun sync(context: Context) = onMain {
-        if (canDraw(context)) {
-            val dm = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
-            val displays = dm?.displays
-            if (displays != null) {
-                val lit = displays.filter { it.state == Display.STATE_ON }.map { it.displayId }.toSet()
-                // 已灭的屏先摘掉，避免残留窗口拖住其它显示组
-                views.keys.toList().filterNot { it in lit }.forEach { remove(it) }
-                // 亮着但还没挂的补上
-                displays.filter { it.displayId in lit && it.displayId !in views }
-                    .forEach { attach(context, it) }
-            }
+        val can = canDraw(context)
+        val dm = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
+        val displays = dm?.displays
+        Log.i(TAG, "sync: canDraw=$can displays=" +
+            (displays?.joinToString { "#${it.displayId}(state=${it.state})" } ?: "null") +
+            " 已挂=${views.keys}")
+        if (can && displays != null) {
+            val lit = displays.filter { it.state == Display.STATE_ON }.map { it.displayId }.toSet()
+            // 已灭的屏先摘掉，避免残留窗口拖住其它显示组
+            views.keys.toList().filterNot { it in lit }.forEach { remove(it) }
+            // 亮着但还没挂的补上
+            displays.filter { it.displayId in lit && it.displayId !in views }
+                .forEach { attach(context, it) }
         }
     }
 
