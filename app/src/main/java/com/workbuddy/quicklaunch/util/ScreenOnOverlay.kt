@@ -4,7 +4,10 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.Display
 import android.view.View
 import android.view.WindowManager
@@ -23,37 +26,47 @@ import android.view.WindowManager
  */
 object ScreenOnOverlay {
 
+    private const val TAG = "QL-AntiSleep"
+
     /** displayId -> 已挂载的占位 View，便于按屏增删。 */
     private val views = mutableMapOf<Int, View>()
 
+    private val main = Handler(Looper.getMainLooper())
+
     fun canDraw(context: Context): Boolean = Settings.canDrawOverlays(context)
+
+    /**
+     * WindowManager.addView 内部要建 Handler，必须跑在有 Looper 的线程上。
+     * 调用方常常在线程池里（root 命令阻塞不能占主线程），所以这里统一兜住。
+     */
+    private inline fun onMain(crossinline block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) block() else main.post { block() }
+    }
 
     /**
      * 同步悬浮窗：给每块「亮着的」屏挂上常亮窗，已灭的屏移除。
      * 屏幕开关、折叠展开后重复调用即可，内部做了幂等。
      */
-    @Synchronized
-    fun sync(context: Context) {
-        if (!canDraw(context)) return
-        val dm = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager ?: return
-        val displays = dm.displays ?: return
-
-        val lit = displays.filter { it.state == Display.STATE_ON }.map { it.displayId }.toSet()
-
-        // 已灭的屏先摘掉，避免残留窗口拖住其它显示组
-        views.keys.toList().filterNot { it in lit }.forEach { remove(it) }
-
-        // 亮着但还没挂的补上
-        displays.filter { it.displayId in lit && it.displayId !in views }.forEach { attach(context, it) }
+    fun sync(context: Context) = onMain {
+        if (canDraw(context)) {
+            val dm = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
+            val displays = dm?.displays
+            if (displays != null) {
+                val lit = displays.filter { it.state == Display.STATE_ON }.map { it.displayId }.toSet()
+                // 已灭的屏先摘掉，避免残留窗口拖住其它显示组
+                views.keys.toList().filterNot { it in lit }.forEach { remove(it) }
+                // 亮着但还没挂的补上
+                displays.filter { it.displayId in lit && it.displayId !in views }
+                    .forEach { attach(context, it) }
+            }
+        }
     }
 
     /** 全部摘除，关闭开关或服务销毁时调用。 */
-    @Synchronized
-    fun clear(context: Context) {
+    fun clear(context: Context) = onMain {
         views.keys.toList().forEach { remove(it) }
     }
 
-    @Synchronized
     fun isActive(): Boolean = views.isNotEmpty()
 
     private fun attach(context: Context, display: Display) {
@@ -64,6 +77,9 @@ object ScreenOnOverlay {
             val v = View(dctx)
             wm.addView(v, params())
             views[display.displayId] = v
+            Log.i(TAG, "常亮窗已挂载 display=${display.displayId}")
+        }.onFailure {
+            Log.w(TAG, "常亮窗挂载失败 display=${display.displayId}: $it")
         }
     }
 

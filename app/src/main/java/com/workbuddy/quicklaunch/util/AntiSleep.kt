@@ -38,13 +38,14 @@ object AntiSleep {
 
     /**
      * 开启：悬浮窗常亮 + （若有 root）顶高系统超时。
-     * @return 悬浮窗是否挂上了 —— 这是功能是否真正生效的判据
+     * 挂窗口要切主线程，是异步的，所以这里用「权限是否具备」作为成功判据。
      */
     fun enable(ctx: Context): Boolean {
+        if (!ScreenOnOverlay.canDraw(ctx)) return false
         setEnabled(ctx, true)
         applyRootTimeout(ctx)
         ScreenOnOverlay.sync(ctx)
-        return ScreenOnOverlay.isActive()
+        return true
     }
 
     /** 关闭：摘掉悬浮窗，并把系统超时还原成开启前备份的值。 */
