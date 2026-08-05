@@ -82,6 +82,16 @@
                 android:value="用户自定义规则触发时自动启动指定应用" />
         </service>
 
+        <!-- 后台保活前台服务：长驻降低被杀概率，保障自动启动规则可靠触发 -->
+        <service
+            android:name=".service.KeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="后台保活，保障自动启动规则可靠触发" />
+        </service>
+
         <!-- 定时触发（显式 PendingIntent，无需导出） -->
         <receiver
             android:name=".receiver.AlarmReceiver"

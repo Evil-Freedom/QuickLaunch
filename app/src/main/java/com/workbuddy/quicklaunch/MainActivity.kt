@@ -25,13 +25,21 @@ import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ActivityMainBinding
 import com.workbuddy.quicklaunch.receiver.WifiReceiver
+import com.workbuddy.quicklaunch.service.KeepAliveService
+import com.workbuddy.quicklaunch.util.AntiSleep
+import com.workbuddy.quicklaunch.util.RootUtils
 import com.workbuddy.quicklaunch.util.Scheduler
+import com.google.android.material.snackbar.Snackbar
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var db: AppDatabase
     private val adapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
+
+    /** root 命令会阻塞（首次还要等授权弹窗），一律丢到单线程池里跑，绝不占主线程。 */
+    private val io = Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -49,12 +57,19 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, CreateAutomationActivity::class.java))
         }
 
+        KeepAliveService.start(this)
+        setupAntiSleep()
         checkPermissionsOnce()
     }
 
     override fun onResume() {
         super.onResume()
         refresh()
+    }
+
+    override fun onDestroy() {
+        io.shutdown()
+        super.onDestroy()
     }
 
     /** targetSdk 35+ 起系统强制边到边显示，不消费 insets 内容会被状态栏和导航栏压住。 */
@@ -86,6 +101,53 @@ class MainActivity : AppCompatActivity() {
         if (a.triggerType == TriggerType.TIME) Scheduler.cancel(this, a)
         db.automationDao().delete(a)
         refresh()
+    }
+
+    // ---------- 防外屏息屏（root） ----------
+
+    /**
+     * 开关初始状态：先显示已保存的状态，再异步探测 root。
+     * 没 root 就把开关灰掉并说明原因，有 root 才放开可点。
+     */
+    private fun setupAntiSleep() {
+        binding.swAntiSleep.isChecked = AntiSleep.isEnabled(this)
+        binding.swAntiSleep.isEnabled = false
+        binding.tvAntiSleep.text = "防外屏息屏 —— 正在检测 root…"
+
+        io.execute {
+            val rooted = RootUtils.hasRoot()
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                binding.swAntiSleep.isEnabled = rooted
+                binding.tvAntiSleep.text =
+                    if (rooted) "防外屏息屏（屏幕常亮）" else "防外屏息屏 —— 未检测到 root，不可用"
+                if (rooted) bindAntiSleepSwitch() else binding.swAntiSleep.isChecked = false
+            }
+        }
+    }
+
+    private fun bindAntiSleepSwitch() {
+        binding.swAntiSleep.setOnCheckedChangeListener { view, checked ->
+            view.isEnabled = false
+            val app = applicationContext
+            io.execute {
+                val ok = if (checked) AntiSleep.enable(app) else AntiSleep.disable(app)
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    view.isEnabled = true
+                    if (ok) {
+                        val tip = if (checked) "已开启：屏幕（含外屏）保持常亮" else "已关闭：熄屏超时已还原"
+                        Snackbar.make(binding.root, tip, Snackbar.LENGTH_SHORT).show()
+                    } else {
+                        // 写失败多半是授权被拒，回滚 UI 状态避免和实际不一致
+                        view.setOnCheckedChangeListener(null)
+                        view.isChecked = !checked
+                        bindAntiSleepSwitch()
+                        Snackbar.make(binding.root, "执行失败，请确认已在 root 管理器中授权", Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
     }
 
     // ---------- 权限与厂商限制引导 ----------
