@@ -37,14 +37,19 @@ jobs:
       - name: 编译 Debug APK（自动 debug 签名，可直接安装）
         run: gradle assembleDebug --no-daemon --stacktrace
 
-      - name: 上传产物
+      - name: 上传 Debug 产物
         uses: actions/upload-artifact@v4
         with:
           name: quicklaunch-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
-  # 如需生成可上架的 Release 签名 APK，在仓库 Settings → Secrets 配置以下变量后启用：
-  #   KEYSTORE_BASE64 : 把 .jks 用 base64 编码后整段粘贴
-  #   KEY_ALIAS / KEY_PASSWORD / KEYSTORE_PASSWORD
-  # 并改用 `assembleRelease` 与对应的签名步骤。
+      - name: 编译 Release APK（正式签名，可上架/长期覆盖安装）
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: 上传 Release 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: quicklaunch-release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
