@@ -43,16 +43,29 @@ class AutomationAdapter(
 
     private fun triggerLabel(a: Automation): String = when (a.triggerType) {
         TriggerType.TIME ->
-            "定时 %02d:%02d（%s）".format(a.timeHour, a.timeMinute, repeatLabel(a.repeatMode))
+            "定时 %02d:%02d（%s）%s".format(
+                a.timeHour, a.timeMinute, repeatLabel(a),
+                if (a.skipHolidays) "·跳假" else ""
+            )
         TriggerType.CHARGING -> "充电时"
         TriggerType.WIFI -> "连接 WiFi"
         else -> if (a.bluetoothName.isNotEmpty()) "连接蓝牙:${a.bluetoothName}" else "连接蓝牙"
     }
 
-    private fun repeatLabel(mode: String): String = when (mode) {
+    private fun repeatLabel(a: Automation): String = when (a.repeatMode) {
         "daily" -> "每天"
         "weekdays" -> "工作日"
         "weekend" -> "周末"
+        "custom" -> customDaysLabel(a.repeatDays)
         else -> "一次"
+    }
+
+    private val DAY_LABELS = arrayOf("日", "一", "二", "三", "四", "五", "六")
+
+    /** 自定义星期位图 -> 可读串，例如 自定义(一三五)；mask 异常时回退「自定义」。 */
+    private fun customDaysLabel(mask: Int): String {
+        if (mask == 0) return "自定义"
+        val picks = (0..6).filter { (mask shr it) and 1 == 1 }.joinToString("") { DAY_LABELS[it] }
+        return if (picks.isEmpty()) "自定义" else "自定义($picks)"
     }
 }

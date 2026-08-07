@@ -2,6 +2,8 @@ package com.workbuddy.quicklaunch
 
 import android.app.TimePickerDialog
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -26,10 +28,14 @@ class CreateAutomationActivity : AppCompatActivity() {
     private var hour = 8
     private var minute = 0
     private var randomWindow = false
+    private var skipHolidays = false
     private var winStartHour = 8
     private var winStartMinute = 30
     private var winEndHour = 8
     private var winEndMinute = 50
+
+    /** 自定义星期选中状态：index = Calendar.DAY_OF_WEEK - 1（0=日 … 6=六） */
+    private val selectedDays = BooleanArray(7)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -60,6 +66,20 @@ class CreateAutomationActivity : AppCompatActivity() {
                 }
                 override fun onNothingSelected(p: android.widget.AdapterView<*>) {}
             }
+        binding.spinnerRepeat.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p: AdapterView<*>, v: android.view.View?, pos: Int, id: Long) {
+                    syncCustomDaysVisibility()
+                }
+                override fun onNothingSelected(p: AdapterView<*>) {}
+            }
+        // 星期多选开关：index 与位图对齐（0=日 … 6=六）
+        listOf(
+            binding.tbDay0, binding.tbDay1, binding.tbDay2, binding.tbDay3,
+            binding.tbDay4, binding.tbDay5, binding.tbDay6
+        ).forEachIndexed { idx, tb ->
+            tb.setOnCheckedChangeListener { _, checked -> selectedDays[idx] = checked }
+        }
         binding.btnTime.setOnClickListener { showTimePicker() }
         binding.btnSave.setOnClickListener { save() }
 
@@ -71,6 +91,7 @@ class CreateAutomationActivity : AppCompatActivity() {
         }
         binding.btnWinStart.setOnClickListener { showWindowPicker(true) }
         binding.btnWinEnd.setOnClickListener { showWindowPicker(false) }
+        binding.cbSkipHolidays.setOnCheckedChangeListener { _, checked -> skipHolidays = checked }
         updateWindowLabels()
 
         updateTriggerUi(binding.spinnerTrigger.selectedItemPosition)
@@ -80,14 +101,26 @@ class CreateAutomationActivity : AppCompatActivity() {
         val isTime = pos == 0
         binding.layoutTime.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
         binding.cbRandom.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
+        binding.cbSkipHolidays.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
         if (!isTime) {
             binding.layoutRandom.visibility = android.view.View.GONE
             binding.btnTime.visibility = android.view.View.VISIBLE
             binding.cbRandom.isChecked = false
+            binding.cbSkipHolidays.isChecked = false
+            binding.layoutCustomDays.visibility = android.view.View.GONE
             randomWindow = false
+            skipHolidays = false
+        } else {
+            syncCustomDaysVisibility()
         }
         binding.layoutBt.visibility =
             if (pos == 3) android.view.View.VISIBLE else android.view.View.GONE
+    }
+
+    /** 仅当选中「自定义」重复模式时显示星期多选，否则隐藏。 */
+    private fun syncCustomDaysVisibility() {
+        val isCustom = binding.spinnerRepeat.selectedItem?.toString() == "自定义"
+        binding.layoutCustomDays.visibility = if (isCustom) android.view.View.VISIBLE else android.view.View.GONE
     }
 
     private fun currentTriggerType(): String = when (binding.spinnerTrigger.selectedItemPosition) {
@@ -156,7 +189,17 @@ class CreateAutomationActivity : AppCompatActivity() {
             "工作日" -> "weekdays"
             "周末" -> "weekend"
             "一次性" -> "once"
+            "自定义" -> "custom"
             else -> "daily"
+        }
+        val repeatDaysMask = if (repeatKey == "custom") {
+            var mask = 0
+            for (i in 0..6) if (selectedDays[i]) mask = mask or (1 shl i)
+            mask
+        } else 0
+        if (repeatKey == "custom" && repeatDaysMask == 0) {
+            toast("请至少选择一天")
+            return
         }
 
         val rawStart = winStartHour * 60 + winStartMinute
@@ -173,6 +216,8 @@ class CreateAutomationActivity : AppCompatActivity() {
             timeHour = hour,
             timeMinute = minute,
             repeatMode = repeatKey,
+            repeatDays = repeatDaysMask,
+            skipHolidays = skipHolidays,
             randomWindow = randomWindow,
             windowStartMin = wsMin,
             windowEndMin = weMin,

@@ -11,5 +11,6 @@
         <item>工作日</item>
         <item>周末</item>
         <item>一次性</item>
+        <item>自定义</item>
     </string-array>
 </resources>

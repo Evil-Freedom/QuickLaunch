@@ -19,6 +19,12 @@ class SchedulerTest {
         triggerType = TriggerType.TIME, timeHour = h, timeMinute = m, repeatMode = mode
     )
 
+    private fun customRule(mask: Int, h: Int = 8, m: Int = 30) = Automation(
+        name = "t", targetPackage = "p", targetAppName = "n",
+        triggerType = TriggerType.TIME, timeHour = h, timeMinute = m,
+        repeatMode = "custom", repeatDays = mask
+    )
+
     private fun randomRule(mode: String, ws: Int, we: Int) = Automation(
         name = "t", targetPackage = "p", targetAppName = "n",
         triggerType = TriggerType.TIME, timeHour = 0, timeMinute = 0,
@@ -29,7 +35,7 @@ class SchedulerTest {
 
     @Test
     fun `任何模式下次触发都在未来`() {
-        listOf("daily", "weekdays", "weekend", "once").forEach { mode ->
+        listOf("daily", "weekdays", "weekend", "once", "custom").forEach { mode ->
             val t = Scheduler.nextTriggerTime(rule(mode))
             assertTrue("$mode 算出了过去的时间", t > System.currentTimeMillis())
         }
@@ -99,5 +105,93 @@ class SchedulerTest {
             c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE) == 530
         }
         assertTrue("随机窗口从未抽到结束时刻 8:50", hit)
+    }
+
+    @Test
+    fun `自定义星期只落在选中的几天`() {
+        // 选中周一、周三、周五 (bit 1,3,5)
+        val mask = (1 shl 1) or (1 shl 3) or (1 shl 5)
+        val d = calOf(Scheduler.nextTriggerTime(customRule(mask))).get(Calendar.DAY_OF_WEEK)
+        val ok = d == Calendar.MONDAY || d == Calendar.WEDNESDAY || d == Calendar.FRIDAY
+        assertTrue("落到了未选中的星期: $d", ok)
+    }
+
+    @Test
+    fun `自定义星期下次触发不超过一周`() {
+        val mask = (1 shl 1) or (1 shl 3) or (1 shl 5)
+        val delta = Scheduler.nextTriggerTime(customRule(mask)) - System.currentTimeMillis()
+        assertTrue("自定义推得太远: ${delta / 3600_000}h", delta < 8 * 24 * 3600_000L)
+    }
+
+    @Test
+    fun `自定义星期随机窗口落在选中日且窗口内`() {
+        val mask = (1 shl 1) or (1 shl 3) or (1 shl 5)
+        val ws = 8 * 60 + 30
+        val we = 8 * 60 + 50
+        val t = Scheduler.nextTriggerTime(
+            Automation(
+                name = "t", targetPackage = "p", targetAppName = "n",
+                triggerType = TriggerType.TIME, repeatMode = "custom", repeatDays = mask,
+                randomWindow = true, windowStartMin = ws, windowEndMin = we
+            )
+        )
+        val c = calOf(t)
+        val d = c.get(Calendar.DAY_OF_WEEK)
+        assertTrue("落到未选中日: $d", d == Calendar.MONDAY || d == Calendar.WEDNESDAY || d == Calendar.FRIDAY)
+        val mins = c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE)
+        assertTrue("时刻 $mins 不在窗口 [$ws,$we]", mins in ws..we)
+        assertEquals(0, c.get(Calendar.SECOND))
+        assertTrue("算出了过去时间", t > System.currentTimeMillis())
+    }
+
+    @Test
+    fun `自定义星期mask为0不进入死循环且返回未来时间`() {
+        val t = Scheduler.nextTriggerTime(customRule(0))
+        assertTrue("mask=0 未返回有效未来时间", t > System.currentTimeMillis())
+    }
+
+    @Test
+    fun `跳过节假日时不会落在节假日且为未来`() {
+        // 把“明天”当成节假日，验证 daily 规则会跳过它
+        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+        val key = "%04d-%02d-%02d".format(
+            tomorrow.get(Calendar.YEAR), tomorrow.get(Calendar.MONTH) + 1, tomorrow.get(Calendar.DAY_OF_MONTH)
+        )
+        val skipSet = setOf(key)
+        val shouldSkip: (Calendar) -> Boolean = { c ->
+            skipSet.contains(
+                "%04d-%02d-%02d".format(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH))
+            )
+        }
+        val t = Scheduler.nextTriggerTime(rule("daily"), shouldSkip)
+        val c = calOf(t)
+        val ds = "%04d-%02d-%02d".format(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH))
+        assertTrue("落到了被跳过的节假日 $ds", ds !in skipSet)
+        assertTrue("算出了过去时间", t > System.currentTimeMillis())
+    }
+
+    @Test
+    fun `随机窗口跳过节假日当天不触发`() {
+        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+        val key = "%04d-%02d-%02d".format(
+            tomorrow.get(Calendar.YEAR), tomorrow.get(Calendar.MONTH) + 1, tomorrow.get(Calendar.DAY_OF_MONTH)
+        )
+        val shouldSkip: (Calendar) -> Boolean = { c ->
+            "%04d-%02d-%02d".format(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH)) == key
+        }
+        val ws = 8 * 60 + 30
+        val we = 8 * 60 + 50
+        val t = Scheduler.nextTriggerTime(
+            Automation(
+                name = "t", targetPackage = "p", targetAppName = "n",
+                triggerType = TriggerType.TIME, repeatMode = "daily",
+                randomWindow = true, windowStartMin = ws, windowEndMin = we
+            ),
+            shouldSkip
+        )
+        val c = calOf(t)
+        val ds = "%04d-%02d-%02d".format(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH))
+        assertTrue("随机窗口落到了被跳过的节假日 $ds", ds != key)
+        assertTrue("算出了过去时间", t > System.currentTimeMillis())
     }
 }

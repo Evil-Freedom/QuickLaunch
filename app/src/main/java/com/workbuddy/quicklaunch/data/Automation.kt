@@ -6,7 +6,9 @@ import androidx.room.PrimaryKey
 /**
  * 一条「自动化」规则：当 triggerType 满足时，自动拉起 targetPackage 对应的 App。
  *
- * @param repeatMode 仅对 TIME 触发生效：daily / weekdays / weekend / once
+ * @param repeatMode 仅对 TIME 触发生效：daily / weekdays / weekend / once / custom
+ * @param repeatDays 仅 repeatMode="custom" 生效：星期位图，bit (Calendar.DAY_OF_WEEK - 1) 表示选中。
+ *   例如周一三五 = (1 shl 1) or (1 shl 3) or (1 shl 5) = 0b0101010。
  * @param bluetoothName 仅对 BLUETOOTH 触发生效，留空表示任意蓝牙设备
  */
 @Entity(tableName = "automations")
@@ -19,6 +21,9 @@ data class Automation(
     val timeHour: Int = 0,
     val timeMinute: Int = 0,
     val repeatMode: String = "daily",
+    val repeatDays: Int = 0,
+    /** 仅对 TIME 触发生效：true 时跳过中国法定节假日（含调休休息日）不触发 */
+    val skipHolidays: Boolean = false,
     val bluetoothName: String = "",
     val enabled: Boolean = true,
     val createdAt: Long = System.currentTimeMillis(),

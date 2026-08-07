@@ -64,6 +64,105 @@
                 android:entries="@array/repeat_modes" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/layoutCustomDays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="选择星期（可多选）"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <ToggleButton
+                    android:id="@+id/tbDay0"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:textSize="13sp"
+                    android:textOff="日"
+                    android:textOn="日" />
+
+                <ToggleButton
+                    android:id="@+id/tbDay1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:textSize="13sp"
+                    android:textOff="一"
+                    android:textOn="一" />
+
+                <ToggleButton
+                    android:id="@+id/tbDay2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:textSize="13sp"
+                    android:textOff="二"
+                    android:textOn="二" />
+
+                <ToggleButton
+                    android:id="@+id/tbDay3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:textSize="13sp"
+                    android:textOff="三"
+                    android:textOn="三" />
+
+                <ToggleButton
+                    android:id="@+id/tbDay4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:textSize="13sp"
+                    android:textOff="四"
+                    android:textOn="四" />
+
+                <ToggleButton
+                    android:id="@+id/tbDay5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:textSize="13sp"
+                    android:textOff="五"
+                    android:textOn="五" />
+
+                <ToggleButton
+                    android:id="@+id/tbDay6"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:textSize="13sp"
+                    android:textOff="六"
+                    android:textOn="六" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/cbSkipHolidays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="跳过中国法定节假日（含调休休息日）不触发" />
+
         <CheckBox
             android:id="@+id/cbRandom"
             android:layout_width="match_parent"

@@ -7,9 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Automation::class], version = 2)
+@Database(entities = [Automation::class, Holiday::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun automationDao(): AutomationDao
+    abstract fun holidayDao(): HolidayDao
 
     companion object {
         @Volatile
@@ -24,6 +25,24 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // 升级到 version 3：新增自定义星期位图列
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE automations ADD COLUMN repeatDays INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        // 升级到 version 4：新增 holidays 表缓存中国法定节假日
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS holidays (" +
+                        "date TEXT NOT NULL PRIMARY KEY, " +
+                        "name TEXT NOT NULL)"
+                )
+            }
+        }
+
         fun get(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -31,7 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "quicklaunch.db"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     // ponytail: 规则数量只有几十条，且 BroadcastReceiver/JobService 里必须同步取数，
                     // 直接放开主线程查询。若将来规则上千条再换协程 + Flow。
                     .allowMainThreadQueries()

@@ -12,6 +12,8 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +31,9 @@ import com.workbuddy.quicklaunch.service.KeepAliveService
 import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.RootUtils
 import com.workbuddy.quicklaunch.util.ScreenOnOverlay
+import com.workbuddy.quicklaunch.util.HolidaySync
+import com.workbuddy.quicklaunch.util.HolidaySources
+import com.workbuddy.quicklaunch.util.HolidayPrefs
 import com.workbuddy.quicklaunch.util.Scheduler
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.Executors
@@ -57,15 +62,72 @@ class MainActivity : AppCompatActivity() {
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, CreateAutomationActivity::class.java))
         }
+        binding.btnSyncHolidays.setOnClickListener { syncHolidays() }
+        binding.btnManageHolidays.setOnClickListener {
+            startActivity(Intent(this, HolidayManageActivity::class.java))
+        }
+        binding.btnManageSources.setOnClickListener {
+            startActivity(Intent(this, SourceManageActivity::class.java))
+        }
+        setupSourceSpinner()
 
         KeepAliveService.start(this)
         setupAntiSleep()
         checkPermissionsOnce()
+
+        // 首次启动（本地无节假日数据）自动同步一次，便于「跳过节假日」立即生效
+        if (db.holidayDao().count() == 0) syncHolidays()
+    }
+
+    /** 数据源下拉：自动（推荐）优先用上次成功源，也可手动指定某一内置/自定义源（失败再回退其余）。 */
+    private fun setupSourceSpinner() {
+        val ids = mutableListOf("auto")
+        val labels = mutableListOf("自动（推荐）")
+        HolidaySources.ALL.forEach {
+            ids.add(it.id)
+            labels.add(it.label)
+        }
+        HolidayPrefs.getCustomSources(this).forEach {
+            ids.add(it.id)
+            labels.add("${it.label}（自定义）")
+        }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerSource.adapter = adapter
+
+        val pref = HolidayPrefs.getSourcePref(this)
+        binding.spinnerSource.setSelection(ids.indexOf(pref).coerceAtLeast(0))
+        binding.spinnerSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p: AdapterView<*>, v: android.view.View?, pos: Int, id: Long) {
+                HolidayPrefs.setSourcePref(this@MainActivity, ids[pos])
+            }
+            override fun onNothingSelected(p: AdapterView<*>) {}
+        }
+    }
+
+    /** 后台拉取并缓存中国法定节假日；结果用 Snackbar 反馈，并显示实际采用的数据源。 */
+    private fun syncHolidays() {
+        if (binding.btnSyncHolidays.isEnabled) binding.btnSyncHolidays.isEnabled = false
+        val pref = HolidayPrefs.getSourcePref(this)
+        val prefId = if (pref == "auto") null else pref
+        HolidaySync.sync(this, prefId) { res ->
+            if (isFinishing || isDestroyed) return@sync
+            binding.btnSyncHolidays.isEnabled = true
+            val msg = if (res.success) {
+                // 同步后重新排程，使「跳过节假日」立即按最新数据生效
+                Scheduler.rescheduleAll(this)
+                "已同步（来源：${res.sourceLabel}，${res.count} 天）"
+            } else {
+                "所有数据源同步失败，请检查网络后重试"
+            }
+            Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         refresh()
+        setupSourceSpinner() // 从「管理数据源」返回后刷新下拉，纳入新增的自定义源
         // 从悬浮窗授权页回来时权限可能刚变，重新对齐开关状态
         syncAntiSleepUi()
         // 后台即防息屏：授权已就绪且未手动关时，让常驻服务重新同步一次，

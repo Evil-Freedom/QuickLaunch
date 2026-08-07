@@ -24,6 +24,8 @@
     <!-- 精确闹钟：SCHEDULE_EXACT_ALARM 需用户手动授权，USE_EXACT_ALARM（Android 13+）免授权 -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- 同步中国法定节假日数据 -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- 唤醒与忽略电池优化 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -60,6 +62,16 @@
 
         <activity
             android:name=".CreateAutomationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QuickLaunch" />
+
+        <activity
+            android:name=".HolidayManageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QuickLaunch" />
+
+        <activity
+            android:name=".SourceManageActivity"
             android:exported="false"
             android:theme="@style/Theme.QuickLaunch" />
 
