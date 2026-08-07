@@ -47,6 +47,13 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    lint {
+        // 个人自用工具，UI 只有中文、不做多语言，硬编码文案是刻意选择；
+        // 屏蔽这两类纯噪音后，lint 报告里剩下的才是真问题，才有持续跑的价值。
+        disable 'HardcodedText', 'UnusedResources'
+        abortOnError true
+    }
 }
 
 dependencies {
@@ -61,4 +68,7 @@ dependencies {
     ksp 'androidx.room:room-compiler:2.7.1'
 
     testImplementation 'junit:junit:4.13.2'
+    // android.jar 里的 org.json 是「未实现」桩，JVM 单测里调用任何方法都会抛
+    // RuntimeException("... not mocked")。引入真实实现，让解析器逻辑可被真正验证。
+    testImplementation 'org.json:json:20240303'
 }

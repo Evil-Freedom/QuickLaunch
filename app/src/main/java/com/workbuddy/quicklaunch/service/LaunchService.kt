@@ -1,5 +1,7 @@
 package com.workbuddy.quicklaunch.service
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,10 +9,12 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
@@ -36,9 +40,10 @@ class LaunchService : Service() {
             return START_NOT_STICKY
         }
 
-        startForegroundCompat(Notifier.build(this, pkg, appName, ongoing = true))
+        // 通知构建失败不应让服务崩掉——真正的启动动作在下面，通知只是保活壳
+        runCatching { startForegroundCompat(Notifier.build(this, pkg, appName, ongoing = true)) }
 
-        val launched = Settings.canDrawOverlays(this) &&
+        val launched = runCatching { Settings.canDrawOverlays(this) }.getOrDefault(false) &&
             runCatching { startActivity(LaunchProxyActivity.intent(this, pkg)) }.isSuccess
 
         // 没有悬浮窗权限时 startActivity 会被系统静默丢弃，统一补一条全屏通知兜底
@@ -101,18 +106,36 @@ object Notifier {
             .build()
     }
 
+    /**
+     * 兜底通知。Android 13+ 未授予 POST_NOTIFICATIONS 时 notify 是空操作，
+     * 先显式判权限并留日志，避免「什么都没发生」这种无从排查的静默失败。
+     */
+    @SuppressLint("MissingPermission")
     fun fallback(context: Context, pkg: String, appName: String) {
+        val allowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!allowed) {
+            Log.w(TAG, "无通知权限，兜底通知无法送达：$pkg")
+            return
+        }
         runCatching {
             NotificationManagerCompat.from(context)
                 .notify(pkg.hashCode(), build(context, pkg, appName, ongoing = false))
-        }
+        }.onFailure { Log.e(TAG, "兜底通知发送失败：$pkg", it) }
     }
 
     private fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "自动启动", NotificationManager.IMPORTANCE_HIGH)
-        )
+        // 硬转型在部分 ROM（服务不可用）会抛 ClassCastException/NPE，改安全转型
+        runCatching {
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                ?: return
+            nm.createNotificationChannel(
+                NotificationChannel(CHANNEL_ID, "自动启动", NotificationManager.IMPORTANCE_HIGH)
+            )
+        }
     }
+
+    private const val TAG = "QL-Notifier"
 }

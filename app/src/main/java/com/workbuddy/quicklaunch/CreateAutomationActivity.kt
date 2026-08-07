@@ -17,6 +17,7 @@ import com.workbuddy.quicklaunch.databinding.ActivityCreateBinding
 import com.workbuddy.quicklaunch.util.AppListLoader
 import com.workbuddy.quicklaunch.util.Scheduler
 import java.util.Calendar
+import java.util.Locale
 
 class CreateAutomationActivity : AppCompatActivity() {
 
@@ -130,13 +131,14 @@ class CreateAutomationActivity : AppCompatActivity() {
         else -> TriggerType.BLUETOOTH
     }
 
+    // 固定 Locale.US：某些语言环境下 %02d 会输出本地数字，时间标签变成乱码般的字符
     private fun updateTimeLabel() {
-        binding.btnTime.text = String.format("%02d:%02d", hour, minute)
+        binding.btnTime.text = String.format(Locale.US, "%02d:%02d", hour, minute)
     }
 
     private fun updateWindowLabels() {
-        binding.btnWinStart.text = String.format("%02d:%02d", winStartHour, winStartMinute)
-        binding.btnWinEnd.text = String.format("%02d:%02d", winEndHour, winEndMinute)
+        binding.btnWinStart.text = String.format(Locale.US, "%02d:%02d", winStartHour, winStartMinute)
+        binding.btnWinEnd.text = String.format(Locale.US, "%02d:%02d", winEndHour, winEndMinute)
     }
 
     private fun showTimePicker() {
@@ -161,21 +163,32 @@ class CreateAutomationActivity : AppCompatActivity() {
         }, h, m, true).show()
     }
 
+    /**
+     * 选择应用。加载列表要对每个应用做 loadLabel（读 APK 资源），几百个应用能耗时 1~2 秒，
+     * 原来直接在主线程跑会明显卡顿甚至 ANR，改为后台加载 + 回到主线程弹窗。
+     */
     private fun pickApp() {
-        val apps = AppListLoader.load(this)
-        if (apps.isEmpty()) {
-            toast("未找到可启动的应用")
-            return
-        }
-        val names = apps.map { it.appName }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("选择应用")
-            .setItems(names) { _, i ->
-                selectedPackage = apps[i].packageName
-                selectedAppName = apps[i].appName
-                binding.btnPickApp.text = "已选择：$selectedAppName"
+        binding.btnPickApp.isEnabled = false
+        AppListLoader.loadAsync(this) { apps ->
+            if (isFinishing || isDestroyed) return@loadAsync
+            binding.btnPickApp.isEnabled = true
+            if (apps.isEmpty()) {
+                toast("未找到可启动的应用")
+                return@loadAsync
             }
-            .show()
+            val names = apps.map { it.appName }.toTypedArray()
+            runCatching {
+                AlertDialog.Builder(this)
+                    .setTitle("选择应用")
+                    .setItems(names) { _, i ->
+                        val app = apps.getOrNull(i) ?: return@setItems
+                        selectedPackage = app.packageName
+                        selectedAppName = app.appName
+                        binding.btnPickApp.text = "已选择：$selectedAppName"
+                    }
+                    .show()
+            }
+        }
     }
 
     private fun save() {
@@ -224,15 +237,38 @@ class CreateAutomationActivity : AppCompatActivity() {
             bluetoothName = binding.etBtName.text.toString().trim()
         )
 
-        val id = db.automationDao().insert(a)
-        if (a.triggerType == TriggerType.TIME) {
-            Scheduler.schedule(this, a.copy(id = id))
+        // 写库 + 排程都是阻塞操作，放后台；避免重复点击保存出现重复规则
+        binding.btnSave.isEnabled = false
+        val app = applicationContext
+        IO.execute {
+            val ok = runCatching {
+                val id = db.automationDao().insert(a)
+                if (a.triggerType == TriggerType.TIME) {
+                    Scheduler.schedule(app, a.copy(id = id))
+                }
+            }.isSuccess
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (ok) {
+                    toast("已保存")
+                    finish()
+                } else {
+                    binding.btnSave.isEnabled = true
+                    toast("保存失败，请重试")
+                }
+            }
         }
-        toast("已保存")
-        finish()
     }
 
     private fun toast(msg: String) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        runCatching { Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() }
+    }
+
+    private companion object {
+        /** 保存动作的后台线程，daemon 避免阻止进程退出。 */
+        val IO: java.util.concurrent.ExecutorService =
+            java.util.concurrent.Executors.newSingleThreadExecutor { r ->
+                Thread(r, "create-io").apply { isDaemon = true }
+            }
     }
 }

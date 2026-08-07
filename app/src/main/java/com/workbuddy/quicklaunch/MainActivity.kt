@@ -44,8 +44,29 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private val adapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
 
-    /** root 命令会阻塞（首次还要等授权弹窗），一律丢到单线程池里跑，绝不占主线程。 */
-    private val io = Executors.newSingleThreadExecutor()
+    /** root 命令与数据库读写都会阻塞（root 首次还要等授权弹窗），一律丢到单线程池里跑，绝不占主线程。 */
+    private val io = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "main-io").apply { isDaemon = true }
+    }
+
+    /** 当前下拉里的数据源 id 顺序，用于判断是否真的需要重建 Adapter。 */
+    private var sourceIds: List<String> = emptyList()
+
+    /**
+     * 安全提交后台任务：onDestroy 之后 executor 已 shutdown，
+     * 再 execute 会抛 RejectedExecutionException 直接崩溃。
+     */
+    private fun runIo(block: () -> Unit) {
+        runCatching { io.execute { runCatching(block) } }
+    }
+
+    /** 回到主线程执行，并自动丢弃 Activity 已销毁后的回调（防泄漏 / 防 BadToken）。 */
+    private fun postUi(block: () -> Unit) {
+        runOnUiThread {
+            if (isFinishing || isDestroyed) return@runOnUiThread
+            runCatching(block)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -75,11 +96,19 @@ class MainActivity : AppCompatActivity() {
         setupAntiSleep()
         checkPermissionsOnce()
 
-        // 首次启动（本地无节假日数据）自动同步一次，便于「跳过节假日」立即生效
-        if (db.holidayDao().count() == 0) syncHolidays()
+        // 首次启动（本地无节假日数据）自动同步一次，便于「跳过节假日」立即生效。
+        // count() 是磁盘 IO，放后台查，避免拖慢冷启动首帧。
+        runIo {
+            val empty = runCatching { db.holidayDao().count() == 0 }.getOrDefault(false)
+            if (empty) postUi { syncHolidays() }
+        }
     }
 
-    /** 数据源下拉：自动（推荐）优先用上次成功源，也可手动指定某一内置/自定义源（失败再回退其余）。 */
+    /**
+     * 数据源下拉：自动（推荐）优先用上次成功源，也可手动指定某一内置/自定义源（失败再回退其余）。
+     * onResume 每次都会调用，这里做**幂等短路**：源列表没变就只更新选中项，
+     * 不再重复 new ArrayAdapter + 重设 Adapter（会触发整段 View 重建与一次多余的选中回调）。
+     */
     private fun setupSourceSpinner() {
         val ids = mutableListOf("auto")
         val labels = mutableListOf("自动（推荐）")
@@ -87,19 +116,32 @@ class MainActivity : AppCompatActivity() {
             ids.add(it.id)
             labels.add(it.label)
         }
-        HolidayPrefs.getCustomSources(this).forEach {
+        runCatching { HolidayPrefs.getCustomSources(this) }.getOrDefault(emptyList()).forEach {
             ids.add(it.id)
             labels.add("${it.label}（自定义）")
         }
+
+        val pref = runCatching { HolidayPrefs.getSourcePref(this) }.getOrNull() ?: "auto"
+        val target = ids.indexOf(pref).coerceAtLeast(0)
+
+        if (ids == sourceIds && binding.spinnerSource.adapter != null) {
+            if (binding.spinnerSource.selectedItemPosition != target) {
+                binding.spinnerSource.setSelection(target)
+            }
+            return
+        }
+        sourceIds = ids
+
+        // 换 Adapter 期间先摘掉监听，避免系统在重建时回调一次把偏好覆盖成默认值
+        binding.spinnerSource.onItemSelectedListener = null
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerSource.adapter = adapter
-
-        val pref = HolidayPrefs.getSourcePref(this)
-        binding.spinnerSource.setSelection(ids.indexOf(pref).coerceAtLeast(0))
+        binding.spinnerSource.setSelection(target)
         binding.spinnerSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p: AdapterView<*>, v: android.view.View?, pos: Int, id: Long) {
-                HolidayPrefs.setSourcePref(this@MainActivity, ids[pos])
+                val chosen = ids.getOrNull(pos) ?: return
+                runCatching { HolidayPrefs.setSourcePref(this@MainActivity, chosen) }
             }
             override fun onNothingSelected(p: AdapterView<*>) {}
         }
@@ -110,17 +152,19 @@ class MainActivity : AppCompatActivity() {
         if (binding.btnSyncHolidays.isEnabled) binding.btnSyncHolidays.isEnabled = false
         val pref = HolidayPrefs.getSourcePref(this)
         val prefId = if (pref == "auto") null else pref
+        val app = applicationContext
         HolidaySync.sync(this, prefId) { res ->
             if (isFinishing || isDestroyed) return@sync
             binding.btnSyncHolidays.isEnabled = true
             val msg = if (res.success) {
-                // 同步后重新排程，使「跳过节假日」立即按最新数据生效
-                Scheduler.rescheduleAll(this)
+                // 同步后重新排程，使「跳过节假日」立即按最新数据生效。
+                // rescheduleAll 会读全表并逐条排程，必须放后台，否则规则一多主线程直接卡顿。
+                runIo { Scheduler.rescheduleAll(app) }
                 "已同步（来源：${res.sourceLabel}，${res.count} 天）"
             } else {
                 "所有数据源同步失败，请检查网络后重试"
             }
-            Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show()
+            runCatching { Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show() }
         }
     }
 
@@ -153,24 +197,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** 列表读取是磁盘 IO，放后台执行，主线程只做 UI 提交。 */
     private fun refresh() {
-        val items = db.automationDao().getAll()
-        adapter.submit(items)
-        binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+        runIo {
+            val items = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            postUi {
+                adapter.submit(items)
+                binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            }
+        }
     }
 
     private fun onToggle(a: Automation, checked: Boolean) {
-        db.automationDao().update(a.copy(enabled = checked))
-        if (a.triggerType == TriggerType.TIME) {
-            if (checked) Scheduler.schedule(this, a.copy(enabled = true))
-            else Scheduler.cancel(this, a)
+        val app = applicationContext
+        runIo {
+            runCatching { db.automationDao().update(a.copy(enabled = checked)) }
+            if (a.triggerType == TriggerType.TIME) {
+                if (checked) Scheduler.schedule(app, a.copy(enabled = true))
+                else Scheduler.cancel(app, a)
+            }
         }
     }
 
     private fun onDelete(a: Automation) {
-        if (a.triggerType == TriggerType.TIME) Scheduler.cancel(this, a)
-        db.automationDao().delete(a)
-        refresh()
+        val app = applicationContext
+        runIo {
+            if (a.triggerType == TriggerType.TIME) Scheduler.cancel(app, a)
+            runCatching { db.automationDao().delete(a) }
+            val items = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            postUi {
+                adapter.submit(items)
+                binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            }
+        }
     }
 
     // ---------- 防外屏息屏（root） ----------
@@ -182,10 +241,10 @@ class MainActivity : AppCompatActivity() {
     private fun setupAntiSleep() {
         syncAntiSleepUi()
 
-        io.execute {
+        runIo {
             val rooted = RootUtils.hasRoot()
-            runOnUiThread {
-                if (isFinishing || isDestroyed || !ScreenOnOverlay.canDraw(this)) return@runOnUiThread
+            postUi {
+                if (!ScreenOnOverlay.canDraw(this)) return@postUi
                 binding.tvAntiSleep.text =
                     if (rooted) "防外屏息屏（屏幕常亮，已叠加 root 增强）" else "防外屏息屏（屏幕常亮）"
             }
@@ -217,12 +276,13 @@ class MainActivity : AppCompatActivity() {
 
             view.isEnabled = false
             val app = applicationContext
-            io.execute {
-                val ok = if (checked) AntiSleep.enable(app) else AntiSleep.disable(app)
+            runIo {
+                val ok = runCatching {
+                    if (checked) AntiSleep.enable(app) else AntiSleep.disable(app)
+                }.getOrDefault(false)
                 // 悬浮窗挂在常驻服务上，Activity 退出后才好继续生效
                 if (checked) KeepAliveService.start(app)
-                runOnUiThread {
-                    if (isFinishing || isDestroyed) return@runOnUiThread
+                postUi {
                     view.isEnabled = true
                     if (ok) {
                         val tip = if (checked) "已开启：屏幕（含外屏）保持常亮" else "已关闭：恢复系统默认息屏"
@@ -262,41 +322,60 @@ class MainActivity : AppCompatActivity() {
         val sp = getSharedPreferences("quicklaunch", Context.MODE_PRIVATE)
         if (sp.getBoolean("guided", false)) return
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1
-            )
-        }
-
-        val missing = buildList {
-            if (!Settings.canDrawOverlays(this@MainActivity)) {
-                add("悬浮窗权限 —— 后台自动拉起应用的必备条件，不开则只能靠点通知启动")
-            }
-            val pm = getSystemService(POWER_SERVICE) as PowerManager
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                add("忽略电池优化 —— 否则休眠时定时任务会被系统推迟或杀掉")
+        // 运行时权限一次性申请：
+        // - POST_NOTIFICATIONS(13+)：兜底全屏通知的送达前提
+        // - BLUETOOTH_CONNECT(12+)：不授权就读不到 BluetoothDevice.name，
+        //   「连接指定蓝牙设备」这类规则会永远不触发（此前完全没申请过，属于静默失效）
+        val wanted = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val am = getSystemService(ALARM_SERVICE) as AlarmManager
-                if (!am.canScheduleExactAlarms()) add("精确闹钟 —— 否则定时触发会有几分钟误差")
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+        }.filter {
+            runCatching { ActivityCompat.checkSelfPermission(this, it) }
+                .getOrDefault(PackageManager.PERMISSION_GRANTED) != PackageManager.PERMISSION_GRANTED
+        }
+        if (wanted.isNotEmpty()) {
+            runCatching { ActivityCompat.requestPermissions(this, wanted.toTypedArray(), 1) }
+        }
+
+        // 各项系统查询在部分定制 ROM 上会抛异常，逐项容错，别让引导弹窗把首启弄崩
+        val missing = buildList {
+            if (runCatching { !Settings.canDrawOverlays(this@MainActivity) }.getOrDefault(false)) {
+                add("悬浮窗权限 —— 后台自动拉起应用的必备条件，不开则只能靠点通知启动")
+            }
+            val ignoring = runCatching {
+                (getSystemService(POWER_SERVICE) as? PowerManager)
+                    ?.isIgnoringBatteryOptimizations(packageName) ?: true
+            }.getOrDefault(true)
+            if (!ignoring) add("忽略电池优化 —— 否则休眠时定时任务会被系统推迟或杀掉")
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val exact = runCatching {
+                    (getSystemService(ALARM_SERVICE) as? AlarmManager)?.canScheduleExactAlarms() ?: true
+                }.getOrDefault(true)
+                if (!exact) add("精确闹钟 —— 否则定时触发会有几分钟误差")
             }
             add("自启动 / 后台弹出界面 —— Motorola myui 等厂商 ROM 需在「应用管理」中单独放行")
         }
 
-        AlertDialog.Builder(this)
-            .setTitle("需要开启以下权限")
-            .setMessage(missing.joinToString("\n\n• ", prefix = "• "))
-            .setPositiveButton("去设置") { _, _ ->
-                sp.edit().putBoolean("guided", true).apply()
-                openSettings()
-            }
-            .setNegativeButton("以后再说") { _, _ ->
-                sp.edit().putBoolean("guided", true).apply()
-            }
-            .show()
+        // Activity 已在销毁流程中时 show() 会抛 BadTokenException
+        if (isFinishing || isDestroyed) return
+        runCatching {
+            AlertDialog.Builder(this)
+                .setTitle("需要开启以下权限")
+                .setMessage(missing.joinToString("\n\n• ", prefix = "• "))
+                .setPositiveButton("去设置") { _, _ ->
+                    sp.edit().putBoolean("guided", true).apply()
+                    openSettings()
+                }
+                .setNegativeButton("以后再说") { _, _ ->
+                    sp.edit().putBoolean("guided", true).apply()
+                }
+                .show()
+        }
     }
 
     /** 依次尝试跳转，跳不动就退回本应用的系统设置详情页（myui 等 ROM 常缺其中某些页面）。 */

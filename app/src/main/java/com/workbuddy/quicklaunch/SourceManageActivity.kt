@@ -13,6 +13,7 @@ import com.workbuddy.quicklaunch.util.CustomSource
 import com.workbuddy.quicklaunch.util.HolidayPrefs
 import com.workbuddy.quicklaunch.util.HolidaySources
 import com.workbuddy.quicklaunch.util.ParserType
+import java.util.Locale
 import java.util.UUID
 
 /**
@@ -58,7 +59,8 @@ class SourceManageActivity : AppCompatActivity() {
         HolidaySources.ALL.forEach {
             items.add(Row(it.id, it.label, "内置源", "内置", true))
         }
-        HolidayPrefs.getCustomSources(this).forEach {
+        // 偏好里的 JSON 可能被外部改坏，读取失败时只展示内置源而不是白屏崩溃
+        runCatching { HolidayPrefs.getCustomSources(this) }.getOrDefault(emptyList()).forEach {
             val parserName = if (it.parser == ParserType.TIMOR) "timor.tech 格式" else "holiday-cn 格式"
             items.add(Row(it.id, it.label, it.urlTemplate, "自定义 · $parserName", false))
         }
@@ -96,10 +98,19 @@ class SourceManageActivity : AppCompatActivity() {
                     android.widget.Toast.makeText(this, "URL 必须包含 {year} 占位符", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
+                // 校验协议与可解析性：非法 URL 曾会在同步时抛异常并中断整条回退链，
+                // 现在同步侧已做容错，但在入口就拦住能给用户明确反馈。
+                val probe = url.replace("{year}", "2000")
+                val validUrl = runCatching { java.net.URL(probe).protocol.lowercase(Locale.US) }
+                    .getOrNull()
+                if (validUrl != "http" && validUrl != "https") {
+                    android.widget.Toast.makeText(this, "URL 必须是 http:// 或 https:// 开头的合法地址", android.widget.Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
                 val parser = if (parserSpinner.selectedItemPosition == 1) ParserType.TIMOR else ParserType.NATE_SCARLET
                 val list = HolidayPrefs.getCustomSources(this).toMutableList()
                 list.add(CustomSource(UUID.randomUUID().toString(), label, url, parser))
-                HolidayPrefs.setCustomSources(this, list)
+                runCatching { HolidayPrefs.setCustomSources(this, list) }
                 load()
             }
             .setNegativeButton("取消", null)
@@ -107,8 +118,10 @@ class SourceManageActivity : AppCompatActivity() {
     }
 
     private fun removeCustom(id: String) {
-        val list = HolidayPrefs.getCustomSources(this).filter { it.id != id }
-        HolidayPrefs.setCustomSources(this, list)
+        runCatching {
+            val list = HolidayPrefs.getCustomSources(this).filter { it.id != id }
+            HolidayPrefs.setCustomSources(this, list)
+        }
         load()
     }
 

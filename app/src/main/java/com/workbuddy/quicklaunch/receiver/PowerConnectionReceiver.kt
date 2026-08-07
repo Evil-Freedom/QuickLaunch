@@ -13,7 +13,14 @@ import com.workbuddy.quicklaunch.service.LaunchService
 class PowerConnectionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_POWER_CONNECTED) return
-        val list = AppDatabase.get(context).automationDao().getEnabledByType(TriggerType.CHARGING)
-        list.forEach { LaunchService.start(context, it.targetPackage, it.targetAppName) }
+        val app = context.applicationContext
+        ReceiverWorker.run(this, "PowerConnectionReceiver") {
+            val list = runCatching {
+                AppDatabase.get(app).automationDao().getEnabledByType(TriggerType.CHARGING)
+            }.getOrDefault(emptyList())
+            list.forEach {
+                runCatching { LaunchService.start(app, it.targetPackage, it.targetAppName) }
+            }
+        }
     }
 }

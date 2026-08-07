@@ -51,35 +51,60 @@ class KeepAliveService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    /** 注册成功才允许反注册，否则 unregisterReceiver 会抛 IllegalArgumentException。 */
+    private var receiverRegistered = false
+    private var displayListenerRegistered = false
+
     override fun onCreate() {
         super.onCreate()
         runCatching {
-            (getSystemService(Context.DISPLAY_SERVICE) as DisplayManager)
-                .registerDisplayListener(displayListener, handler)
+            (getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager)
+                ?.registerDisplayListener(displayListener, handler)
+            displayListenerRegistered = true
         }
         runCatching {
-            registerReceiver(screenReceiver, IntentFilter().apply {
-                addAction(Intent.ACTION_SCREEN_ON)
-                addAction(Intent.ACTION_SCREEN_OFF)
-                addAction(Intent.ACTION_USER_PRESENT)
-            })
-        }
+            // Android 14(UPSIDE_DOWN_CAKE) 起动态注册非系统广播必须显式声明导出属性，
+            // 否则直接抛 SecurityException —— 原实现被 runCatching 吞掉，
+            // 表现为「屏幕开关不再触发悬浮窗同步」这种无声故障。
+            ContextCompat.registerReceiver(
+                this,
+                screenReceiver,
+                IntentFilter().apply {
+                    addAction(Intent.ACTION_SCREEN_ON)
+                    addAction(Intent.ACTION_SCREEN_OFF)
+                    addAction(Intent.ACTION_USER_PRESENT)
+                },
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+            receiverRegistered = true
+        }.onFailure { Log.e("QL-AntiSleep", "屏幕广播注册失败", it) }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForegroundCompat(buildNotify())
+        // buildNotify 里的 PendingIntent / 通知构造在极端 ROM 上也可能抛，
+        // 这里崩了等于保活服务本身把进程带崩，必须兜住。
+        runCatching { startForegroundCompat(buildNotify()) }
+            .onFailure { Log.e("QL-AntiSleep", "前台通知启动失败", it) }
         scheduleSync()
         return START_STICKY
     }
 
     override fun onDestroy() {
-        runCatching {
-            (getSystemService(Context.DISPLAY_SERVICE) as DisplayManager)
-                .unregisterDisplayListener(displayListener)
+        // 清掉所有待执行回调，避免服务销毁后 Runnable 仍持有 Service 引用（内存泄漏）
+        handler.removeCallbacksAndMessages(null)
+        if (displayListenerRegistered) {
+            runCatching {
+                (getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager)
+                    ?.unregisterDisplayListener(displayListener)
+            }
+            displayListenerRegistered = false
         }
-        runCatching { unregisterReceiver(screenReceiver) }
+        if (receiverRegistered) {
+            runCatching { unregisterReceiver(screenReceiver) }
+            receiverRegistered = false
+        }
         releaseWakeLock()
-        ScreenOnOverlay.clear(this)
+        runCatching { ScreenOnOverlay.clear(this) }
         super.onDestroy()
     }
 
@@ -95,15 +120,33 @@ class KeepAliveService : Service() {
     private val syncTask = Runnable {
         // 后台即防息屏：服务在跑 + 有悬浮窗权限 + 用户没手动关 → 自动挂常亮窗 + 持锁。
         // 不再依赖显式开关，开关仅作为「手动关闭」覆盖项。
-        val disabled = AntiSleep.isDisabled(this)
-        val can = ScreenOnOverlay.canDraw(this)
-        Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can")
-        if (can && !disabled) {
-            ScreenOnOverlay.sync(this)
-            acquireWakeLock()
-        } else {
-            ScreenOnOverlay.clear(this)
-            releaseWakeLock()
+        // 整体包 runCatching：这里跑在主线程，抛异常会直接崩掉整个进程，保活服务反而成了崩溃源。
+        runCatching {
+            val disabled = AntiSleep.isDisabled(this)
+            val can = ScreenOnOverlay.canDraw(this)
+            Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can")
+            if (can && !disabled) {
+                ScreenOnOverlay.sync(this)
+                acquireWakeLock()
+            } else {
+                ScreenOnOverlay.clear(this)
+                releaseWakeLock()
+            }
+        }.onFailure { Log.e("QL-AntiSleep", "同步失败", it) }
+    }
+
+    /**
+     * WakeLock 续期任务。见 [acquireWakeLock] 的说明：
+     * 用「带超时 + 定期续期」替代「无超时常驻」，功能等价但可自愈。
+     */
+    private val renewWakeLockTask = object : Runnable {
+        override fun run() {
+            runCatching {
+                if (wakeLock?.isHeld == true) {
+                    wakeLock?.acquire(WAKELOCK_TIMEOUT_MS)   // 非计数锁，重复 acquire 即刷新超时
+                    handler.postDelayed(this, WAKELOCK_RENEW_MS)
+                }
+            }
         }
     }
 
@@ -116,21 +159,31 @@ class KeepAliveService : Service() {
     @Suppress("DEPRECATION")
     private fun acquireWakeLock() {
         if (wakeLock?.isHeld == true) return
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = pm.newWakeLock(
-            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ON_AFTER_RELEASE,
-            "QuickLaunch:antiSleep"
-        ).apply {
-            setReferenceCounted(false)
-            acquire() // 无超时常驻，直到 releaseWakeLock
-        }
-        Log.i("QL-AntiSleep", "WakeLock 已持有(屏幕常亮兜底)")
+        runCatching {
+            val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return
+            wakeLock = pm.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ON_AFTER_RELEASE,
+                "QuickLaunch:antiSleep"
+            ).apply {
+                setReferenceCounted(false)
+                // 原来是无超时 acquire()：进程被异常杀死（不走 onDestroy）时锁不会释放，
+                // 屏幕会一直亮着直到重启，是最典型的电量/资源泄漏。
+                // 改为带超时 + 定期续期：功能不变，但任何异常路径都会在 30 分钟内自愈。
+                acquire(WAKELOCK_TIMEOUT_MS)
+            }
+            handler.removeCallbacks(renewWakeLockTask)
+            handler.postDelayed(renewWakeLockTask, WAKELOCK_RENEW_MS)
+            Log.i("QL-AntiSleep", "WakeLock 已持有(屏幕常亮兜底, 自动续期)")
+        }.onFailure { Log.e("QL-AntiSleep", "WakeLock 获取失败", it) }
     }
 
     private fun releaseWakeLock() {
-        wakeLock?.takeIf { it.isHeld }?.let {
-            it.release()
-            Log.i("QL-AntiSleep", "WakeLock 已释放")
+        handler.removeCallbacks(renewWakeLockTask)
+        runCatching {
+            wakeLock?.takeIf { it.isHeld }?.let {
+                it.release()
+                Log.i("QL-AntiSleep", "WakeLock 已释放")
+            }
         }
         wakeLock = null
     }
@@ -161,15 +214,21 @@ class KeepAliveService : Service() {
 
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.createNotificationChannel(
-            NotificationChannel(CHANNEL, "后台保活", NotificationManager.IMPORTANCE_LOW)
-        )
+        runCatching {
+            val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+            nm.createNotificationChannel(
+                NotificationChannel(CHANNEL, "后台保活", NotificationManager.IMPORTANCE_LOW)
+            )
+        }
     }
 
     companion object {
         const val NOTIF_ID = 1002
         private const val CHANNEL = "quicklaunch_keepalive"
+
+        /** WakeLock 超时（自愈上限）与续期间隔。续期间隔必须明显小于超时。 */
+        private const val WAKELOCK_TIMEOUT_MS = 30 * 60 * 1000L
+        private const val WAKELOCK_RENEW_MS = 10 * 60 * 1000L
 
         fun start(context: Context) {
             runCatching {

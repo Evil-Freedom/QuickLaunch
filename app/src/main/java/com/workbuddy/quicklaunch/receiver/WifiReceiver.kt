@@ -22,9 +22,16 @@ import com.workbuddy.quicklaunch.service.LaunchService
 class WifiReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        AppDatabase.get(context).automationDao()
-            .getEnabledByType(TriggerType.WIFI)
-            .forEach { LaunchService.start(context, it.targetPackage, it.targetAppName) }
+        val app = context.applicationContext
+        ReceiverWorker.run(this, "WifiReceiver") {
+            val list = runCatching {
+                AppDatabase.get(app).automationDao().getEnabledByType(TriggerType.WIFI)
+            }.getOrDefault(emptyList())
+            // 单条启动失败不影响其余规则
+            list.forEach {
+                runCatching { LaunchService.start(app, it.targetPackage, it.targetAppName) }
+            }
+        }
     }
 
     companion object {

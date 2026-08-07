@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ItemAutomationBinding
+import java.util.Locale
 
 /**
  * 主界面列表适配器：展示每条自动化，支持启用开关与删除。
@@ -43,7 +44,9 @@ class AutomationAdapter(
 
     private fun triggerLabel(a: Automation): String = when (a.triggerType) {
         TriggerType.TIME ->
-            "定时 %02d:%02d（%s）%s".format(
+            // 显式给 Locale，避免依赖系统默认 locale 产生非预期数字形态
+            String.format(
+                Locale.US, "定时 %02d:%02d（%s）%s",
                 a.timeHour, a.timeMinute, repeatLabel(a),
                 if (a.skipHolidays) "·跳假" else ""
             )

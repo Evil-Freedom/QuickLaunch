@@ -75,7 +75,8 @@ object AntiSleep {
         ScreenOnOverlay.clear(ctx)
         val back = sp(ctx).getInt(KEY_BACKUP, FALLBACK_TIMEOUT)
         if (currentTimeout(ctx) >= MAX_TIMEOUT) {
-            RootUtils.runAsRoot("settings put system screen_off_timeout $back")
+            // 走异步入口：即便调用方误在主线程调用，也不会因 su 授权弹窗 ANR
+            RootUtils.runAsRootAsync("settings put system screen_off_timeout $back")
         }
         return true
     }
@@ -101,11 +102,12 @@ object AntiSleep {
 
     /** 只有真有 root 才动 settings；没 root 静默跳过，不影响悬浮窗那条主路径。 */
     private fun applyRootTimeout(ctx: Context) {
-        val now = currentTimeout(ctx)
+        // 读 Settings 可能因 ContentProvider 未就绪抛异常（开机早期尤其常见），不能让它带崩调用链
+        val now = runCatching { currentTimeout(ctx) }.getOrNull() ?: return
         if (now >= MAX_TIMEOUT) return
         if (now in 1 until MAX_TIMEOUT) {
-            sp(ctx).edit().putInt(KEY_BACKUP, now).apply()
+            runCatching { sp(ctx).edit().putInt(KEY_BACKUP, now).apply() }
         }
-        RootUtils.runAsRoot("settings put system screen_off_timeout $MAX_TIMEOUT")
+        RootUtils.runAsRootAsync("settings put system screen_off_timeout $MAX_TIMEOUT")
     }
 }

@@ -1,7 +1,6 @@
 package com.workbuddy.quicklaunch.util
 
 import com.workbuddy.quicklaunch.data.Holiday
-import org.json.JSONArray
 import org.json.JSONObject
 
 /** 解析器类型：决定如何解析某源返回的原始 JSON。 */
@@ -75,15 +74,29 @@ object HolidaySources {
      * 其余按 ALL + 自定义源顺序跟随。两者为空则直接用 ALL + 自定义源。
      */
     fun ordered(pref: String?, lastGood: String?, custom: List<HolidaySource> = emptyList()): List<HolidaySource> {
-        val all = ALL + custom
+        // 自定义源可能与内置源 id 冲突，先按 id 去重，避免同一个源被请求两次。
+        val all = (ALL + custom).distinctBy { it.id }
         val prefSrc = all.firstOrNull { it.id == pref }
         val lastSrc = all.firstOrNull { it.id == lastGood }
-        val rest = all.filter { it != prefSrc && it != lastSrc }
-        return listOfNotNull(prefSrc, lastSrc) + rest
+        val rest = all.filter { it !== prefSrc && it !== lastSrc }
+        // pref == lastGood 时 listOfNotNull 会产生同一个源两次，distinct 消除重复网络请求。
+        return (listOfNotNull(prefSrc, lastSrc) + rest).distinctBy { it.id }
     }
 }
 
-/** timor.tech：code==0 时 holiday 对象里 holiday==true 的键即为休息日日期。 */
+/** 严格校验 yyyy-MM-dd（含月/日范围），避免把脏数据写进 holidays 表。 */
+private val DATE_RE = Regex("""^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$""")
+
+private fun validDateOrNull(s: String?): String? {
+    val v = s?.trim() ?: return null
+    return if (DATE_RE.matches(v)) v else null
+}
+
+/**
+ * timor.tech：code==0 时 holiday 对象里 holiday==true 的项为休息日。
+ * 注意真实接口的键是 "01-01"（MM-dd）而非完整日期，完整日期在值对象的 date 字段里；
+ * 少数镜像会把键写成完整 yyyy-MM-dd，故两者都兼容，且最终统一校验为 yyyy-MM-dd。
+ */
 private fun parseTimor(json: String): List<Holiday> {
     val root = runCatching { JSONObject(json) }.getOrNull() ?: return emptyList()
     if (root.optInt("code", -1) != 0) return emptyList()
@@ -93,9 +106,9 @@ private fun parseTimor(json: String): List<Holiday> {
     while (keys.hasNext()) {
         val k = keys.next()
         val obj = holiday.optJSONObject(k) ?: continue
-        if (obj.optBoolean("holiday", false)) {
-            out.add(Holiday(date = k, name = obj.optString("name", "")))
-        }
+        if (!obj.optBoolean("holiday", false)) continue
+        val date = validDateOrNull(obj.optString("date", "")) ?: validDateOrNull(k) ?: continue
+        out.add(Holiday(date = date, name = obj.optString("name", "")))
     }
     return out
 }
@@ -107,9 +120,9 @@ private fun parseNateScarlet(json: String): List<Holiday> {
     val out = mutableListOf<Holiday>()
     for (i in 0 until days.length()) {
         val obj = days.optJSONObject(i) ?: continue
-        if (obj.optBoolean("isOffDay", false)) {
-            out.add(Holiday(date = obj.optString("date", ""), name = obj.optString("name", "")))
-        }
+        if (!obj.optBoolean("isOffDay", false)) continue
+        val date = validDateOrNull(obj.optString("date", "")) ?: continue
+        out.add(Holiday(date = date, name = obj.optString("name", "")))
     }
     return out
 }

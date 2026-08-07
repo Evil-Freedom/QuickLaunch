@@ -20,18 +20,19 @@ import android.view.Display
 object DisplayPicker {
 
     /** 当前应当用于启动的屏幕 id；判断不出来一律返回 DEFAULT_DISPLAY。 */
-    fun activeDisplayId(context: Context): Int {
+    fun activeDisplayId(context: Context): Int = runCatching {
         val dm = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
-            ?: return Display.DEFAULT_DISPLAY
-        val displays = dm.displays ?: return Display.DEFAULT_DISPLAY
-        if (displays.size <= 1) return Display.DEFAULT_DISPLAY
+            ?: return@runCatching Display.DEFAULT_DISPLAY
+        val displays = dm.displays ?: return@runCatching Display.DEFAULT_DISPLAY
+        if (displays.size <= 1) return@runCatching Display.DEFAULT_DISPLAY
 
         // ponytail: 只认「唯一一块亮着的屏」这一条判据。
         // 录屏/投屏时主屏同时亮着（2 块 ON），自动落回默认屏，无需额外识别虚拟屏。
         // 两块都灭（息屏定时触发）时也回默认屏，由中转页 turnScreenOn 点亮系统当前主屏。
         val lit = displays.filter { it.state == Display.STATE_ON }
-        return if (lit.size == 1) lit[0].displayId else Display.DEFAULT_DISPLAY
-    }
+        if (lit.size == 1) lit[0].displayId else Display.DEFAULT_DISPLAY
+        // DisplayManager 在部分 ROM 上枚举副屏会抛，出错一律回默认屏而不是让触发链断掉。
+    }.getOrDefault(Display.DEFAULT_DISPLAY)
 
     /**
      * 生成 startActivity 的 options。
