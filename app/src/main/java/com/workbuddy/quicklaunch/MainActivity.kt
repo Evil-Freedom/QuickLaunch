@@ -55,13 +55,13 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 安全提交后台任务：onDestroy 之后 executor 已 shutdown，
-     * 再 execute 会抛 RejectedExecutionException 直接崩溃。
+     * 再 execute 会抛「线程池拒绝执行」异常直接崩溃。
      */
     private fun runIo(block: () -> Unit) {
         runCatching { io.execute { runCatching(block) } }
     }
 
-    /** 回到主线程执行，并自动丢弃 Activity 已销毁后的回调（防泄漏 / 防 BadToken）。 */
+    /** 回到主线程执行，并自动丢弃 Activity 已销毁后的回调（防内存泄漏 / 防访问已销毁界面）。 */
     private fun postUi(block: () -> Unit) {
         runOnUiThread {
             if (isFinishing || isDestroyed) return@runOnUiThread
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * 数据源下拉：自动（推荐）优先用上次成功源，也可手动指定某一内置/自定义源（失败再回退其余）。
-     * onResume 每次都会调用，这里做**幂等短路**：源列表没变就只更新选中项，
+     * onResume 每次都会调用，源列表没变就只更新选中项，
      * 不再重复 new ArrayAdapter + 重设 Adapter（会触发整段 View 重建与一次多余的选中回调）。
      */
     private fun setupSourceSpinner() {
@@ -243,7 +243,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** 真正删除 + Snackbar 撤销。undoDelete 用原 Automation（含原 id）重插，保证 PendingIntent requestCode 不变。 */
+    /** 真正删除 + Snackbar 撤销。undoDelete 用原 Automation（含原 id）重插，保证 AlarmManager 的请求码不变。 */
     private fun performDelete(a: Automation) {
         val app = applicationContext
         runIo {
@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * 撤销删除 = 用原 id 重插 + 若为已启用的定时规则则重新排程。
      * 关键不变量：Room @PrimaryKey(autoGenerate=true) 显式带 id 会保留该 id，
-     * Scheduler.pendingIntent 的 requestCode（a.id.toInt()）因此与删除前一致，
+     * Scheduler 用来区分不同闹钟的请求码（a.id.toInt()）因此与删除前一致，
      * AlarmManager 不会出现重复闹钟/漏闹钟。
      */
     private fun undoDelete(a: Automation) {
@@ -408,7 +408,7 @@ class MainActivity : AppCompatActivity() {
             add("自启动 / 后台弹出界面 —— Motorola myui 等厂商 ROM 需在「应用管理」中单独放行")
         }
 
-        // Activity 已在销毁流程中时 show() 会抛 BadTokenException
+        // Activity 已在销毁流程中时 show() 会抛「访问已销毁界面」异常
         if (isFinishing || isDestroyed) return
         runCatching {
             AlertDialog.Builder(this)

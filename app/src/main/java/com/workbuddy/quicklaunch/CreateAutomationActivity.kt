@@ -74,7 +74,7 @@ class CreateAutomationActivity : AppCompatActivity() {
                 }
                 override fun onNothingSelected(p: AdapterView<*>) {}
             }
-        // 星期多选开关：index 与位图对齐（0=日 … 6=六）
+        // 星期多选开关：index 与二进制位对齐（0=日 … 6=六）
         listOf(
             binding.tbDay0, binding.tbDay1, binding.tbDay2, binding.tbDay3,
             binding.tbDay4, binding.tbDay5, binding.tbDay6
@@ -240,7 +240,7 @@ class CreateAutomationActivity : AppCompatActivity() {
         // 写库 + 排程都是阻塞操作，放后台；避免重复点击保存出现重复规则
         binding.btnSave.isEnabled = false
         val app = applicationContext
-        IO.execute {
+        saveExecutor.execute {
             val ok = runCatching {
                 val id = db.automationDao().insert(a)
                 if (a.triggerType == TriggerType.TIME) {
@@ -266,9 +266,9 @@ class CreateAutomationActivity : AppCompatActivity() {
 
     private companion object {
         /** 保存动作的后台线程，daemon 避免阻止进程退出。 */
-        val IO: java.util.concurrent.ExecutorService =
+        val saveExecutor: java.util.concurrent.ExecutorService =
             java.util.concurrent.Executors.newSingleThreadExecutor { r ->
-                Thread(r, "create-io").apply { isDaemon = true }
+                Thread(r, "create-save").apply { isDaemon = true }
             }
     }
 }

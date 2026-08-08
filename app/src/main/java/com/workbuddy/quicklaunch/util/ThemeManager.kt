@@ -27,7 +27,7 @@ object ThemeManager {
     val MINT_GREEN = PresetColor(
         id = "mint_green",
         label = "薄荷绿",
-        primary = 0xFF5EA88B.toInt(),          // 与 colors.xml 中 m3_primary 对齐
+        primary = 0xFF5EA88B.toInt(),          // 与 colors.xml 中「薄荷绿主色」对齐（m3_primary 是 Material Design 3 的设计命名）
         onPrimary = 0xFFFFFFFF.toInt(),
         primaryContainer = 0xFFB8E6D4.toInt(),
         onPrimaryContainer = 0xFF00210A.toInt()
@@ -84,47 +84,47 @@ object ThemeManager {
         val onPrimaryContainer: Int
     )
 
-    private fun prefs(ctx: Context): SharedPreferences =
-        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE)
+    private fun getPreferences(context: Context): SharedPreferences =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
 
     /** 获取当前主题模式。 */
-    fun getThemeMode(ctx: Context): Int =
-        prefs(ctx).getInt(KEY_THEME_MODE, MODE_SYSTEM)
+    fun getThemeMode(context: Context): Int =
+        getPreferences(context).getInt(KEY_THEME_MODE, MODE_SYSTEM)
 
     /** 设置主题模式。 */
-    fun setThemeMode(ctx: Context, mode: Int) {
-        prefs(ctx).edit().putInt(KEY_THEME_MODE, mode).apply()
+    fun setThemeMode(context: Context, mode: Int) {
+        getPreferences(context).edit().putInt(KEY_THEME_MODE, mode).apply()
         AppCompatDelegate.setDefaultNightMode(mode)
     }
 
     /** 获取当前主色值（ARGB 整数）。 */
-    fun getPrimaryColor(ctx: Context): Int {
-        val presetId = prefs(ctx).getString(KEY_PRIMARY_COLOR, MINT_GREEN.id)
+    fun getPrimaryColor(context: Context): Int {
+        val presetId = getPreferences(context).getString(KEY_PRIMARY_COLOR, MINT_GREEN.id)
         return PRESETS.firstOrNull { it.id == presetId }?.primary ?: MINT_GREEN.primary
     }
 
     /** 获取当前完整的预设颜色配置。 */
-    fun getCurrentPreset(ctx: Context): PresetColor {
-        val presetId = prefs(ctx).getString(KEY_PRIMARY_COLOR, MINT_GREEN.id)
+    fun getCurrentPreset(context: Context): PresetColor {
+        val presetId = getPreferences(context).getString(KEY_PRIMARY_COLOR, MINT_GREEN.id)
         return PRESETS.firstOrNull { it.id == presetId } ?: MINT_GREEN
     }
 
     /** 设置预设主题色。 */
-    fun setPresetColor(ctx: Context, preset: PresetColor) {
-        prefs(ctx).edit().putString(KEY_PRIMARY_COLOR, preset.id).apply()
+    fun setPresetColor(context: Context, preset: PresetColor) {
+        getPreferences(context).edit().putString(KEY_PRIMARY_COLOR, preset.id).apply()
     }
 
     /**
      * 应用启动时初始化主题：恢复用户上次保存的主题模式。
      * 必须在 onCreate 中尽早调用。
      */
-    fun init(ctx: Context) {
-        val mode = getThemeMode(ctx)
+    fun init(context: Context) {
+        val mode = getThemeMode(context)
         AppCompatDelegate.setDefaultNightMode(mode)
     }
 
     /**
      * 从资源 ID 获取颜色（兼容主题切换）。
      */
-    fun color(ctx: Context, resId: Int): Int = ContextCompat.getColor(ctx, resId)
+    fun color(context: Context, resId: Int): Int = ContextCompat.getColor(context, resId)
 }

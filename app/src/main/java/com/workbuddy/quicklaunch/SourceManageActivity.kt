@@ -23,6 +23,9 @@ import java.util.UUID
  */
 class SourceManageActivity : AppCompatActivity() {
 
+    /** 用一个普通年份测试网址格式是否合法，不关心具体是哪年。 */
+    private const val URL_VALIDATION_YEAR = 2000
+
     private lateinit var binding: ActivitySourceManageBinding
     private val items = mutableListOf<Row>()
     private val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<RowVH>() {
@@ -33,13 +36,13 @@ class SourceManageActivity : AppCompatActivity() {
 
         override fun getItemCount() = items.size
 
-        override fun onBindViewHolder(h: RowVH, position: Int) {
-            val r = items[position]
-            h.label.text = r.label
-            h.url.text = r.url
-            h.tag.text = r.tag
-            h.delete.visibility = if (r.builtIn) View.GONE else View.VISIBLE
-            h.delete.setOnClickListener { removeCustom(r.id) }
+        override fun onBindViewHolder(holder: RowVH, position: Int) {
+            val row = items[position]
+            holder.label.text = row.label
+            holder.url.text = row.url
+            holder.tag.text = row.tag
+            holder.delete.visibility = if (row.builtIn) View.GONE else View.VISIBLE
+            holder.delete.setOnClickListener { removeCustom(row.id) }
         }
     }
 
@@ -100,8 +103,8 @@ class SourceManageActivity : AppCompatActivity() {
                 }
                 // 校验协议与可解析性：非法网址曾会在同步时抛异常并中断整条回退链，
                 // 现在同步侧已做容错，但在入口就拦住能给用户明确反馈。
-                // 校验方法：把「年份」标记替换成 2000，看看能不能生成合法的网址格式
-                val probe = url.replace("【年份】", "2000")
+                // 校验方法：把「年份」标记替换成一个普通年份（如 2000），看看能不能生成合法的网址格式
+                val probe = url.replace("【年份】", URL_VALIDATION_YEAR.toString())
                 val validUrl = runCatching { java.net.URL(probe).protocol.lowercase(Locale.US) }
                     .getOrNull()
                 if (validUrl != "http" && validUrl != "https") {

@@ -39,10 +39,10 @@ class HolidayManageActivity : AppCompatActivity() {
         override fun getItemCount() = items.size
 
         override fun onBindViewHolder(h: ViewHolder, position: Int) {
-            val h0 = items[position]
-            h.date.text = h0.date
-            h.name.text = h0.name
-            h.delete.setOnClickListener { removeHoliday(h0.date) }
+            val holiday = items[position]
+            h.date.text = holiday.date
+            h.name.text = holiday.name
+            h.delete.setOnClickListener { removeHoliday(holiday.date) }
         }
     }
 
@@ -58,12 +58,12 @@ class HolidayManageActivity : AppCompatActivity() {
         load()
     }
 
-    /** 后台执行；executor 已关闭时静默丢弃，避免 RejectedExecutionException 崩溃。 */
+    /** 后台执行；executor 已关闭时静默丢弃，避免因「线程池拒绝执行」异常导致崩溃。 */
     private fun runIo(block: () -> Unit) {
         runCatching { io.execute { runCatching(block) } }
     }
 
-    /** 回主线程执行；Activity 已销毁则丢弃，避免 BadTokenException / 空 binding 访问。 */
+    /** 回主线程执行；Activity 已销毁则丢弃，避免因访问已销毁界面导致崩溃。 */
     private fun postUi(block: () -> Unit) {
         runOnUiThread {
             if (isFinishing || isDestroyed) return@runOnUiThread

@@ -43,8 +43,8 @@ object ThemePrefs {
     private const val NO_CUSTOM = ""
 
     // ── SP 访问封装 ───────────────────────────────────────────────
-    private fun sp(ctx: Context) =
-        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE)
+    private fun getPreferences(context: Context) =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE)
 
     // ── 主题模式读写 ───────────────────────────────────────────────
 
@@ -52,15 +52,15 @@ object ThemePrefs {
      * 获取当前主题模式。
      * @return [MODE_FOLLOW_SYSTEM] / [MODE_LIGHT] / [MODE_DARK]
      */
-    fun getThemeMode(ctx: Context): String =
-        sp(ctx).getString(KEY_THEME_MODE, DEFAULT_MODE) ?: DEFAULT_MODE
+    fun getThemeMode(context: Context): String =
+        getPreferences(context).getString(KEY_THEME_MODE, DEFAULT_MODE) ?: DEFAULT_MODE
 
     /** 设置主题模式（自动持久化）。 */
-    fun setThemeMode(ctx: Context, mode: String) {
+    fun setThemeMode(context: Context, mode: String) {
         require(mode in setOf(MODE_FOLLOW_SYSTEM, MODE_LIGHT, MODE_DARK)) {
             "mode 必须是 FOLLOW_SYSTEM / LIGHT / DARK"
         }
-        sp(ctx).edit().putString(KEY_THEME_MODE, mode).apply()
+        getPreferences(context).edit().putString(KEY_THEME_MODE, mode).apply()
     }
 
     // ── 预设色板读写 ───────────────────────────────────────────────
@@ -69,15 +69,15 @@ object ThemePrefs {
      * 获取当前预设色板。
      * @return [PRESET_MINT] / [PRESET_LAVENDER] / [PRESET_CLASSIC]
      */
-    fun getColorPreset(ctx: Context): String =
-        sp(ctx).getString(KEY_COLOR_PRESET, DEFAULT_PRESET) ?: DEFAULT_PRESET
+    fun getColorPreset(context: Context): String =
+        getPreferences(context).getString(KEY_COLOR_PRESET, DEFAULT_PRESET) ?: DEFAULT_PRESET
 
     /** 设置预设色板（自动持久化）。 */
-    fun setColorPreset(ctx: Context, preset: String) {
+    fun setColorPreset(context: Context, preset: String) {
         require(preset in setOf(PRESET_MINT, PRESET_LAVENDER, PRESET_CLASSIC)) {
             "preset 必须是 MINT / LAVENDER / CLASSIC"
         }
-        sp(ctx).edit().putString(KEY_COLOR_PRESET, preset).apply()
+        getPreferences(context).edit().putString(KEY_COLOR_PRESET, preset).apply()
     }
 
     // ── 自定义颜色读写 ─────────────────────────────────────────────
@@ -86,22 +86,22 @@ object ThemePrefs {
      * 获取用户自定义颜色（ARGB 格式，如 "#FF5EA88B"）。
      * @return 自定义颜色字符串，未设置时返回空串 ""。
      */
-    fun getCustomColor(ctx: Context): String =
-        sp(ctx).getString(KEY_CUSTOM_COLOR, NO_CUSTOM) ?: NO_CUSTOM
+    fun getCustomColor(context: Context): String =
+        getPreferences(context).getString(KEY_CUSTOM_COLOR, NO_CUSTOM) ?: NO_CUSTOM
 
     /**
      * 设置自定义颜色。
      * @param colorHex ARGB 格式字符串，如 "#FF5EA88B"；传空串 "" 表示清除自定义。
      */
-    fun setCustomColor(ctx: Context, colorHex: String) {
-        sp(ctx).edit().putString(KEY_CUSTOM_COLOR, colorHex).apply()
+    fun setCustomColor(context: Context, colorHex: String) {
+        getPreferences(context).edit().putString(KEY_CUSTOM_COLOR, colorHex).apply()
     }
 
     /**
      * 判断是否有有效的自定义颜色。
      */
-    fun hasCustomColor(ctx: Context): Boolean {
-        val hex = getCustomColor(ctx)
+    fun hasCustomColor(context: Context): Boolean {
+        val hex = getCustomColor(context)
         return hex.isNotEmpty() && runCatching { Color.parseColor(hex) }.isSuccess
     }
 

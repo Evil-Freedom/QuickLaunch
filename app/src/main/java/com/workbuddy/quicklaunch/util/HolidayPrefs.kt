@@ -14,41 +14,42 @@ object HolidayPrefs {
     private const val KEY_LAST = "holiday_source"
     private const val KEY_CUSTOM = "holiday_custom_sources"
 
-    fun getSourcePref(ctx: Context): String =
-        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY_PREF, "auto") ?: "auto"
+    // 解析器类型名称常量（存到 JSON 里的字符串）
+    private const val PARSER_TIMOR = "timor"
+    private const val PARSER_NATESCARLET = "natescarlet"
 
-    fun setSourcePref(ctx: Context, pref: String) =
-        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_PREF, pref).apply()
+    fun getSourcePref(context: Context): String =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY_PREF, "auto") ?: "auto"
 
-    fun getLastGood(ctx: Context): String? =
-        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY_LAST, null)
+    fun setSourcePref(context: Context, pref: String) =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_PREF, pref).apply()
 
-    fun setLastGood(ctx: Context, id: String) =
-        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_LAST, id).apply()
+    fun getLastGood(context: Context): String? =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY_LAST, null)
 
-    fun getCustomSources(ctx: Context): List<CustomSource> {
-        val raw = ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY_CUSTOM, null)
+    fun setLastGood(context: Context, id: String) =
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_LAST, id).apply()
+
+    fun getCustomSources(context: Context): List<CustomSource> {
+        val raw = context.getSharedPreferences(SP, Context.MODE_PRIVATE).getString(KEY_CUSTOM, null)
             ?: return emptyList()
         return runCatching {
             val arr = JSONArray(raw)
             (0 until arr.length()).mapNotNull { i ->
-                val o = arr.optJSONObject(i) ?: return@mapNotNull null
-                val parser = if (o.optString("parser", "natescarlet") == "timor") {
-                    ParserType.TIMOR
-                } else {
-                    ParserType.NATE_SCARLET
-                }
+                val sourceJson = arr.optJSONObject(i) ?: return@mapNotNull null
+                val parserName = sourceJson.optString("parser", PARSER_NATESCARLET)
+                val parser = if (parserName == PARSER_TIMOR) ParserType.TIMOR else ParserType.NATE_SCARLET
                 CustomSource(
-                    id = o.optString("id"),
-                    label = o.optString("label"),
-                    urlTemplate = o.optString("urlTemplate"),
+                    id = sourceJson.optString("id"),
+                    label = sourceJson.optString("label"),
+                    urlTemplate = sourceJson.optString("urlTemplate"),
                     parser = parser
                 )
             }
         }.getOrDefault(emptyList())
     }
 
-    fun setCustomSources(ctx: Context, list: List<CustomSource>) {
+    fun setCustomSources(context: Context, list: List<CustomSource>) {
         val arr = JSONArray()
         list.forEach {
             arr.put(JSONObject().apply {
@@ -58,6 +59,6 @@ object HolidayPrefs {
                 put("parser", it.parser.name.lowercase())
             })
         }
-        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_CUSTOM, arr.toString()).apply()
+        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_CUSTOM, arr.toString()).apply()
     }
 }

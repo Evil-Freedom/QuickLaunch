@@ -14,7 +14,7 @@ import java.util.concurrent.Executors
  * 同步中国法定节假日（含调休休息日）到本地 holidays 表。
  * 多数据源：依次尝试 HolidaySources 中的源，第一个成功的即采用（见 [HolidaySources]）。
  * - pref 指定优先源；lastGood 为上次成功源（SharedPreferences 记忆），提升稳定性。
- * - 全部失败（无网络/接口异常）静默回退，已有规则照常触发，不会因同步失败而崩。
+ * - 全部失败（无网络/接口异常）时悄悄忽略错误，已有的定时规则照常运行，不会因同步失败而崩溃。
  */
 object HolidaySync {
 
@@ -37,15 +37,16 @@ object HolidaySync {
     fun sync(context: Context, pref: String? = null, onDone: (Result) -> Unit = {}) {
         // 用 applicationContext，防止后台任务持有 Activity 导致内存泄漏
         val app = context.applicationContext
+        // 原子地尝试把 running 从 false 改成 true；如果已经是 true 说明已有同步在跑，直接忽略本次请求
         if (!running.compareAndSet(false, true)) {
             mainHandler.post { runCatching { onDone(Result(false, null, 0)) } }
             return
         }
         val submitted = runCatching {
             executor.execute {
-                val res = runCatching { doSync(app, pref) }.getOrDefault(Result(false, null, 0))
+                val syncResult = runCatching { doSync(app, pref) }.getOrDefault(Result(false, null, 0))
                 running.set(false)
-                mainHandler.post { runCatching { onDone(res) } }
+                mainHandler.post { runCatching { onDone(syncResult) } }
             }
         }.isSuccess
         if (!submitted) {
@@ -78,7 +79,7 @@ object HolidaySync {
                 acc
             }.getOrDefault(emptyList())
 
-            // 同一天可能被两年的数据重复给出，落库前按日期去重，避免表膨胀
+            // 同一天可能被两年的数据重复给出，落库前按日期去重，防止数据库表变得过大
             val distinct = holidays.distinctBy { it.date }
             if (distinct.isNotEmpty()) {
                 val written = runCatching { dao.replaceAll(distinct) }.isSuccess
@@ -91,8 +92,8 @@ object HolidaySync {
     }
 
     /**
-     * 拉取文本。此前 `URL(url).openConnection()` 裸奔在 try 之外：
-     * 用户自定义源填了非法 URL（如 "abc"）会抛 MalformedURLException 直接冒泡，
+     * 拉取文本。此前 URL(url).openConnection() 放在 try 之外：
+     * 用户自定义源填了非法 URL（如 "abc"）会抛 MalformedURLException 直接向上抛出，
      * 把整个 doSync 打断，后面的可用源一个都试不到。现在全部异常本地消化。
      */
     private fun fetchText(url: String): String? {
@@ -114,12 +115,12 @@ object HolidaySync {
             // 限制读取上限：防止异常/恶意源返回超大响应把内存吃爆（正常年数据 < 100KB）
             conn.inputStream.bufferedReader().use { reader ->
                 val sb = StringBuilder()
-                val buf = CharArray(8 * 1024)
+                val buf = CharArray(READ_BUFFER_SIZE)
                 while (true) {
-                    val n = reader.read(buf)
-                    if (n < 0) break
-                    if (sb.length + n > MAX_BODY_CHARS) return null
-                    sb.appendRange(buf, 0, n)
+                    val charsRead = reader.read(buf)
+                    if (charsRead < 0) break
+                    if (sb.length + charsRead > MAX_BODY_CHARS) return null
+                    sb.appendRange(buf, 0, charsRead)
                 }
                 sb.toString()
             }
@@ -133,5 +134,6 @@ object HolidaySync {
     private const val CONNECT_TIMEOUT_MS = 10_000
     private const val READ_TIMEOUT_MS = 10_000
     private const val MAX_BODY_CHARS = 2 * 1024 * 1024
+    private const val READ_BUFFER_SIZE = 8 * 1024  // 8KB 缓冲区，够用且不会占用太多内存
     private val ALLOWED_SCHEMES = setOf("http", "https")
 }

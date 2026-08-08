@@ -171,7 +171,17 @@ object HolidaySources {
 // 下面这些是 JSON 解析器的实现，和网址替换逻辑无关，保持不变
 // ═══════════════════════════════════════════════════════════════════════
 
-/** 严格校验日期格式 yyyy-MM-dd（包括月份和日期的合理范围），防止脏数据写入数据库。 */
+/** 接口返回 0 表示请求成功，其他值表示出错。 */
+private const val API_CODE_SUCCESS = 0
+
+/**
+ * 严格校验日期格式 yyyy-MM-dd（包括月份和日期的合理范围），防止把格式错误或不合格的数据存进数据库。
+ *
+ * 正则拆成四段来理解：
+ *   ^\d{4}           → 四位年份开头（如 2026）
+ *   -(0[1-9]|1[0-2]) → 月份 01~12
+ *   -(0[1-9]|[12]\d|3[01]) → 日期 01~31
+ */
 private val DATE_RE = Regex("""^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$""")
 
 private fun validDateOrNull(s: String?): String? {
@@ -198,17 +208,18 @@ private fun validDateOrNull(s: String?): String? {
  */
 private fun parseTimor(json: String): List<Holiday> {
     val root = runCatching { JSONObject(json) }.getOrNull() ?: return emptyList()
-    if (root.optInt("code", -1) != 0) return emptyList()
+    // 接口返回 0 表示请求成功，其他值表示出错
+    if (root.optInt("code", -1) != API_CODE_SUCCESS) return emptyList()
     val holiday = root.optJSONObject("holiday") ?: return emptyList()
     val out = mutableListOf<Holiday>()
     val keys = holiday.keys()
     while (keys.hasNext()) {
-        val k = keys.next()
-        val obj = holiday.optJSONObject(k) ?: continue
-        if (!obj.optBoolean("holiday", false)) continue
+        val dateKey = keys.next()  // 如 "01-01" 或 "2026-01-01"
+        val dayInfo = holiday.optJSONObject(dateKey) ?: continue
+        if (!dayInfo.optBoolean("holiday", false)) continue
         // 优先使用对象内的 date 字段（完整日期），否则用键的值（兼容两种格式）
-        val date = validDateOrNull(obj.optString("date", "")) ?: validDateOrNull(k) ?: continue
-        out.add(Holiday(date = date, name = obj.optString("name", "")))
+        val date = validDateOrNull(dayInfo.optString("date", "")) ?: validDateOrNull(dateKey) ?: continue
+        out.add(Holiday(date = date, name = dayInfo.optString("name", "")))
     }
     return out
 }
@@ -231,10 +242,10 @@ private fun parseNateScarlet(json: String): List<Holiday> {
     val days = root.optJSONArray("days") ?: return emptyList()
     val out = mutableListOf<Holiday>()
     for (i in 0 until days.length()) {
-        val obj = days.optJSONObject(i) ?: continue
-        if (!obj.optBoolean("isOffDay", false)) continue
-        val date = validDateOrNull(obj.optString("date", "")) ?: continue
-        out.add(Holiday(date = date, name = obj.optString("name", "")))
+        val dayInfo = days.optJSONObject(i) ?: continue  // 单个日期信息
+        if (!dayInfo.optBoolean("isOffDay", false)) continue
+        val date = validDateOrNull(dayInfo.optString("date", "")) ?: continue
+        out.add(Holiday(date = date, name = dayInfo.optString("name", "")))
     }
     return out
 }
