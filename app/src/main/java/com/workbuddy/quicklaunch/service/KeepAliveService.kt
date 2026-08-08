@@ -217,6 +217,9 @@ class KeepAliveService : Service() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         runCatching {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+            // 先删后建：渠道由系统持久化，换 ID 升版后旧渠道不会自动消失，
+            // 会在「设置-通知」里留下同名僵尸开关。delete 幂等，渠道不存在时静默返回。
+            LEGACY_CHANNELS.forEach { nm.deleteNotificationChannel(it) }
             nm.createNotificationChannel(
                 NotificationChannel(CHANNEL, "后台保活", NotificationManager.IMPORTANCE_LOW)
             )
@@ -226,6 +229,9 @@ class KeepAliveService : Service() {
     companion object {
         const val NOTIF_ID = 1002
         private const val CHANNEL = "quicklaunch_keepalive_v2"
+
+        /** 历史版本渠道 ID。图标升版换新 ID 时，旧 ID 必须登记在此以便清理。 */
+        private val LEGACY_CHANNELS = listOf("quicklaunch_keepalive")
 
         /** WakeLock 超时（自愈上限）与续期间隔。续期间隔必须明显小于超时。 */
         private const val WAKELOCK_TIMEOUT_MS = 30 * 60 * 1000L
