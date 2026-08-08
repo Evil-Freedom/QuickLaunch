@@ -1,0 +1,365 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.workbuddy.quicklaunch"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="36" />
+10
+11    <!-- 开机自启后重新排程定时任务与网络回调 -->
+12    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+12-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:6:5-81
+12-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:6:22-78
+13    <!-- 前台服务：用于在后台真正拉起目标 App -->
+14    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+14-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:8:5-77
+14-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:8:22-74
+15    <!-- Android 14+ 声明 specialUse 类型的前台服务必须同时申请此权限，否则运行时 SecurityException -->
+16    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+16-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:10:5-89
+16-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:10:22-86
+17    <!-- Android 13+ 通知权限 -->
+18    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+18-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:12:5-77
+18-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:12:22-74
+19    <!-- 通知兜底时使用全屏 Intent，保证锁屏也能弹出 -->
+20    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+20-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:14:5-81
+20-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:14:22-78
+21    <!-- 关键：Android 10+ 后台启动 Activity 的可靠豁免途径，无此权限自动拉起会被系统静默丢弃 -->
+22    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+22-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:16:5-78
+22-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:16:22-75
+23    <!-- WiFi 条件监听（registerNetworkCallback 需要） -->
+24    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+24-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:18:5-79
+24-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:18:22-76
+25    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+25-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:19:5-76
+25-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:19:22-73
+26    <!-- 蓝牙条件监听 -->
+27    <uses-permission
+27-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:21:5-95
+28        android:name="android.permission.BLUETOOTH"
+28-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:21:22-65
+29        android:maxSdkVersion="30" />
+29-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:21:66-92
+30    <uses-permission
+30-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:22:5-101
+31        android:name="android.permission.BLUETOOTH_ADMIN"
+31-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:22:22-71
+32        android:maxSdkVersion="30" />
+32-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:22:72-98
+33    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+33-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:23:5-76
+33-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:23:22-73
+34    <!-- 精确闹钟：SCHEDULE_EXACT_ALARM 需用户手动授权，USE_EXACT_ALARM（Android 13+）免授权 -->
+35    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+35-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:25:5-79
+35-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:25:22-76
+36    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+36-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:26:5-74
+36-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:26:22-71
+37    <!-- 同步中国法定节假日数据 -->
+38    <uses-permission android:name="android.permission.INTERNET" />
+38-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:28:5-67
+38-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:28:22-64
+39    <!-- 唤醒与忽略电池优化 -->
+40    <uses-permission android:name="android.permission.WAKE_LOCK" />
+40-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:30:5-68
+40-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:30:22-65
+41    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+41-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:31:5-95
+41-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:31:22-92
+42
+43    <!--
+44      targetSdk 30+ 的包可见性限制：不声明 queries 就查不到其它应用，
+45      应用选择列表会是空的、getLaunchIntentForPackage 也会返回 null。
+46      只声明 LAUNCHER 意图即可（比 QUERY_ALL_PACKAGES 更克制，也不会被应用商店拒审）。
+47    -->
+48    <queries>
+48-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:38:5-43:15
+49        <intent>
+49-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:39:9-42:18
+50            <action android:name="android.intent.action.MAIN" />
+50-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:40:13-65
+50-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:40:21-62
+51
+52            <category android:name="android.intent.category.LAUNCHER" />
+52-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:41:13-73
+52-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:41:23-70
+53        </intent>
+54    </queries>
+55
+56    <permission
+56-->[androidx.core:core:1.15.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\bb2108edc0d24e5c1685f0e691f0f133\transformed\core-1.15.0\AndroidManifest.xml:22:5-24:47
+57        android:name="com.workbuddy.quicklaunch.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+57-->[androidx.core:core:1.15.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\bb2108edc0d24e5c1685f0e691f0f133\transformed\core-1.15.0\AndroidManifest.xml:23:9-81
+58        android:protectionLevel="signature" />
+58-->[androidx.core:core:1.15.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\bb2108edc0d24e5c1685f0e691f0f133\transformed\core-1.15.0\AndroidManifest.xml:24:9-44
+59
+60    <uses-permission android:name="com.workbuddy.quicklaunch.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+60-->[androidx.core:core:1.15.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\bb2108edc0d24e5c1685f0e691f0f133\transformed\core-1.15.0\AndroidManifest.xml:26:5-97
+60-->[androidx.core:core:1.15.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\bb2108edc0d24e5c1685f0e691f0f133\transformed\core-1.15.0\AndroidManifest.xml:26:22-94
+61
+62    <application
+62-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:45:5-150:19
+63        android:allowBackup="true"
+63-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:46:9-35
+64        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+64-->[androidx.core:core:1.15.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\bb2108edc0d24e5c1685f0e691f0f133\transformed\core-1.15.0\AndroidManifest.xml:28:18-86
+65        android:debuggable="true"
+66        android:extractNativeLibs="false"
+67        android:icon="@mipmap/ic_launcher"
+67-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:47:9-43
+68        android:label="@string/app_name"
+68-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:49:9-41
+69        android:roundIcon="@mipmap/ic_launcher_round"
+69-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:48:9-54
+70        android:supportsRtl="true"
+70-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:50:9-35
+71        android:theme="@style/Theme.QuickLaunch" >
+71-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:51:9-49
+72        <activity
+72-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:54:9-62:20
+73            android:name="com.workbuddy.quicklaunch.MainActivity"
+73-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:55:13-41
+74            android:exported="true"
+74-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:56:13-36
+75            android:theme="@style/Theme.QuickLaunch" >
+75-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:57:13-53
+76            <intent-filter>
+76-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:58:13-61:29
+77                <action android:name="android.intent.action.MAIN" />
+77-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:40:13-65
+77-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:40:21-62
+78
+79                <category android:name="android.intent.category.LAUNCHER" />
+79-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:41:13-73
+79-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:41:23-70
+80            </intent-filter>
+81        </activity>
+82        <activity
+82-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:64:9-67:56
+83            android:name="com.workbuddy.quicklaunch.CreateAutomationActivity"
+83-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:65:13-53
+84            android:exported="false"
+84-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:66:13-37
+85            android:theme="@style/Theme.QuickLaunch" />
+85-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:67:13-53
+86        <activity
+86-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:69:9-72:56
+87            android:name="com.workbuddy.quicklaunch.HolidayManageActivity"
+87-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:70:13-50
+88            android:exported="false"
+88-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:71:13-37
+89            android:theme="@style/Theme.QuickLaunch" />
+89-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:72:13-53
+90        <activity
+90-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:74:9-77:56
+91            android:name="com.workbuddy.quicklaunch.SourceManageActivity"
+91-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:75:13-49
+92            android:exported="false"
+92-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:76:13-37
+93            android:theme="@style/Theme.QuickLaunch" />
+93-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:77:13-53
+94        <activity
+94-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:79:9-82:56
+95            android:name="com.workbuddy.quicklaunch.ThemeSettingsActivity"
+95-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:80:13-50
+96            android:exported="false"
+96-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:81:13-37
+97            android:theme="@style/Theme.QuickLaunch" />
+97-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:82:13-53
+98
+99        <!--
+100             透明中转页：定时/条件触发时先拉起它，由它选屏 + 点亮屏幕 + 绕过锁屏后启动目标 App。
+101             exported=false 足够——它由本应用的前台服务与通知 PendingIntent 唤起，无需对外暴露。
+102        -->
+103        <activity
+103-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:86:9-91:43
+104            android:name="com.workbuddy.quicklaunch.LaunchProxyActivity"
+104-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:87:13-48
+105            android:exported="false"
+105-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:88:13-37
+106            android:showWhenLocked="true"
+106-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:90:13-42
+107            android:theme="@style/Theme.QuickLaunch.Transparent"
+107-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:89:13-65
+108            android:turnScreenOn="true" />
+108-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:91:13-40
+109
+110        <!-- 真正拉起目标 App 的前台服务 -->
+111        <service
+111-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:94:9-101:19
+112            android:name="com.workbuddy.quicklaunch.service.LaunchService"
+112-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:95:13-50
+113            android:exported="false"
+113-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:96:13-37
+114            android:foregroundServiceType="specialUse" >
+114-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:97:13-55
+115            <property
+115-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:98:13-100:54
+116                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+116-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:99:17-76
+117                android:value="用户自定义规则触发时自动启动指定应用" />
+117-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:100:17-51
+118        </service>
+119
+120        <!-- 后台保活前台服务：长驻降低被杀概率，保障自动启动规则可靠触发 -->
+121        <service
+121-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:104:9-111:19
+122            android:name="com.workbuddy.quicklaunch.service.KeepAliveService"
+122-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:105:13-53
+123            android:exported="false"
+123-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:106:13-37
+124            android:foregroundServiceType="specialUse" >
+124-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:107:13-55
+125            <property
+125-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:98:13-100:54
+126                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+126-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:99:17-76
+127                android:value="后台保活，保障自动启动规则可靠触发" />
+127-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:100:17-51
+128        </service>
+129
+130        <!-- 定时触发（显式 PendingIntent，无需导出） -->
+131        <receiver
+131-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:114:9-116:40
+132            android:name="com.workbuddy.quicklaunch.receiver.AlarmReceiver"
+132-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:115:13-51
+133            android:exported="false" />
+133-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:116:13-37
+134
+135        <!-- WiFi 触发：由 registerNetworkCallback 的显式 PendingIntent 唤起，不需要 intent-filter -->
+136        <receiver
+136-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:119:9-121:40
+137            android:name="com.workbuddy.quicklaunch.receiver.WifiReceiver"
+137-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:120:13-50
+138            android:exported="false" />
+138-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:121:13-37
+139
+140        <!-- 开机完成：重新注册定时任务与网络回调 -->
+141        <receiver
+141-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:124:9-130:20
+142            android:name="com.workbuddy.quicklaunch.receiver.BootReceiver"
+142-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:125:13-50
+143            android:exported="true" >
+143-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:126:13-36
+144            <intent-filter>
+144-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:127:13-129:29
+145                <action android:name="android.intent.action.BOOT_COMPLETED" />
+145-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:128:17-79
+145-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:128:25-76
+146            </intent-filter>
+147        </receiver>
+148
+149        <!-- 充电触发：ACTION_POWER_CONNECTED 属系统豁免广播，静态注册有效 -->
+150        <receiver
+150-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:133:9-139:20
+151            android:name="com.workbuddy.quicklaunch.receiver.PowerConnectionReceiver"
+151-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:134:13-61
+152            android:exported="true" >
+152-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:135:13-36
+153            <intent-filter>
+153-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:136:13-138:29
+154                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+154-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:137:17-87
+154-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:137:25-84
+155            </intent-filter>
+156        </receiver>
+157
+158        <!-- 蓝牙触发：ACL_CONNECTED 同属豁免广播 -->
+159        <receiver
+159-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:142:9-148:20
+160            android:name="com.workbuddy.quicklaunch.receiver.BluetoothReceiver"
+160-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:143:13-55
+161            android:exported="true" >
+161-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:144:13-36
+162            <intent-filter>
+162-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:145:13-147:29
+163                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+163-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:146:17-88
+163-->C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\AndroidManifest.xml:146:25-85
+164            </intent-filter>
+165        </receiver>
+166
+167        <provider
+167-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\3c4bd4496f2f45947ea467a5b6320613\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+168            android:name="androidx.startup.InitializationProvider"
+168-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\3c4bd4496f2f45947ea467a5b6320613\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+169            android:authorities="com.workbuddy.quicklaunch.androidx-startup"
+169-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\3c4bd4496f2f45947ea467a5b6320613\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+170            android:exported="false" >
+170-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\3c4bd4496f2f45947ea467a5b6320613\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+171            <meta-data
+171-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\3c4bd4496f2f45947ea467a5b6320613\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+172                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+172-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\3c4bd4496f2f45947ea467a5b6320613\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+173                android:value="androidx.startup" />
+173-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\3c4bd4496f2f45947ea467a5b6320613\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+174            <meta-data
+174-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\218e90ad6a22591fd99e58efc72cbabf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+175                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+175-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\218e90ad6a22591fd99e58efc72cbabf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+176                android:value="androidx.startup" />
+176-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\218e90ad6a22591fd99e58efc72cbabf\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+177            <meta-data
+177-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+178                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+178-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+179                android:value="androidx.startup" />
+179-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+180        </provider>
+181
+182        <service
+182-->[androidx.room:room-runtime-android:2.7.1] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\27732fda79cf62f42e4f82af3b3e0832\transformed\room-runtime-release\AndroidManifest.xml:24:9-28:63
+183            android:name="androidx.room.MultiInstanceInvalidationService"
+183-->[androidx.room:room-runtime-android:2.7.1] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\27732fda79cf62f42e4f82af3b3e0832\transformed\room-runtime-release\AndroidManifest.xml:25:13-74
+184            android:directBootAware="true"
+184-->[androidx.room:room-runtime-android:2.7.1] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\27732fda79cf62f42e4f82af3b3e0832\transformed\room-runtime-release\AndroidManifest.xml:26:13-43
+185            android:exported="false" />
+185-->[androidx.room:room-runtime-android:2.7.1] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\27732fda79cf62f42e4f82af3b3e0832\transformed\room-runtime-release\AndroidManifest.xml:27:13-37
+186
+187        <receiver
+187-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+188            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+188-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+189            android:directBootAware="false"
+189-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+190            android:enabled="true"
+190-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+191            android:exported="true"
+191-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+192            android:permission="android.permission.DUMP" >
+192-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+193            <intent-filter>
+193-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+194                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+194-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+194-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+195            </intent-filter>
+196            <intent-filter>
+196-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+197                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+197-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+197-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+198            </intent-filter>
+199            <intent-filter>
+199-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+200                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+200-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+200-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+201            </intent-filter>
+202            <intent-filter>
+202-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+203                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+203-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+203-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Administrator\.gradle\caches\8.11.1\transforms\90e22fcdd4de7825e4cc835fa3de1cc8\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+204            </intent-filter>
+205        </receiver>
+206    </application>
+207
+208</manifest>

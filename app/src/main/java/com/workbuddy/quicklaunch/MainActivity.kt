@@ -165,6 +165,7 @@ class MainActivity : AppCompatActivity() {
 
     /** 后台拉取并缓存中国法定节假日；结果用 Snackbar 反馈，并显示实际采用的数据源。 */
     private fun syncHolidays() {
+        // 幂等短路：按钮已禁用时说明同步已在跑，直接忽略本次点击，不重复触发
         if (binding.btnSyncHolidays.isEnabled) {
             binding.btnSyncHolidays.isEnabled = false
             binding.btnSyncHolidays.text = "同步中…"
@@ -220,26 +221,27 @@ class MainActivity : AppCompatActivity() {
     /** 列表读取是磁盘 IO，放后台执行，主线程只做 UI 提交。 */
     private fun refresh() {
         runIo {
-            val items = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            // db.automationDao().getAll() 是磁盘 IO，放后台执行
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             postUi {
-                adapter.submit(items)
-                binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+                adapter.submit(automations)
+                binding.tvEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
             }
         }
     }
 
-    private fun onToggle(a: Automation, checked: Boolean) {
+    private fun onToggle(automation: Automation, checked: Boolean) {
         val app = applicationContext
         runIo {
-            runCatching { db.automationDao().update(a.copy(enabled = checked)) }
-            if (a.triggerType == TriggerType.TIME) {
-                if (checked) Scheduler.schedule(app, a.copy(enabled = true))
-                else Scheduler.cancel(app, a)
+            runCatching { db.automationDao().update(automation.copy(enabled = checked)) }
+            if (automation.triggerType == TriggerType.TIME) {
+                if (checked) Scheduler.schedule(app, automation.copy(enabled = true))
+                else Scheduler.cancel(app, automation)
             }
             postUi {
                 Snackbar.make(
                     binding.root,
-                    if (checked) "已开启「${a.name}」" else "已关闭「${a.name}」",
+                    if (checked) "已开启「${automation.name}」" else "已关闭「${automation.name}」",
                     Snackbar.LENGTH_SHORT
                 ).show()
             }
@@ -247,29 +249,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** 删除入口：先弹二次确认，用户确认后才真正删库。 */
-    private fun onDelete(a: Automation) {
+    private fun onDelete(automation: Automation) {
         runCatching {
             MaterialAlertDialogBuilder(this)
                 .setTitle("删除自动化？")
-                .setMessage("「${a.name}」将被删除，其定时任务会一并取消。")
-                .setPositiveButton("删除") { _, _ -> performDelete(a) }
+                .setMessage("「${automation.name}」将被删除，其定时任务会一并取消。")
+                .setPositiveButton("删除") { _, _ -> performDelete(automation) }
                 .setNegativeButton("取消", null)
                 .show()
         }
     }
 
     /** 真正删除 + Snackbar 撤销。undoDelete 用原 Automation（含原 id）重插，保证 AlarmManager 的请求码不变。 */
-    private fun performDelete(a: Automation) {
+    private fun performDelete(automation: Automation) {
         val app = applicationContext
         runIo {
-            if (a.triggerType == TriggerType.TIME) Scheduler.cancel(app, a)
-            runCatching { db.automationDao().delete(a) }
-            val items = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            if (automation.triggerType == TriggerType.TIME) Scheduler.cancel(app, automation)
+            runCatching { db.automationDao().delete(automation) }
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             postUi {
-                adapter.submit(items)
-                binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
-                Snackbar.make(binding.root, "已删除「${a.name}」", Snackbar.LENGTH_LONG)
-                    .setAction("撤销") { undoDelete(a) } // 闭包持有原 Automation（含原 id）
+                adapter.submit(automations)
+                binding.tvEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                Snackbar.make(binding.root, "已删除「${automation.name}」", Snackbar.LENGTH_LONG)
+                    .setAction("撤销") { undoDelete(automation) } // 闭包持有原 Automation（含原 id）
                     .show()
             }
         }
@@ -278,18 +280,18 @@ class MainActivity : AppCompatActivity() {
     /**
      * 撤销删除 = 用原 id 重插 + 若为已启用的定时规则则重新排程。
      * 关键不变量：Room @PrimaryKey(autoGenerate=true) 显式带 id 会保留该 id，
-     * Scheduler 用来区分不同闹钟的请求码（a.id.toInt()）因此与删除前一致，
+     * Scheduler 用来区分不同闹钟的请求码（automation.id.toInt()）因此与删除前一致，
      * AlarmManager 不会出现重复闹钟/漏闹钟。
      */
-    private fun undoDelete(a: Automation) {
+    private fun undoDelete(automation: Automation) {
         val app = applicationContext
         runIo {
-            runCatching { db.automationDao().insert(a) } // 显式带原 id，requestCode 不变
-            if (a.triggerType == TriggerType.TIME && a.enabled) Scheduler.schedule(app, a)
-            val items = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            runCatching { db.automationDao().insert(automation) } // 显式带原 id，requestCode 不变
+            if (automation.triggerType == TriggerType.TIME && automation.enabled) Scheduler.schedule(app, automation)
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             postUi {
-                adapter.submit(items)
-                binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+                adapter.submit(automations)
+                binding.tvEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
             }
         }
     }

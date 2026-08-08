@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.workbuddy.quicklaunch.SchedulerTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-08-07T16:57:14" hostname="EVIL_FREEDOM" time="0.154">
+  <properties/>
+  <testcase name="随机窗口每次重排时刻不同" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.076"/>
+  <testcase name="随机窗口触发时刻落在窗口内且为未来" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.01"/>
+  <testcase name="自定义星期下次触发不超过一周" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.003"/>
+  <testcase name="任何模式下次触发都在未来" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.03"/>
+  <testcase name="自定义星期mask为0不进入死循环且返回未来时间" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.0"/>
+  <testcase name="下次触发不会超过一周" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.009"/>
+  <testcase name="随机窗口跳过节假日当天不触发" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.002"/>
+  <testcase name="跳过节假日时不会落在节假日且为未来" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.008"/>
+  <testcase name="自定义星期随机窗口落在选中日且窗口内" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.004"/>
+  <testcase name="时分与规则一致" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.0"/>
+  <testcase name="随机窗口末边界包含结束时刻" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.002"/>
+  <testcase name="周末模式永远落在周六或周日" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.001"/>
+  <testcase name="自定义星期只落在选中的几天" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.001"/>
+  <testcase name="工作日模式永远落在周一到周五" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.0"/>
+  <testcase name="随机窗口工作日落在周一到周五" classname="com.workbuddy.quicklaunch.SchedulerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

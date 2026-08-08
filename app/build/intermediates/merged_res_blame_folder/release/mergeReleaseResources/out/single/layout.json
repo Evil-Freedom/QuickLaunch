@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/item_automation.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/item_automation.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/activity_main.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/activity_theme_settings.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_theme_settings.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/activity_create.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_create.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/activity_source_manage.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_source_manage.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/activity_holiday_manage.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_holiday_manage.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/item_holiday.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/item_holiday.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeReleaseResources-40:/layout/item_source.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/item_source.xml"
+    }
+]

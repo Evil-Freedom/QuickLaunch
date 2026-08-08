@@ -44,9 +44,10 @@ object HolidaySync {
         }
         val submitted = runCatching {
             executor.execute {
-                val syncResult = runCatching { doSync(app, pref) }.getOrDefault(Result(false, null, 0))
+                // doSync 可能因网络异常返回失败结果，这里统一兜底成「失败」
+                val result = runCatching { doSync(app, pref) }.getOrDefault(Result(false, null, 0))
                 running.set(false)
-                mainHandler.post { runCatching { onDone(syncResult) } }
+                mainHandler.post { runCatching { onDone(result) } }
             }
         }.isSuccess
         if (!submitted) {
@@ -117,10 +118,11 @@ object HolidaySync {
                 val sb = StringBuilder()
                 val buf = CharArray(READ_BUFFER_SIZE)
                 while (true) {
-                    val charsRead = reader.read(buf)
-                    if (charsRead < 0) break
-                    if (sb.length + charsRead > MAX_BODY_CHARS) return null
-                    sb.appendRange(buf, 0, charsRead)
+                    // reader.read 返回本次读到的字符数，-1 表示流已读完
+                    val readCount = reader.read(buf)
+                    if (readCount < 0) break
+                    if (sb.length + readCount > MAX_BODY_CHARS) return null
+                    sb.appendRange(buf, 0, readCount)
                 }
                 sb.toString()
             }

@@ -1,0 +1,58 @@
+[
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-mergeDebugResources-40:\\layout\\item_source.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\item_source.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeDebugResources-40:/layout/activity_theme_settings.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_theme_settings.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeDebugResources-40:/layout/item_source.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_source.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-mergeDebugResources-40:\\layout\\item_holiday.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\item_holiday.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-mergeDebugResources-40:\\layout\\activity_holiday_manage.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_holiday_manage.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-mergeDebugResources-40:\\layout\\activity_source_manage.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_source_manage.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-mergeDebugResources-40:\\layout\\activity_main.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-mergeDebugResources-40:\\layout\\activity_create.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_create.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeDebugResources-40:/layout/activity_holiday_manage.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_holiday_manage.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeDebugResources-40:/layout/item_holiday.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_holiday.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeDebugResources-40:/layout/activity_main.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeDebugResources-40:/layout/item_automation.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_automation.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-mergeDebugResources-40:/layout/activity_source_manage.xml",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_source_manage.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-mergeDebugResources-40:\\layout\\item_automation.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\item_automation.xml"
+    }
+]

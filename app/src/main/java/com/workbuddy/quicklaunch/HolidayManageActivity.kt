@@ -38,11 +38,11 @@ class HolidayManageActivity : AppCompatActivity() {
 
         override fun getItemCount() = items.size
 
-        override fun onBindViewHolder(h: ViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val holiday = items[position]
-            h.date.text = holiday.date
-            h.name.text = holiday.name
-            h.delete.setOnClickListener { removeHoliday(holiday.date) }
+            holder.date.text = holiday.date
+            holder.name.text = holiday.name
+            holder.delete.setOnClickListener { removeHoliday(holiday.date) }
         }
     }
 

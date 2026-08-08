@@ -1,0 +1,86 @@
+[
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_item_source.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/item_source.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_activity_main.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_status_dot_on.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/status_dot_on.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_activity_theme_settings.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_theme_settings.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_item_holiday.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/item_holiday.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_color_swatch_lavender.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/color_swatch_lavender.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_status_dot_off.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/status_dot_off.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_item_automation.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/item_automation.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_activity_create.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_create.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_ic_empty_state.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/ic_empty_state.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_color_swatch_classic.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/color_swatch_classic.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/mipmap-anydpi_ic_launcher_round.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/mipmap-anydpi/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/mipmap-anydpi_ic_launcher.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/mipmap-anydpi/ic_launcher.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_color_swatch_mint.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/color_swatch_mint.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_activity_holiday_manage.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_holiday_manage.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_ic_launcher.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/ic_launcher.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-release-41:/layout_activity_source_manage.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-42:/layout/activity_source_manage.xml"
+    }
+]

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.workbuddy.quicklaunch.util.HolidaySourcesTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-08-07T16:57:14" hostname="EVIL_FREEDOM" time="0.102">
+  <properties/>
+  <testcase name="holidaycn解析器剔除空日期与补班日" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.074"/>
+  <testcase name="解析器对畸形JSON返回空而不抛异常" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.005"/>
+  <testcase name="自定义源进入尝试顺序且可被指定为偏好" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.012"/>
+  <testcase name="自定义源URL模板正确替换year" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.0"/>
+  <testcase name="timor解析器剔除调休补班日与非法日期" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.001"/>
+  <testcase name="自定义源与内置源id冲突时去重" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.001"/>
+  <testcase name="自定义源按所选解析器解析" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.0"/>
+  <testcase name="偏好源与上次成功源相同时不重复" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.003"/>
+  <testcase name="未知偏好回退到默认顺序" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.001"/>
+  <testcase name="指定偏好源排最前且上次成功源其次" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.0"/>
+  <testcase name="timor解析器兼容键为完整日期的镜像" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.0"/>
+  <testcase name="自动模式下上次成功源前置" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.001"/>
+  <testcase name="默认顺序包含全部三个内置数据源" classname="com.workbuddy.quicklaunch.util.HolidaySourcesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

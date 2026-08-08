@@ -1,0 +1,29 @@
+<lint-module
+    format="1"
+    dir="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app"
+    name=":app"
+    type="APP"
+    maven="QuickLaunch:app:unspecified"
+    agpVersion="8.9.1"
+    buildFolder="build"
+    bootClassPath="C:\Users\Administrator\Android\platforms\android-36\android.jar;C:\Users\Administrator\Android\build-tools\35.0.0\core-lambda-stubs.jar"
+    javaSourceLevel="17"
+    compileTarget="android-36"
+    neverShrinking="true">
+  <lintOptions
+      disable="HardcodedText,UnusedResources"
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true">
+    <severities>
+      <severity
+        id="HardcodedText"
+        severity="IGNORE" />
+      <severity
+        id="UnusedResources"
+        severity="IGNORE" />
+    </severities>
+  </lintOptions>
+  <variant name="debug"/>
+</lint-module>

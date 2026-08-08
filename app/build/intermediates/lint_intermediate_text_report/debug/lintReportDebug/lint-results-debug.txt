@@ -1,0 +1,181 @@
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\MainActivity.kt:386: Warning: Use of REQUEST_IGNORE_BATTERY_OPTIMIZATIONS violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html [BatteryLife]
+            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "BatteryLife":
+   This issue flags code that either
+   * negatively affects battery life, or
+   * uses APIs that have recently changed behavior to prevent background tasks
+   from consuming memory and battery excessively.
+
+   Generally, you should be using WorkManager instead.
+
+   For more details on how to update your code, please see
+   https://developer.android.com/topic/performance/background-optimization
+
+
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_automation.xml:30: Warning: Use SwitchCompat from AppCompat or MaterialSwitch from Material library [UseSwitchCompatOrMaterialXml from androidx.appcompat]
+            <Switch
+            ^
+
+   Explanation for issues of type "UseSwitchCompatOrMaterialXml":
+   Use SwitchCompat from AppCompat or MaterialSwitch from Material library
+
+   Vendor: Android Open Source Project
+   Identifier: androidx.appcompat
+   Feedback: https://issuetracker.google.com/issues/new?component=460343
+
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\HolidayManageActivity.kt:80: Warning: It will always be more efficient to use more specific change events if you can. Rely on notifyDataSetChanged as a last resort. [NotifyDataSetChanged]
+                adapter.notifyDataSetChanged()
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\SourceManageActivity.kt:67: Warning: It will always be more efficient to use more specific change events if you can. Rely on notifyDataSetChanged as a last resort. [NotifyDataSetChanged]
+        adapter.notifyDataSetChanged()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "NotifyDataSetChanged":
+   The RecyclerView adapter's onNotifyDataSetChanged method does not specify
+   what about the data set has changed, forcing any observers to assume that
+   all existing items and structure may no longer be valid. `LayoutManager`s
+   will be forced to fully rebind and relayout all visible views.
+
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_holiday.xml:8: Warning: Possible overdraw: Root element paints background ?attr/selectableItemBackground with a theme that also paints a background (inferred theme is @style/Theme_QuickLaunch) [Overdraw]
+    android:background="?attr/selectableItemBackground">
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "Overdraw":
+   If you set a background drawable on a root view, then you should use a
+   custom theme where the theme background is null. Otherwise, the theme
+   background will be painted first, only to have your custom background
+   completely cover it; this is called "overdraw".
+
+   NOTE: This detector relies on figuring out which layouts are associated
+   with which activities based on scanning the Java code, and it's currently
+   doing that using an inexact pattern matching algorithm. Therefore, it can
+   incorrectly conclude which activity the layout is associated with and then
+   wrongly complain that a background-theme is hidden.
+
+   If you want your custom background on multiple pages, then you should
+   consider making a custom theme with your custom background and just using
+   that theme instead of a root element background.
+
+   Of course it's possible that your custom drawable is translucent and you
+   want it to be mixed with the background. However, you will get better
+   performance if you pre-mix the background with your drawable and use that
+   resulting image or color as a custom theme background instead.
+
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_main.xml:100: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
+        <Button
+         ~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_main.xml:108: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
+        <Button
+         ~~~~~~
+
+   Explanation for issues of type "ButtonStyle":
+   Button bars typically use a borderless style for the buttons. Set the
+   style="?android:attr/buttonBarButtonStyle" attribute on each of the
+   buttons, and set style="?android:attr/buttonBarStyle" on the parent layout
+
+   https://d.android.com/r/studio-ui/designer/material/dialogs
+
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\util\AntiSleep.kt:47: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        sp(ctx).edit().putBoolean(KEY_DISABLED, disabled).apply()
+        ~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\util\AntiSleep.kt:109: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            runCatching { sp(ctx).edit().putInt(KEY_BACKUP, now).apply() }
+                          ~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\util\HolidayPrefs.kt:21: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_PREF, pref).apply()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\util\HolidayPrefs.kt:27: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_LAST, id).apply()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\util\HolidayPrefs.kt:61: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+        ctx.getSharedPreferences(SP, Context.MODE_PRIVATE).edit().putString(KEY_CUSTOM, arr.toString()).apply()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\MainActivity.kt:310: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\MainActivity.kt:371: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                    sp.edit().putBoolean("guided", true).apply()
+                    ~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\MainActivity.kt:375: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+                    sp.edit().putBoolean("guided", true).apply()
+                    ~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\MainActivity.kt:383: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val uri = Uri.parse("package:$packageName")
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\AutomationAdapter.kt:35: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+        holder.b.tvDesc.text = "${triggerLabel(a)} → ${a.targetAppName}"
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\java\com\workbuddy\quicklaunch\CreateAutomationActivity.kt:187: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+                        binding.btnPickApp.text = "已选择：$selectedAppName"
+                                                  ~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "SetTextI18n":
+   When calling TextView#setText
+   * Never call Number#toString() to format numbers; it will not handle
+   fraction separators and locale-specific digits properly. Consider using
+   String#format with proper format specifications (%d or %f) instead.
+   * Do not pass a string literal (e.g. "Hello") to display text. Hardcoded
+   text can not be properly translated to other languages. Consider using
+   Android resource strings instead.
+   * Do not build messages by concatenating text chunks. Such messages can not
+   be properly translated.
+
+   https://developer.android.com/guide/topics/resources/localization.html
+
+0 errors, 18 warnings
