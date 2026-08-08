@@ -1,234 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  iOS 26 主题设置界面 - Inset Grouped 风格
+  暗黑极简胶囊风格（Dark Minimalist Capsule UI）
+  - 纯黑背景
+  - 深灰胶囊卡片
+  - 苹果绿强调色
+  - 纤细字体
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_ios26_wallpaper"
+    android:background="@drawable/bg_dark_root"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/ios_space_lg">
+        android:padding="16dp">
 
         <!-- 标题 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:fontFamily="sans-serif-light"
             android:text="@string/theme_settings"
-            android:textAppearance="@style/TextAppearance.QuickLaunch.LargeTitle"
-            android:textStyle="bold" />
+            android:textColor="@color/dark_text_primary"
+            android:textSize="28sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/ios_space_xs"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif-light"
             android:text="选择你喜欢的主题色与深浅模式"
-            android:textAppearance="@style/TextAppearance.QuickLaunch.Caption" />
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="14sp" />
 
         <!-- 主题色分组卡片 -->
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.QuickLaunch.Group.Card"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/ios_space_xl"
-            app:cardBackgroundColor="@color/ios_glass_group_light">
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="主题色"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05" />
+
+            <!-- 薄荷绿 -->
             <LinearLayout
+                android:id="@+id/cardMint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/ios_space_md">
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_dark_card_secondary"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <View
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/color_swatch_mint" />
 
                 <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/theme_mint"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/rbMint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="主题色"
-                    android:textAppearance="@style/TextAppearance.QuickLaunch.Group.Header" />
-
-                <!-- 薄荷绿 -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardMint"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ios_space_sm"
-                    android:checkable="true"
-                    android:clickable="true"
-                    app:cardBackgroundColor="@color/ios_glass_surface_light"
-                    app:cardCornerRadius="@dimen/ios_radius_md"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="@dimen/ios_space_md">
-
-                        <View
-                            android:layout_width="@dimen/ios_icon_md"
-                            android:layout_height="@dimen/ios_icon_md"
-                            android:background="@drawable/color_swatch_mint" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/ios_space_md"
-                            android:layout_weight="1"
-                            android:text="@string/theme_mint"
-                            android:textAppearance="@style/TextAppearance.QuickLaunch.Body" />
-
-                        <RadioButton
-                            android:id="@+id/rbMint"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="false" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- 丁香紫 -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardLavender"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ios_space_sm"
-                    android:checkable="true"
-                    android:clickable="true"
-                    app:cardBackgroundColor="@color/ios_glass_surface_light"
-                    app:cardCornerRadius="@dimen/ios_radius_md"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="@dimen/ios_space_md">
-
-                        <View
-                            android:layout_width="@dimen/ios_icon_md"
-                            android:layout_height="@dimen/ios_icon_md"
-                            android:background="@drawable/color_swatch_lavender" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/ios_space_md"
-                            android:layout_weight="1"
-                            android:text="@string/theme_lavender"
-                            android:textAppearance="@style/TextAppearance.QuickLaunch.Body" />
-
-                        <RadioButton
-                            android:id="@+id/rbLavender"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="false" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- 经典绿 -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardClassic"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ios_space_sm"
-                    android:checkable="true"
-                    android:clickable="true"
-                    app:cardBackgroundColor="@color/ios_glass_surface_light"
-                    app:cardCornerRadius="@dimen/ios_radius_md"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="@dimen/ios_space_md">
-
-                        <View
-                            android:layout_width="@dimen/ios_icon_md"
-                            android:layout_height="@dimen/ios_icon_md"
-                            android:background="@drawable/color_swatch_classic" />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/ios_space_md"
-                            android:layout_weight="1"
-                            android:text="@string/theme_classic"
-                            android:textAppearance="@style/TextAppearance.QuickLaunch.Body" />
-
-                        <RadioButton
-                            android:id="@+id/rbClassic"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="false" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                    android:buttonTint="@color/dark_accent_green"
+                    android:clickable="false" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+
+            <!-- 丁香紫 -->
+            <LinearLayout
+                android:id="@+id/cardLavender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_dark_card_secondary"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <View
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/color_swatch_lavender" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/theme_lavender"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/rbLavender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/dark_accent_green"
+                    android:clickable="false" />
+            </LinearLayout>
+
+            <!-- 经典绿 -->
+            <LinearLayout
+                android:id="@+id/cardClassic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_dark_card_secondary"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <View
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/color_swatch_classic" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="@string/theme_classic"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/rbClassic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/dark_accent_green"
+                    android:clickable="false" />
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- 深浅模式分组卡片 -->
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.QuickLaunch.Group.Card"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/ios_space_md"
-            app:cardBackgroundColor="@color/ios_glass_group_light">
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="深浅模式"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleThemeMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/ios_space_md">
+                android:layout_marginTop="8dp"
+                app:selectionRequired="true"
+                app:singleSelection="true">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="深浅模式"
-                    android:textAppearance="@style/TextAppearance.QuickLaunch.Group.Header" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnModeSystem"
+                    style="@style/Widget.QuickLaunch.Dark.Button.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="@string/theme_mode_system" />
 
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/toggleThemeMode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ios_space_sm"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnModeLight"
+                    style="@style/Widget.QuickLaunch.Dark.Button.Secondary"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="@string/theme_mode_light" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnModeSystem"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/ios_button_height"
-                        android:layout_weight="1"
-                        android:text="@string/theme_mode_system" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnModeLight"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/ios_button_height"
-                        android:layout_weight="1"
-                        android:text="@string/theme_mode_light" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnModeDark"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/ios_button_height"
-                        android:layout_weight="1"
-                        android:text="@string/theme_mode_dark" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnModeDark"
+                    style="@style/Widget.QuickLaunch.Dark.Button.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:text="@string/theme_mode_dark" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

@@ -1,201 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-      M3 主题色板（光模式）—— 薄荷绿默认主题。
-      品牌种子色：清新薄荷绿 #5EA88B，比经典绿更柔和、现代。
-      所有颜色均满足 WCAG AA 对比度标准（正文 ≥4.5:1，非文本 ≥3:1）。
-      深色差异统一写在 values-night/colors.xml 同名覆盖。
-    -->
-
-    <!-- primary（品牌主色 - 薄荷绿） -->
-    <color name="m3_primary">#5EA88B</color>
-    <color name="m3_on_primary">#FFFFFF</color>
-    <color name="m3_primary_container">#B8E6D4</color>
-    <color name="m3_on_primary_container">#00210A</color>
-
-    <!-- secondary -->
-    <color name="m3_secondary">#52634D</color>
-    <color name="m3_on_secondary">#FFFFFF</color>
-    <color name="m3_secondary_container">#D5E8CB</color>
-    <color name="m3_on_secondary_container">#121F0E</color>
-
-    <!-- tertiary（数据源 tag 等点缀色 - 薄荷绿族） -->
-    <color name="m3_tertiary">#3A6B5A</color>
-    <color name="m3_on_tertiary">#FFFFFF</color>
-    <color name="m3_tertiary_container">#B2D8CB</color>
-    <color name="m3_on_tertiary_container">#002019</color>
-
-    <!-- error -->
-    <color name="m3_error">#BA1A1A</color>
-    <color name="m3_on_error">#FFFFFF</color>
-    <color name="m3_error_container">#FFDAD6</color>
-    <color name="m3_on_error_container">#410002</color>
-
-    <!-- background / surface -->
-    <color name="m3_background">#F5FBF7</color>
-    <color name="m3_on_background">#191D17</color>
-    <color name="m3_surface">#F5FBF7</color>
-    <color name="m3_on_surface">#191D17</color>
-    <color name="m3_surface_variant">#D9E5DD</color>
-    <color name="m3_on_surface_variant">#43483E</color>
-
-    <!-- outline -->
-    <color name="m3_outline">#6F7972</color>
-    <color name="m3_outline_variant">#C3C9BC</color>
-
-    <!-- surface container 层级（操作区卡片等） -->
-    <color name="m3_surface_container_lowest">#FFFFFF</color>
-    <color name="m3_surface_container_low">#EFF6F1</color>
-    <color name="m3_surface_container">#E9F1EB</color>
-    <color name="m3_surface_container_high">#E3ECE6</color>
-    <color name="m3_surface_container_highest">#DDE7E1</color>
-
-    <!-- inverse -->
-    <color name="m3_inverse_surface">#2E322B</color>
-    <color name="m3_inverse_on_surface">#F0F4EA</color>
-    <color name="m3_inverse_primary">#8BD5C0</color>
-
-    <!-- 业务色：状态色点（薄荷绿主题下的高对比度版本） -->
-    <color name="status_enabled">#3D8B6F</color>
-    <!-- 停用灰：vs 卡片底 #EFF6F1 对比度 4.91:1 -->
-    <color name="status_disabled">#5A6B62</color>
-
-    <!-- 自适应图标渐变背景（薄荷绿渐变） -->
-    <color name="ic_launcher_bg_top">#5EA88B</color>
-    <color name="ic_launcher_bg_bottom">#2D6B52</color>
-    <!-- 闪电内高光（与图标背景同色系） -->
-    <color name="ic_launcher_lightning_highlight">#B8E6D4</color>
-
     <!-- ═══════════════════════════════════════════════════════════════
-         主题预设色板（用户可切换）
+         车机质感暗色主题色板（Car Dashboard Dark）
+         深邃夜空暗蓝 → 纯黑渐变背景 + 深灰蓝立体卡片 + 微光描边
+         高亮色：#34C759（状态绿）/ #007AFF（苹果蓝）
          ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- 薄荷绿（Mint）- 清新、低饱和度 -->
-    <color name="preset_mint_primary">#5EA88B</color>
-    <color name="preset_mint_on_primary">#FFFFFF</color>
-    <color name="preset_mint_primary_container">#B8E6D4</color>
-    <color name="preset_mint_on_primary_container">#00210A</color>
-    <color name="preset_mint_secondary">#52634D</color>
-    <color name="preset_mint_on_secondary">#FFFFFF</color>
-    <color name="preset_mint_secondary_container">#D5E8CB</color>
-    <color name="preset_mint_on_secondary_container">#121F0E</color>
-    <color name="preset_mint_tertiary">#3A6B5A</color>
-    <color name="preset_mint_on_tertiary">#FFFFFF</color>
-    <color name="preset_mint_tertiary_container">#B2D8CB</color>
-    <color name="preset_mint_on_tertiary_container">#002019</color>
-    <color name="preset_mint_error">#BA1A1A</color>
-    <color name="preset_mint_on_error">#FFFFFF</color>
-    <color name="preset_mint_error_container">#FFDAD6</color>
-    <color name="preset_mint_on_error_container">#410002</color>
-    <color name="preset_mint_background">#F5FBF7</color>
-    <color name="preset_mint_on_background">#191D17</color>
-    <color name="preset_mint_surface">#F5FBF7</color>
-    <color name="preset_mint_on_surface">#191D17</color>
-    <color name="preset_mint_surface_variant">#D9E5DD</color>
-    <color name="preset_mint_on_surface_variant">#43483E</color>
-    <color name="preset_mint_outline">#6F7972</color>
-    <color name="preset_mint_outline_variant">#C3C9BC</color>
-    <color name="preset_mint_inverse_surface">#2E322B</color>
-    <color name="preset_mint_inverse_on_surface">#F0F4EA</color>
-    <color name="preset_mint_inverse_primary">#8BD5C0</color>
+    <!-- 根背景：深邃夜空暗蓝，与渐变底对齐 -->
+    <color name="dark_root">#0F111A</color>
+    <color name="dark_bg_primary">#0F111A</color>
 
-    <!-- 丁香紫（Lavender）- 优雅、浪漫 -->
-    <color name="preset_lavender_primary">#9B7EC4</color>
-    <color name="preset_lavender_on_primary">#FFFFFF</color>
-    <color name="preset_lavender_primary_container">#D4C4ED</color>
-    <color name="preset_lavender_on_primary_container">#1A0A30</color>
-    <color name="preset_lavender_secondary">#6B5B80</color>
-    <color name="preset_lavender_on_secondary">#FFFFFF</color>
-    <color name="preset_lavender_secondary_container">#E0D4F0</color>
-    <color name="preset_lavender_on_secondary_container">#1E1530</color>
-    <color name="preset_lavender_tertiary">#7A5EA0</color>
-    <color name="preset_lavender_on_tertiary">#FFFFFF</color>
-    <color name="preset_lavender_tertiary_container">#D8CCEB</color>
-    <color name="preset_lavender_on_tertiary_container">#1C0E35</color>
-    <color name="preset_lavender_error">#BA1A1A</color>
-    <color name="preset_lavender_on_error">#FFFFFF</color>
-    <color name="preset_lavender_error_container">#FFDAD6</color>
-    <color name="preset_lavender_on_error_container">#410002</color>
-    <color name="preset_lavender_background">#F8F5FC</color>
-    <color name="preset_lavender_on_background">#1A1825</color>
-    <color name="preset_lavender_surface">#F8F5FC</color>
-    <color name="preset_lavender_on_surface">#1A1825</color>
-    <color name="preset_lavender_surface_variant">#E2DCEB</color>
-    <color name="preset_lavender_on_surface_variant">#454250</color>
-    <color name="preset_lavender_outline">#716C7D</color>
-    <color name="preset_lavender_outline_variant">#C8C2D2</color>
-    <color name="preset_lavender_inverse_surface">#2E2B38</color>
-    <color name="preset_lavender_inverse_on_surface">#EDE8F4</color>
-    <color name="preset_lavender_inverse_primary">#B89FE0</color>
+    <!-- 一阶卡片背景：深色立体卡片 -->
+    <color name="dark_card_primary">#1C1E26</color>
+    <!-- 二阶容器/输入框背景 -->
+    <color name="dark_card_secondary">#252833</color>
+    <!-- 深色按钮/选项背景 -->
+    <color name="dark_button_bg">#252833</color>
+    <!-- 深色分割线 -->
+    <color name="dark_divider">#2C2E3A</color>
+    <!-- 微光描边 -->
+    <color name="dark_stroke">#333542</color>
+    <!-- 输入框/选择框背景 -->
+    <color name="dark_input_bg">@color/dark_card_secondary</color>
+    <!-- 搜索框背景 -->
+    <color name="dark_search_bg">#1F2129</color>
 
-    <!-- 经典绿（Classic）- 沉稳、传统 Android 绿 -->
-    <color name="preset_classic_primary">#2E7D32</color>
-    <color name="preset_classic_on_primary">#FFFFFF</color>
-    <color name="preset_classic_primary_container">#A8EDA5</color>
-    <color name="preset_classic_on_primary_container">#002105</color>
-    <color name="preset_classic_secondary">#52634D</color>
-    <color name="preset_classic_on_secondary">#FFFFFF</color>
-    <color name="preset_classic_secondary_container">#D5E8CB</color>
-    <color name="preset_classic_on_secondary_container">#121F0E</color>
-    <color name="preset_classic_tertiary">#38656B</color>
-    <color name="preset_classic_on_tertiary">#FFFFFF</color>
-    <color name="preset_classic_tertiary_container">#BCE8EE</color>
-    <color name="preset_classic_on_tertiary_container">#001F24</color>
-    <color name="preset_classic_error">#BA1A1A</color>
-    <color name="preset_classic_on_error">#FFFFFF</color>
-    <color name="preset_classic_error_container">#FFDAD6</color>
-    <color name="preset_classic_on_error_container">#410002</color>
-    <color name="preset_classic_background">#F9FAF3</color>
-    <color name="preset_classic_on_background">#191D17</color>
-    <color name="preset_classic_surface">#F9FAF3</color>
-    <color name="preset_classic_on_surface">#191D17</color>
-    <color name="preset_classic_surface_variant">#DFE5D8</color>
-    <color name="preset_classic_on_surface_variant">#43483E</color>
-    <color name="preset_classic_outline">#73796C</color>
-    <color name="preset_classic_outline_variant">#C3C9BC</color>
-    <color name="preset_classic_inverse_surface">#2E322B</color>
-    <color name="preset_classic_inverse_on_surface">#F0F4EA</color>
-    <color name="preset_classic_inverse_primary">#8BD58C</color>
+    <!-- 主文字（纯白） -->
+    <color name="dark_text_primary">#FFFFFF</color>
+    <!-- 次要文字（浅灰） -->
+    <color name="dark_text_secondary">#A1A1AA</color>
+    <!-- 辅助文字（更暗） -->
+    <color name="dark_text_tertiary">#71717A</color>
+    <!-- 占位符/提示文字 -->
+    <color name="dark_text_hint">#4A4D5A</color>
 
-    <!-- 旧名兼容（保留，勿删） -->
-    <color name="green">#3DDC84</color>
-    <color name="green_dark">#2BB673</color>
-    <color name="black">#FF000000</color>
+    <!-- 品牌强调色：状态绿（电量进度、开启态） -->
+    <color name="dark_accent">#34C759</color>
+    <color name="dark_accent_green">#34C759</color>
+    <color name="dark_accent_press">#2DBD4E</color>
+    <!-- 苹果蓝（选中态、高亮） -->
+    <color name="dark_accent_blue">#007AFF</color>
+
+    <!-- Switch 控件颜色 -->
+    <color name="dark_switch_thumb">#34C759</color>
+    <color name="dark_switch_track">#333542</color>
+
+    <!-- 危险/删除 -->
+    <color name="dark_destructive">#FF453A</color>
+
+    <!-- 底部导航毛玻璃背景：带透明度的深色 -->
+    <color name="car_bottom_nav_bg">#C0121212</color>
+    <!-- 底栏上沿微光 -->
+    <color name="car_bottom_nav_stroke">#333542</color>
+
+    <!-- 白色/黑色 -->
     <color name="white">#FFFFFFFF</color>
-    <color name="text_hint">#666666</color>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         iOS 极质感毛玻璃 & 莫兰迪调色板（浅色模式）
-         ═══════════════════════════════════════════════════════════════ -->
-
-    <!-- 毛玻璃基色 -->
-    <color name="ios_glass_surface_light">#80FFFFFF</color>
-    <color name="ios_glass_search_light">#99FFFFFF</color>
-    <color name="ios_glass_dock_light">#75FFFFFF</color>
-    <color name="ios_glass_group_light">#B3FFFFFF</color>
-    <color name="ios_glass_border">#50FFFFFF</color>
-
-    <!-- 莫兰迪低饱和色板 -->
-    <color name="ios_morand_blush">#E8C4C4</color>
-    <color name="ios_morand_lavender">#C4B7D4</color>
-    <color name="ios_morand_mint">#B5D5C5</color>
-    <color name="ios_morand_sky">#B8D4E3</color>
-    <color name="ios_morand_sand">#D5C9B5</color>
-    <color name="ios_morand_peach">#E8CFC4</color>
-    <color name="ios_morand_rose">#D4B5B5</color>
-
-    <!-- 文字颜色 -->
-    <color name="ios_text_primary">#1C1C1E</color>
-    <color name="ios_text_secondary">#8E8E93</color>
-    <color name="ios_text_tertiary">#AEAEB2</color>
-
-    <!-- iOS 系统色（分段控制、开关等） -->
-    <color name="ios_blue">#007AFF</color>
-    <color name="ios_green">#34C759</color>
-    <color name="ios_orange">#FF9500</color>
-    <color name="ios_red">#FF3B30</color>
-    <color name="ios_purple">#AF52DE</color>
-    <color name="ios_pink">#FF2D55</color>
-    <color name="ios_teal">#5AC8FA</color>
+    <color name="black">#FF000000</color>
 
 </resources>

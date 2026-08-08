@@ -1,47 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  iOS 26 Liquid Glass 数据源管理界面
+  暗黑极简胶囊风格（Dark Minimalist Capsule UI）
+  - 纯黑背景
+  - 深灰胶囊卡片
+  - 苹果绿 FAB
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_ios26_wallpaper">
+    android:background="@drawable/bg_dark_root">
 
     <!-- 标题卡片 -->
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:id="@+id/cardTitle"
-        style="@style/Widget.QuickLaunch.Glass.Card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/ios_space_lg"
-        android:layout_marginTop="@dimen/ios_space_3xl"
-        android:layout_marginEnd="@dimen/ios_space_lg"
-        app:cardBackgroundColor="@color/ios_glass_search_light"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_dark_card_primary"
+        android:orientation="vertical"
+        android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/tvTitle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/ios_space_lg"
+            android:fontFamily="sans-serif-light"
             android:text="管理数据源"
-            android:textAppearance="@style/TextAppearance.QuickLaunch.Title"
-            android:textStyle="bold" />
-    </com.google.android.material.card.MaterialCardView>
+            android:textColor="@color/dark_text_primary"
+            android:textSize="22sp" />
+    </LinearLayout>
 
     <!-- 提示卡片 -->
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:id="@+id/cardHint"
-        style="@style/Widget.QuickLaunch.Glass.Card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/ios_space_lg"
-        android:layout_marginTop="@dimen/ios_space_md"
-        android:layout_marginEnd="@dimen/ios_space_lg"
-        app:cardBackgroundColor="@color/ios_glass_group_light"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_dark_card_primary"
+        android:orientation="vertical"
+        android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardTitle">
@@ -50,21 +55,22 @@
             android:id="@+id/tvHint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/ios_space_lg"
+            android:fontFamily="sans-serif-light"
             android:text="内置源已够用；你也可添加自己的节假日 API（网址里要有「年份」标记，如 2026）。"
-            android:textAppearance="@style/TextAppearance.QuickLaunch.Caption" />
-    </com.google.android.material.card.MaterialCardView>
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <!-- 列表 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/ios_space_md"
+        android:layout_marginTop="12dp"
         android:clipToPadding="false"
         android:overScrollMode="never"
-        android:padding="@dimen/ios_space_sm"
-        android:paddingBottom="@dimen/ios_space_3xl"
+        android:padding="12dp"
+        android:paddingBottom="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -73,14 +79,14 @@
     <!-- 悬浮添加按钮 -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
-        android:layout_width="@dimen/ios_fab_size"
-        android:layout_height="@dimen/ios_fab_size"
-        android:layout_margin="@dimen/ios_space_xl"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_margin="20dp"
         android:contentDescription="添加数据源"
         android:src="@drawable/ic_add_ios"
-        app:backgroundTint="@color/ios_blue"
+        app:backgroundTint="@color/dark_accent_green"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@color/white" />
+        app:tint="@color/dark_bg_primary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

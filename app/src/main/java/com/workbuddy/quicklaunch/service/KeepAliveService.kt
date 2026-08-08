@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.workbuddy.quicklaunch.MainActivity
+import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.ScreenOnOverlay
 
@@ -197,7 +198,7 @@ class KeepAliveService : Service() {
         return NotificationCompat.Builder(this, CHANNEL)
             .setContentTitle("QuickLaunch 后台保活中")
             .setContentText("保障自动启动规则不被系统回收")
-            .setSmallIcon(android.R.drawable.ic_popup_sync)
+            .setSmallIcon(R.drawable.ic_notification_stat)   // 强制单色透明通知图标，彻底避开旧缓存
             .setContentIntent(pi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
@@ -224,7 +225,7 @@ class KeepAliveService : Service() {
 
     companion object {
         const val NOTIF_ID = 1002
-        private const val CHANNEL = "quicklaunch_keepalive"
+        private const val CHANNEL = "quicklaunch_keepalive_v2"
 
         /** WakeLock 超时（自愈上限）与续期间隔。续期间隔必须明显小于超时。 */
         private const val WAKELOCK_TIMEOUT_MS = 30 * 60 * 1000L

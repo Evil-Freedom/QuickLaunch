@@ -48,4 +48,33 @@
     <dimen name="ios_elevation_low">2dp</dimen>
     <dimen name="ios_elevation_md">4dp</dimen>
     <dimen name="ios_elevation_high">8dp</dimen>
+
+    <!--
+      暗黑极简胶囊 UI 设计 Token（Dark Minimalist Capsule UI）
+      原则：所有暗黑布局统一引用这些变量，禁止硬编码颜色/圆角。
+    -->
+    <!-- 圆角：大卡片 20dp（车机风） / 按钮、输入框、选择框、弹窗抽屉 28dp -->
+    <dimen name="dark_radius_card">20dp</dimen>
+    <dimen name="dark_radius_pill">28dp</dimen>
+
+    <!-- 车机底栏 -->
+    <dimen name="car_bottom_nav_height">56dp</dimen>
+    <dimen name="car_bottom_nav_margin">12dp</dimen>
+    <dimen name="car_nav_item_glow">44dp</dimen>
+    <!-- 描边 -->
+    <dimen name="dark_stroke_width">1px</dimen>
+    <!-- 组件高度 -->
+    <dimen name="dark_button_height">44dp</dimen>
+    <dimen name="dark_input_height">44dp</dimen>
+    <dimen name="dark_chip_height">36dp</dimen>
+    <!-- 间距 -->
+    <dimen name="dark_card_margin_horizontal">16dp</dimen>
+    <dimen name="dark_card_margin_vertical">8dp</dimen>
+    <dimen name="dark_card_padding">16dp</dimen>
+    <dimen name="dark_section_gap">12dp</dimen>
+
+    <!-- iOS 3D 滚轮时间选择器 -->
+    <dimen name="wheel_item_height">48dp</dimen>
+    <dimen name="wheel_visible_rows">5</dimen>
+    <dimen name="wheel_container_height">240dp</dimen>
 </resources>

@@ -1,143 +1,284 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-      iOS 极质感组件样式
-      包括：毛玻璃卡片、iOS 胶囊搜索栏、Squircle 图标、分组卡片
+      暗黑极简胶囊组件样式（Dark Minimalist Capsule UI）
+      所有控件统一采用 28dp 胶囊圆角 + 深灰底色 + 白色文字
     -->
 
     <!-- ═══════════════════════════════════════════════════════════════
-         毛玻璃容器样式
+         一阶卡片（页面主体内容容器）
          ═══════════════════════════════════════════════════════════════ -->
+    <style name="Widget.QuickLaunch.Dark.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/dark_card_primary</item>
+        <item name="contentPadding">@dimen/dark_card_padding</item>
+        <item name="android:layout_marginHorizontal">@dimen/dark_card_margin_horizontal</item>
+        <item name="android:layout_marginVertical">@dimen/dark_card_margin_vertical</item>
+        <item name="strokeColor">@color/dark_stroke</item>
+        <item name="strokeWidth">@dimen/dark_stroke_width</item>
+    </style>
 
-    <!-- 通用毛玻璃卡片：24dp 圆角 + 半透明背景 + 微光描边 -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         胶囊按钮（全圆角，主操作按钮）- 苹果绿实心
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="Widget.QuickLaunch.Dark.Button.Primary" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:backgroundTint">@color/dark_accent_green</item>
+        <item name="android:textColor">@color/dark_bg_primary</item>
+        <item name="android:minHeight">@dimen/dark_button_height</item>
+    </style>
+
+    <!-- 次要胶囊按钮（深灰底色 + 浅色文字） -->
+    <style name="Widget.QuickLaunch.Dark.Button.Secondary" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:backgroundTint">@color/dark_card_secondary</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:minHeight">@dimen/dark_button_height</item>
+    </style>
+
+    <!-- 操作按钮（二阶 Surface 暗灰胶囊，纯白文字） -->
+    <style name="Widget.QuickLaunch.Dark.Button.Action" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:backgroundTint">@color/dark_card_secondary</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:minHeight">@dimen/dark_button_height</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         毛玻璃卡片样式（兼容旧代码，已废弃但保留引用）
+         ═══════════════════════════════════════════════════════════════ -->
     <style name="Widget.QuickLaunch.Glass.Card" parent="Widget.Material3.CardView.Filled">
-        <item name="cardCornerRadius">@dimen/ios_radius_lg</item>
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
         <item name="cardElevation">0dp</item>
-        <item name="cardBackgroundColor">@color/ios_glass_surface_light</item>
-        <item name="contentPadding">@dimen/ios_space_lg</item>
-        <item name="strokeColor">@color/ios_glass_border</item>
-        <item name="strokeWidth">@dimen/ios_border_hairline</item>
-        <item name="android:layout_marginHorizontal">@dimen/ios_space_lg</item>
-        <item name="android:layout_marginVertical">@dimen/ios_space_sm</item>
+        <item name="cardBackgroundColor">@color/dark_card_primary</item>
     </style>
-
-    <!-- Dock 栏专用毛玻璃：更厚实的模糊底座 -->
-    <style name="Widget.QuickLaunch.Glass.Dock" parent="Widget.Material3.CardView.Filled">
-        <item name="cardCornerRadius">@dimen/ios_radius_xl</item>
-        <item name="cardElevation">0dp</item>
-        <item name="cardBackgroundColor">@color/ios_glass_dock_light</item>
-        <item name="strokeColor">@color/ios_glass_border</item>
-        <item name="strokeWidth">@dimen/ios_border_hairline</item>
-        <item name="contentPadding">@dimen/ios_space_md</item>
-    </style>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         胶囊搜索栏样式
-         ═══════════════════════════════════════════════════════════════ -->
-
-    <style name="Widget.QuickLaunch.Search.Pill" parent="Widget.Material3.CardView.Filled">
-        <item name="cardCornerRadius">@dimen/ios_radius_pill</item>
-        <item name="cardElevation">0dp</item>
-        <item name="cardBackgroundColor">@color/ios_glass_search_light</item>
-        <item name="strokeColor">@color/ios_glass_border</item>
-        <item name="strokeWidth">@dimen/ios_border_hairline</item>
-        <item name="android:layout_margin">@dimen/ios_space_lg</item>
-    </style>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         Squircle 超椭圆图标样式
-         ═══════════════════════════════════════════════════════════════ -->
-
-    <style name="Widget.QuickLaunch.Icon.Squircle" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">22%</item>
-        <item name="android:scaleType">centerInside</item>
-        <item name="android:background">@drawable/bg_icon_squircle</item>
-    </style>
-
-    <!-- Dock 栏图标：更大圆角 + 悬浮阴影 -->
-    <style name="Widget.QuickLaunch.Icon.Squircle.Dock" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">24%</item>
-        <item name="android:scaleType">centerInside</item>
-        <item name="android:elevation">@dimen/ios_elevation_md</item>
-    </style>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         iOS 分组卡片样式（Inset Grouped）
-         ═══════════════════════════════════════════════════════════════ -->
 
     <style name="Widget.QuickLaunch.Group.Card" parent="Widget.Material3.CardView.Filled">
-        <item name="cardCornerRadius">@dimen/ios_radius_lg</item>
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
         <item name="cardElevation">0dp</item>
-        <item name="cardBackgroundColor">@color/ios_glass_group_light</item>
-        <item name="contentPadding">0dp</item>
-        <item name="android:layout_marginHorizontal">@dimen/ios_space_lg</item>
-        <item name="android:layout_marginVertical">@dimen/ios_space_sm</item>
-        <item name="strokeColor">@color/ios_glass_border</item>
-        <item name="strokeWidth">@dimen/ios_border_hairline</item>
+        <item name="cardBackgroundColor">@color/dark_card_primary</item>
     </style>
 
-    <style name="Widget.QuickLaunch.Group.Header" parent="">
-        <item name="android:textColor">@color/ios_text_secondary</item>
-        <item name="android:textSize">@dimen/ios_text_caption</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:letterSpacing">0.05</item>
-        <item name="android:paddingHorizontal">@dimen/ios_space_lg</item>
-        <item name="android:paddingTop">@dimen/ios_space_lg</item>
-        <item name="android:paddingBottom">@dimen/ios_space_xs</item>
+    <!-- 次要胶囊按钮（描边） -->
+    <style name="Widget.QuickLaunch.Dark.Button.Capsule.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:paddingVertical">14dp</item>
+        <item name="strokeColor">@color/dark_stroke</item>
+        <item name="strokeWidth">@dimen/dark_stroke_width</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style>
+
+    <!-- 内嵌选择胶囊（触发条件 / 重复模式 等平铺 chip） -->
+    <style name="Widget.QuickLaunch.Dark.Chip" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/dark_chip_height</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/bg_dark_capsule_unselected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Dark.Chip.Selected" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/dark_chip_height</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/bg_dark_capsule_selected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:textColor">@color/dark_bg_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <!-- 车机 4 联排触发条件网格卡片 -->
+    <style name="Widget.QuickLaunch.Dark.GridChip" parent="">
+        <item name="android:background">@drawable/bg_trigger_grid_item</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:drawableTint">@color/dark_text_secondary</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Dark.GridChip.Selected" parent="">
+        <item name="android:background">@drawable/bg_trigger_grid_item_selected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textColor">@color/dark_accent_green</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:drawableTint">@color/dark_accent_green</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
     </style>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         文字样式（纤细无衬线）
+         输入框
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="Widget.QuickLaunch.Dark.Input" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <item name="boxBackgroundMode">filled</item>
+        <item name="boxBackgroundColor">@color/dark_input_bg</item>
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="boxStrokeColor">@color/dark_stroke</item>
+        <item name="boxStrokeWidth">@dimen/dark_stroke_width</item>
+        <item name="hintTextColor">@color/dark_text_hint</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         文字样式
          ═══════════════════════════════════════════════════════════════ -->
 
-    <style name="TextAppearance.QuickLaunch.LargeTitle" parent="TextAppearance.Material3.HeadlineLarge">
-        <item name="android:textSize">@dimen/ios_text_large_title</item>
-        <item name="android:textFontWeight">300</item>
-        <item name="android:textColor">@color/ios_text_primary</item>
+    <style name="TextAppearance.QuickLaunch.Dark.Title" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">600</item>
     </style>
 
-    <style name="TextAppearance.QuickLaunch.Title" parent="TextAppearance.Material3.TitleLarge">
-        <item name="android:textSize">@dimen/ios_text_title</item>
-        <item name="android:textFontWeight">300</item>
-        <item name="android:textColor">@color/ios_text_primary</item>
+    <style name="TextAppearance.QuickLaunch.Dark.Subtitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">500</item>
     </style>
 
-    <style name="TextAppearance.QuickLaunch.Subhead" parent="TextAppearance.Material3.BodyLarge">
-        <item name="android:textSize">@dimen/ios_text_subhead</item>
-        <item name="android:textColor">@color/ios_text_primary</item>
+    <style name="TextAppearance.QuickLaunch.Dark.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Dark.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Dark.GroupHeader" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <!-- 底部导航标签：10sp 小字，与 20dp 图标组成紧凑 Tab -->
+    <style name="TextAppearance.QuickLaunch.BottomNav" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <!-- 兼容旧代码的文字样式引用 -->
+    <style name="TextAppearance.QuickLaunch.Title" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">300</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Subtitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Subhead" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
     </style>
 
     <style name="TextAppearance.QuickLaunch.Body" parent="TextAppearance.Material3.BodyMedium">
-        <item name="android:textSize">@dimen/ios_text_body</item>
-        <item name="android:textColor">@color/ios_text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
     </style>
 
     <style name="TextAppearance.QuickLaunch.Caption" parent="TextAppearance.Material3.BodySmall">
-        <item name="android:textSize">@dimen/ios_text_caption</item>
-        <item name="android:textColor">@color/ios_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/dark_text_tertiary</item>
     </style>
 
-    <!-- 分组小标题样式（供 TextView 直接引用） -->
-    <style name="TextAppearance.QuickLaunch.Group.Header" parent="TextAppearance.Material3.BodySmall">
-        <item name="android:textColor">@color/ios_text_secondary</item>
-        <item name="android:textSize">@dimen/ios_text_caption</item>
+    <style name="TextAppearance.QuickLaunch.Group.Header" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:letterSpacing">0.05</item>
     </style>
 
+    <style name="TextAppearance.QuickLaunch.LargeTitle" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">34sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style>
+
+    <!-- 兼容旧代码的控件样式引用 -->
+    <style name="Widget.QuickLaunch.Search.Pill" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:backgroundTint">@color/dark_card_secondary</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Glass.Dock" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/dark_card_primary</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Icon.Squircle" parent="">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:background">@drawable/bg_icon_squircle</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Icon.Squircle.Dock" parent="">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/bg_icon_squircle</item>
+    </style>
+
     <!-- ═══════════════════════════════════════════════════════════════
-         按钮样式
+         星期选择胶囊（选中/未选中）
          ═══════════════════════════════════════════════════════════════ -->
 
-    <style name="Widget.QuickLaunch.Button.Pill" parent="Widget.Material3.Button">
-        <item name="cornerRadius">@dimen/ios_radius_pill</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">@dimen/ios_text_body</item>
-        <item name="android:letterSpacing">0.02</item>
-        <item name="android:paddingHorizontal">@dimen/ios_space_xl</item>
-        <item name="android:paddingVertical">@dimen/ios_space_md</item>
+    <style name="Widget.QuickLaunch.DayCapsule" parent="">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:background">@drawable/bg_dark_capsule_unselected</item>
+        <item name="android:textColor">@color/dark_text_tertiary</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_marginHorizontal">4dp</item>
     </style>
 
 </resources>

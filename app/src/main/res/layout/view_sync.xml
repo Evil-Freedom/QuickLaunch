@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Tab 2：同步源
+  - 法定节假日同步、数据源选择、手动管理、自定义源管理
+  - 纯 OLED 暗黑 + 胶囊卡片
+-->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/syncScroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_dark_root"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 页面标题 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="sans-serif-light"
+            android:text="同步源"
+            android:textColor="@color/dark_text_primary"
+            android:textSize="28sp" />
+
+        <!-- 防外屏息屏开关 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_dark_card_primary"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvAntiSleep"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-light"
+                android:text="防外屏息屏"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="16sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swAntiSleep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:thumbTint="@color/dark_switch_thumb"
+                android:trackTint="@color/dark_switch_track" />
+        </LinearLayout>
+
+        <!-- 节假日同步卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.05"
+                android:text="法定节假日数据"
+                android:textAllCaps="true"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <!-- 数据源选择行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:text="数据源"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerSource"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/dark_accent_green" />
+            </LinearLayout>
+
+            <!-- 同步按钮 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSyncHolidays"
+                style="@style/Widget.QuickLaunch.Dark.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="12dp"
+                android:text="同步法定节假日" />
+
+            <!-- 管理按钮组 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnManageHolidays"
+                    style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginBottom="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:paddingHorizontal="16dp"
+                    android:text="手动管理节假日"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnManageSources"
+                    style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:paddingHorizontal="16dp"
+                    android:text="管理数据源"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 底部 spacer，避免被自定义毛玻璃底栏遮挡 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/car_bottom_nav_height" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

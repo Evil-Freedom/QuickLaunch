@@ -14,55 +14,131 @@ import android.provider.Settings
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.CheckBox
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.snackbar.Snackbar
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ActivityMainBinding
+import com.workbuddy.quicklaunch.databinding.ViewLaunchBinding
+import com.workbuddy.quicklaunch.databinding.ViewSyncBinding
 import com.workbuddy.quicklaunch.receiver.WifiReceiver
 import com.workbuddy.quicklaunch.service.KeepAliveService
 import com.workbuddy.quicklaunch.util.AntiSleep
-import com.workbuddy.quicklaunch.util.RootUtils
-import com.workbuddy.quicklaunch.util.ScreenOnOverlay
-import com.workbuddy.quicklaunch.util.HolidaySync
-import com.workbuddy.quicklaunch.util.HolidaySources
+import com.workbuddy.quicklaunch.util.AppListLoader
+import com.workbuddy.quicklaunch.util.AppPickerBottomSheet
+import com.workbuddy.quicklaunch.util.DarkWheelTimePicker
 import com.workbuddy.quicklaunch.util.HolidayPrefs
-import com.workbuddy.quicklaunch.util.LiquidGlassHelper
+import com.workbuddy.quicklaunch.util.HolidaySources
+import com.workbuddy.quicklaunch.util.HolidaySync
+import com.workbuddy.quicklaunch.util.RootUtils
 import com.workbuddy.quicklaunch.util.Scheduler
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import com.workbuddy.quicklaunch.util.ScreenOnOverlay
+import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.Executors
 
+/**
+ * 主入口：底部双 Tab 导航，彻底取消二级页跳转。
+ * - Tab 1 快捷启动：规则创建表单 + 规则列表平铺在同一页。
+ * - Tab 2 同步源：法定节假日同步、数据源选择、手动管理、自定义源管理。
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var db: AppDatabase
-    private val adapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
 
-    /** root 命令与数据库读写都会阻塞（root 首次还要等授权弹窗），一律丢到单线程池里跑，绝不占主线程。 */
+    // ---------- Tab 容器 ----------
+    private lateinit var launchBinding: ViewLaunchBinding
+    private lateinit var syncBinding: ViewSyncBinding
+
+    // ---------- 自定义毛玻璃底栏 ----------
+    private lateinit var navLaunch: View
+    private lateinit var navSync: View
+    private lateinit var ivNavLaunch: ImageView
+    private lateinit var ivNavSync: ImageView
+    private lateinit var tvNavLaunch: TextView
+    private lateinit var tvNavSync: TextView
+
+    // ---------- 规则列表 ----------
+    private lateinit var rvRules: RecyclerView
+    private lateinit var tvRulesEmpty: TextView
+    private val ruleAdapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
+
+    // ---------- 仪表盘 ----------
+    private lateinit var tvDashboardEnabled: TextView
+    private lateinit var tvDashboardNext: TextView
+
+    // ---------- 创建表单 ----------
+    private lateinit var etName: TextView
+    private lateinit var btnPickApp: MaterialButton
+    private lateinit var btnTime: TextView
+    private lateinit var btnWinStart: TextView
+    private lateinit var btnWinEnd: TextView
+    private lateinit var cbRandom: CheckBox
+    private lateinit var cbSkipHolidays: CheckBox
+    private lateinit var layoutRandom: View
+    private lateinit var layoutTime: View
+    private lateinit var layoutBt: View
+    private lateinit var layoutCustomDays: View
+    private lateinit var etBtName: TextView
+    private lateinit var btnSaveRule: MaterialButton
+
+    private val triggerChips = mutableListOf<TextView>()
+    private val repeatChips = mutableListOf<TextView>()
+    private val dayViews = mutableListOf<TextView>()
+    private var selectedTriggerIndex = 0
+    private var selectedRepeatIndex = 0
+    private val selectedDays = BooleanArray(7)
+
+    private var selectedPackage: String? = null
+    private var selectedAppName: String? = null
+    private var selectedTab = TAB_LAUNCH
+    private var hour = 8
+    private var minute = 0
+    private var randomWindow = false
+    private var skipHolidays = false
+    private var winStartHour = 8
+    private var winStartMinute = 30
+    private var winEndHour = 8
+    private var winEndMinute = 50
+
+    // ---------- 同步源 ----------
+    private lateinit var spinnerSource: Spinner
+    private lateinit var btnSyncHolidays: MaterialButton
+    private lateinit var btnManageHolidays: MaterialButton
+    private lateinit var btnManageSources: MaterialButton
+    private var sourceIds: List<String> = emptyList()
+
+    // ---------- 防息屏 ----------
+    private lateinit var tvAntiSleep: TextView
+    private lateinit var swAntiSleep: SwitchCompat
+
+    // ---------- 线程 ----------
     private val io = Executors.newSingleThreadExecutor { r ->
         Thread(r, "main-io").apply { isDaemon = true }
     }
 
-    /** 当前下拉里的数据源 id 顺序，用于判断是否真的需要重建 Adapter。 */
-    private var sourceIds: List<String> = emptyList()
-
-    /**
-     * 安全提交后台任务：onDestroy 之后 executor 已 shutdown，
-     * 再 execute 会抛「线程池拒绝执行」异常直接崩溃。
-     */
     private fun runIo(block: () -> Unit) {
         runCatching { io.execute { runCatching(block) } }
     }
 
-    /** 回到主线程执行，并自动丢弃 Activity 已销毁后的回调（防内存泄漏 / 防访问已销毁界面）。 */
     private fun postUi(block: () -> Unit) {
         runOnUiThread {
             if (isFinishing || isDestroyed) return@runOnUiThread
@@ -80,51 +156,560 @@ class MainActivity : AppCompatActivity() {
         db = AppDatabase.get(this)
         WifiReceiver.register(this)
 
-        binding.recycler.layoutManager = LinearLayoutManager(this)
-        binding.recycler.adapter = adapter
-        // 去除原生 OverScroll 阴影，改用 iOS 弹性回弹
-        binding.recycler.overScrollMode = View.OVER_SCROLL_NEVER
-        binding.fabAdd.setOnClickListener {
-            startActivity(Intent(this, CreateAutomationActivity::class.java))
-        }
-        binding.btnSyncHolidays.setOnClickListener { syncHolidays() }
-        binding.btnManageHolidays.setOnClickListener {
-            startActivity(Intent(this, HolidayManageActivity::class.java))
-        }
-        binding.btnManageSources.setOnClickListener {
-            startActivity(Intent(this, SourceManageActivity::class.java))
-        }
-        setupSourceSpinner()
+        bindContainers()
+        setupBottomNav()
+        setupLaunchTab()
+        setupSyncTab()
+        setupAntiSleep() // 必须在 setupSyncTab 之后，因需引用 swAntiSleep / tvAntiSleep
 
         KeepAliveService.start(this)
-        setupAntiSleep()
         checkPermissionsOnce()
 
-        // 初始化 iOS 26 毛玻璃效果
-        setupLiquidGlass()
-
         // 首次启动（本地无节假日数据）自动同步一次，便于「跳过节假日」立即生效。
-        // count() 是磁盘 IO，放后台查，避免拖慢冷启动首帧。
         runIo {
             val empty = runCatching { db.holidayDao().count() == 0 }.getOrDefault(false)
             if (empty) postUi { syncHolidays() }
         }
     }
 
-    /**
-     * 初始化 iOS 26 Liquid Glass 毛玻璃效果
-     * 为顶部操作卡片施加硬件级高斯模糊
-     */
-    private fun setupLiquidGlass() {
-        // 操作区卡片：轻微毛玻璃
-        LiquidGlassHelper.apply(binding.cardOperations)
+    /** targetSdk 35+ 起系统强制边到边显示，不消费 insets 内容会被状态栏和导航栏压住。 */
+    private fun applyInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rootContainer) { v, insets ->
+            val bars: Insets = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
     }
 
-    /**
-     * 数据源下拉：自动（推荐）优先用上次成功源，也可手动指定某一内置/自定义源（失败再回退其余）。
-     * onResume 每次都会调用，源列表没变就只更新选中项，
-     * 不再重复 new ArrayAdapter + 重设 Adapter（会触发整段 View 重建与一次多余的选中回调）。
-     */
+    // ═══════════════════════════════════════════════════════════════════
+    // Tab 容器
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun bindContainers() {
+        launchBinding = binding.launchContainer
+        syncBinding = binding.syncContainer
+
+        navLaunch = binding.navLaunch
+        navSync = binding.navSync
+        ivNavLaunch = binding.ivNavLaunch
+        ivNavSync = binding.ivNavSync
+        tvNavLaunch = binding.tvNavLaunch
+        tvNavSync = binding.tvNavSync
+    }
+
+    private fun setupBottomNav() {
+        navLaunch.setOnClickListener { selectTab(TAB_LAUNCH) }
+        navSync.setOnClickListener { selectTab(TAB_SYNC) }
+        selectTab(TAB_LAUNCH)
+    }
+
+    private fun selectTab(tab: Int) {
+        selectedTab = tab
+        when (tab) {
+            TAB_LAUNCH -> {
+                launchBinding.root.visibility = View.VISIBLE
+                syncBinding.root.visibility = View.GONE
+                ivNavLaunch.setBackgroundResource(R.drawable.bg_nav_item_selected)
+                ivNavLaunch.setColorFilter(resources.getColor(R.color.dark_accent_blue, null))
+                tvNavLaunch.setTextColor(resources.getColor(R.color.dark_accent_blue, null))
+                ivNavSync.background = null
+                ivNavSync.setColorFilter(resources.getColor(R.color.dark_text_secondary, null))
+                tvNavSync.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
+                refreshRules()
+            }
+            TAB_SYNC -> {
+                launchBinding.root.visibility = View.GONE
+                syncBinding.root.visibility = View.VISIBLE
+                ivNavLaunch.background = null
+                ivNavLaunch.setColorFilter(resources.getColor(R.color.dark_text_secondary, null))
+                tvNavLaunch.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
+                ivNavSync.setBackgroundResource(R.drawable.bg_nav_item_selected)
+                ivNavSync.setColorFilter(resources.getColor(R.color.dark_accent_blue, null))
+                tvNavSync.setTextColor(resources.getColor(R.color.dark_accent_blue, null))
+                setupSourceSpinner()
+                syncAntiSleepUi()
+            }
+        }
+    }
+
+    private fun showLaunch() = selectTab(TAB_LAUNCH)
+    private fun showSync() = selectTab(TAB_SYNC)
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Tab 1：快捷启动（创建表单 + 规则列表）
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun setupLaunchTab() {
+        // 仪表盘
+        tvDashboardEnabled = launchBinding.tvDashboardEnabled
+        tvDashboardNext = launchBinding.tvDashboardNext
+
+        // 规则列表
+        rvRules = launchBinding.rvRules
+        tvRulesEmpty = launchBinding.tvRulesEmpty
+        rvRules.layoutManager = LinearLayoutManager(this)
+        rvRules.adapter = ruleAdapter
+        rvRules.overScrollMode = View.OVER_SCROLL_NEVER
+
+        // 创建表单 View
+        etName = launchBinding.etName
+        btnPickApp = launchBinding.btnPickApp
+        btnTime = launchBinding.btnTime
+        btnWinStart = launchBinding.btnWinStart
+        btnWinEnd = launchBinding.btnWinEnd
+        cbRandom = launchBinding.cbRandom
+        cbSkipHolidays = launchBinding.cbSkipHolidays
+        layoutRandom = launchBinding.layoutRandom
+        layoutTime = launchBinding.layoutTime
+        layoutBt = launchBinding.layoutBt
+        layoutCustomDays = launchBinding.layoutCustomDays
+        etBtName = launchBinding.etBtName
+        btnSaveRule = launchBinding.btnSaveRule
+
+        triggerChips.clear()
+        triggerChips.addAll(
+            listOf(
+                launchBinding.chipTrigger0,
+                launchBinding.chipTrigger1,
+                launchBinding.chipTrigger2,
+                launchBinding.chipTrigger3
+            )
+        )
+        repeatChips.clear()
+        repeatChips.addAll(
+            listOf(
+                launchBinding.chipRepeat0,
+                launchBinding.chipRepeat1,
+                launchBinding.chipRepeat2,
+                launchBinding.chipRepeat3,
+                launchBinding.chipRepeat4
+            )
+        )
+        dayViews.clear()
+        dayViews.addAll(
+            listOf(
+                launchBinding.tbDay0,
+                launchBinding.tbDay1,
+                launchBinding.tbDay2,
+                launchBinding.tbDay3,
+                launchBinding.tbDay4,
+                launchBinding.tbDay5,
+                launchBinding.tbDay6
+            )
+        )
+
+        // 初始化时间
+        val now = Calendar.getInstance()
+        hour = now.get(Calendar.HOUR_OF_DAY)
+        minute = now.get(Calendar.MINUTE)
+        updateTimeLabel()
+
+        setupTriggerChips()
+        setupRepeatChips()
+        setupDayCapsules()
+
+        btnPickApp.setOnClickListener { pickApp() }
+        btnTime.setOnClickListener { showTimePicker() }
+        btnSaveRule.setOnClickListener { saveRule() }
+
+        cbRandom.setOnCheckedChangeListener { _, checked ->
+            randomWindow = checked
+            layoutRandom.visibility = if (checked) View.VISIBLE else View.GONE
+            btnTime.visibility = if (checked) View.GONE else View.VISIBLE
+        }
+        btnWinStart.setOnClickListener { showWindowPicker(true) }
+        btnWinEnd.setOnClickListener { showWindowPicker(false) }
+        cbSkipHolidays.setOnCheckedChangeListener { _, checked -> skipHolidays = checked }
+        updateWindowLabels()
+        updateTriggerUi()
+        refreshRules()
+    }
+
+    private fun setupTriggerChips() {
+        triggerChips.forEachIndexed { index, textView ->
+            textView.setOnClickListener {
+                selectedTriggerIndex = index
+                updateTriggerUi()
+            }
+        }
+        selectedTriggerIndex = 0
+    }
+
+    private fun setupRepeatChips() {
+        repeatChips.forEachIndexed { index, textView ->
+            textView.setOnClickListener {
+                selectedRepeatIndex = index
+                updateRepeatUi()
+            }
+        }
+        selectedRepeatIndex = 0
+    }
+
+    private fun setupDayCapsules() {
+        dayViews.forEachIndexed { idx, view ->
+            view.setOnClickListener {
+                selectedDays[idx] = !selectedDays[idx]
+                refreshDayCapsule(view, selectedDays[idx])
+            }
+        }
+    }
+
+    private fun refreshDayCapsule(view: TextView, selected: Boolean) {
+        view.setBackgroundResource(
+            if (selected) R.drawable.bg_dark_capsule_selected else R.drawable.bg_dark_capsule_unselected
+        )
+        view.setTextColor(
+            if (selected) resources.getColor(R.color.dark_bg_primary, null)
+            else resources.getColor(R.color.dark_text_secondary, null)
+        )
+    }
+
+    private fun refreshTriggerChip(textView: TextView, selected: Boolean) {
+        if (selected) {
+            textView.setBackgroundResource(R.drawable.bg_trigger_grid_item_selected)
+            textView.setTextColor(resources.getColor(R.color.dark_accent_green, null))
+            textView.setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+            textView.setBackgroundResource(R.drawable.bg_trigger_grid_item)
+            textView.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
+            textView.setTypeface(null, android.graphics.Typeface.NORMAL)
+        }
+    }
+
+    private fun refreshRepeatChip(textView: TextView, selected: Boolean) {
+        if (selected) {
+            textView.setBackgroundResource(R.drawable.bg_dark_capsule_selected)
+            textView.setTextColor(resources.getColor(R.color.dark_bg_primary, null))
+            textView.setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+            textView.setBackgroundResource(R.drawable.bg_dark_capsule_unselected)
+            textView.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
+            textView.setTypeface(null, android.graphics.Typeface.NORMAL)
+        }
+    }
+
+    private fun updateTriggerUi() {
+        triggerChips.forEachIndexed { index, textView ->
+            refreshTriggerChip(textView, index == selectedTriggerIndex)
+        }
+        val isTime = selectedTriggerIndex == 0
+        layoutTime.visibility = if (isTime) View.VISIBLE else View.GONE
+        cbRandom.visibility = if (isTime) View.VISIBLE else View.GONE
+        cbSkipHolidays.visibility = if (isTime) View.VISIBLE else View.GONE
+        if (!isTime) {
+            layoutRandom.visibility = View.GONE
+            btnTime.visibility = View.VISIBLE
+            cbRandom.isChecked = false
+            cbSkipHolidays.isChecked = false
+            randomWindow = false
+            skipHolidays = false
+        }
+        updateRepeatUi()
+        layoutBt.visibility = if (selectedTriggerIndex == 3) View.VISIBLE else View.GONE
+    }
+
+    private fun updateRepeatUi() {
+        repeatChips.forEachIndexed { index, textView ->
+            refreshRepeatChip(textView, index == selectedRepeatIndex)
+        }
+        val isCustom = selectedRepeatIndex == 3
+        layoutCustomDays.visibility = if (isCustom) View.VISIBLE else View.GONE
+    }
+
+    private fun currentTriggerType(): String = when (selectedTriggerIndex) {
+        0 -> TriggerType.TIME
+        1 -> TriggerType.CHARGING
+        2 -> TriggerType.WIFI
+        else -> TriggerType.BLUETOOTH
+    }
+
+    private fun currentRepeatKey(): String = when (selectedRepeatIndex) {
+        0 -> "daily"
+        1 -> "weekdays"
+        2 -> "weekend"
+        3 -> "custom"
+        4 -> "once"
+        else -> "daily"
+    }
+
+    private fun updateTimeLabel() {
+        btnTime.text = String.format(Locale.US, "%02d:%02d", hour, minute)
+    }
+
+    private fun updateWindowLabels() {
+        btnWinStart.text = String.format(Locale.US, "%02d:%02d", winStartHour, winStartMinute)
+        btnWinEnd.text = String.format(Locale.US, "%02d:%02d", winEndHour, winEndMinute)
+    }
+
+    private fun showTimePicker() {
+        DarkWheelTimePicker.newInstance(hour, minute)
+            .setOnConfirmListener { h, m ->
+                hour = h
+                minute = m
+                updateTimeLabel()
+            }
+            .show(supportFragmentManager, "dark_wheel_time_picker")
+    }
+
+    private fun showWindowPicker(isStart: Boolean) {
+        val (h, m) = if (isStart) winStartHour to winStartMinute else winEndHour to winEndMinute
+        DarkWheelTimePicker.newInstance(h, m)
+            .setOnConfirmListener { pickedH, pickedM ->
+                if (isStart) {
+                    winStartHour = pickedH
+                    winStartMinute = pickedM
+                } else {
+                    winEndHour = pickedH
+                    winEndMinute = pickedM
+                }
+                updateWindowLabels()
+            }
+            .show(supportFragmentManager, "dark_wheel_window_picker")
+    }
+
+    private fun pickApp() {
+        btnPickApp.isEnabled = false
+        AppListLoader.loadAsync(this) { apps ->
+            if (isFinishing || isDestroyed) return@loadAsync
+            btnPickApp.isEnabled = true
+            if (apps.isEmpty()) {
+                toast("未找到可启动的应用")
+                return@loadAsync
+            }
+            runCatching {
+                AppPickerBottomSheet.newInstance(apps)
+                    .setOnSelectedListener { app ->
+                        selectedPackage = app.packageName
+                        selectedAppName = app.appName
+                        btnPickApp.text = "已选择：$selectedAppName"
+                    }
+                    .show(supportFragmentManager, "app_picker")
+            }
+        }
+    }
+
+    private fun saveRule() {
+        val pkg = selectedPackage
+        if (pkg == null) {
+            toast("请先选择要启动的应用")
+            return
+        }
+        val name = etName.text.toString().ifBlank { selectedAppName ?: "自动化" }
+        val repeatKey = currentRepeatKey()
+        val repeatDaysMask = if (repeatKey == "custom") {
+            var mask = 0
+            for (i in 0..6) if (selectedDays[i]) mask = mask or (1 shl i)
+            mask
+        } else 0
+        if (repeatKey == "custom" && repeatDaysMask == 0) {
+            toast("请至少选择一天")
+            return
+        }
+
+        val rawStart = winStartHour * 60 + winStartMinute
+        val rawEnd = winEndHour * 60 + winEndMinute
+        val (wsMin, weMin) = if (randomWindow) {
+            Math.min(rawStart, rawEnd) to Math.max(rawStart, rawEnd)
+        } else 0 to 0
+
+        val a = Automation(
+            name = name,
+            targetPackage = pkg,
+            targetAppName = selectedAppName ?: "",
+            triggerType = currentTriggerType(),
+            timeHour = hour,
+            timeMinute = minute,
+            repeatMode = repeatKey,
+            repeatDays = repeatDaysMask,
+            skipHolidays = skipHolidays,
+            randomWindow = randomWindow,
+            windowStartMin = wsMin,
+            windowEndMin = weMin,
+            bluetoothName = etBtName.text.toString().trim()
+        )
+
+        btnSaveRule.isEnabled = false
+        val app = applicationContext
+        saveExecutor.execute {
+            val ok = runCatching {
+                val id = db.automationDao().insert(a)
+                if (a.triggerType == TriggerType.TIME) {
+                    Scheduler.schedule(app, a.copy(id = id))
+                }
+            }.isSuccess
+            postUi {
+                if (isFinishing || isDestroyed) return@postUi
+                btnSaveRule.isEnabled = true
+                if (ok) {
+                    toast("已保存")
+                    resetForm()
+                    refreshRules()
+                } else {
+                    toast("保存失败，请重试")
+                }
+            }
+        }
+    }
+
+    private fun resetForm() {
+        etName.text = ""
+        selectedPackage = null
+        selectedAppName = null
+        btnPickApp.text = "选择要启动的应用"
+        selectedTriggerIndex = 0
+        selectedRepeatIndex = 0
+        selectedDays.fill(false)
+        dayViews.forEachIndexed { i, v -> refreshDayCapsule(v, selectedDays[i]) }
+        cbRandom.isChecked = false
+        cbSkipHolidays.isChecked = false
+        randomWindow = false
+        skipHolidays = false
+        etBtName.text = ""
+        val now = Calendar.getInstance()
+        hour = now.get(Calendar.HOUR_OF_DAY)
+        minute = now.get(Calendar.MINUTE)
+        updateTimeLabel()
+        updateWindowLabels()
+        updateTriggerUi()
+    }
+
+    private fun refreshRules() {
+        runIo {
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            postUi {
+                ruleAdapter.submit(automations)
+                tvRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                updateDashboard(automations)
+            }
+        }
+    }
+
+    private fun updateDashboard(automations: List<Automation>) {
+        val enabled = automations.count { it.enabled }
+        tvDashboardEnabled.text = "$enabled"
+        val next = computeNextTriggerTime(automations.filter { it.enabled && it.triggerType == TriggerType.TIME })
+        tvDashboardNext.text = next ?: "--:--"
+    }
+
+    private fun computeNextTriggerTime(rules: List<Automation>): String? {
+        if (rules.isEmpty()) return null
+        val now = Calendar.getInstance()
+        val currentMin = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+        val currentDow = now.get(Calendar.DAY_OF_WEEK) - 1 // 0=周日
+
+        fun nextMinute(rule: Automation): Int? {
+            val targetMin = rule.timeHour * 60 + rule.timeMinute
+            return when (rule.repeatMode) {
+                "once" -> if (targetMin > currentMin) targetMin else null
+                "daily" -> targetMin
+                "weekdays" -> if (currentDow in 1..5) targetMin else null
+                "weekend" -> if (currentDow == 0 || currentDow == 6) targetMin else null
+                "custom" -> {
+                    val mask = rule.repeatDays
+                    if ((mask shr currentDow) and 1 == 1) targetMin else null
+                }
+                else -> targetMin
+            }
+        }
+
+        // 找今天还没触发且最近的一条；若都已过，取时间最小的那一条作为明天/后续最早
+        val todayCandidates = rules.mapNotNull { rule ->
+            nextMinute(rule)?.let { m -> if (m > currentMin) rule to m else null }
+        }
+        if (todayCandidates.isNotEmpty()) {
+            val (_, min) = todayCandidates.minByOrNull { it.second } ?: return null
+            return String.format(Locale.US, "%02d:%02d", min / 60, min % 60)
+        }
+        // 全部已过时，显示最早一条的目标时间
+        val earliest = rules.minByOrNull { it.timeHour * 60 + it.timeMinute } ?: return null
+        return String.format(Locale.US, "%02d:%02d", earliest.timeHour, earliest.timeMinute)
+    }
+
+    private fun onToggle(automation: Automation, checked: Boolean) {
+        val app = applicationContext
+        runIo {
+            runCatching { db.automationDao().update(automation.copy(enabled = checked)) }
+            if (automation.triggerType == TriggerType.TIME) {
+                if (checked) Scheduler.schedule(app, automation.copy(enabled = true))
+                else Scheduler.cancel(app, automation)
+            }
+            postUi {
+                refreshRules()
+                Snackbar.make(
+                    binding.rootContainer,
+                    if (checked) "已开启「${automation.name}」" else "已关闭「${automation.name}」",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun onDelete(automation: Automation) {
+        runCatching {
+            AlertDialog.Builder(this)
+                .setTitle("删除自动化？")
+                .setMessage("「${automation.name}」将被删除，其定时任务会一并取消。")
+                .setPositiveButton("删除") { _, _ -> performDelete(automation) }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+    }
+
+    private fun performDelete(automation: Automation) {
+        val app = applicationContext
+        runIo {
+            if (automation.triggerType == TriggerType.TIME) Scheduler.cancel(app, automation)
+            runCatching { db.automationDao().delete(automation) }
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            postUi {
+                ruleAdapter.submit(automations)
+                tvRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                Snackbar.make(binding.rootContainer, "已删除「${automation.name}」", Snackbar.LENGTH_LONG)
+                    .setAction("撤销") { undoDelete(automation) }
+                    .show()
+            }
+        }
+    }
+
+    private fun undoDelete(automation: Automation) {
+        val app = applicationContext
+        runIo {
+            runCatching { db.automationDao().insert(automation) }
+            if (automation.triggerType == TriggerType.TIME && automation.enabled) {
+                Scheduler.schedule(app, automation)
+            }
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            postUi {
+                ruleAdapter.submit(automations)
+                tvRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+            }
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Tab 2：同步源
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun setupSyncTab() {
+        spinnerSource = syncBinding.spinnerSource
+        btnSyncHolidays = syncBinding.btnSyncHolidays
+        btnManageHolidays = syncBinding.btnManageHolidays
+        btnManageSources = syncBinding.btnManageSources
+        tvAntiSleep = syncBinding.tvAntiSleep
+        swAntiSleep = syncBinding.swAntiSleep
+
+        btnSyncHolidays.setOnClickListener { syncHolidays() }
+        btnManageHolidays.setOnClickListener {
+            startActivity(Intent(this, HolidayManageActivity::class.java))
+        }
+        btnManageSources.setOnClickListener {
+            startActivity(Intent(this, SourceManageActivity::class.java))
+        }
+        setupSourceSpinner()
+    }
+
     private fun setupSourceSpinner() {
         val ids = mutableListOf("auto")
         val labels = mutableListOf("自动（推荐）")
@@ -140,21 +725,20 @@ class MainActivity : AppCompatActivity() {
         val pref = runCatching { HolidayPrefs.getSourcePref(this) }.getOrNull() ?: "auto"
         val target = ids.indexOf(pref).coerceAtLeast(0)
 
-        if (ids == sourceIds && binding.spinnerSource.adapter != null) {
-            if (binding.spinnerSource.selectedItemPosition != target) {
-                binding.spinnerSource.setSelection(target)
+        if (ids == sourceIds && spinnerSource.adapter != null) {
+            if (spinnerSource.selectedItemPosition != target) {
+                spinnerSource.setSelection(target)
             }
             return
         }
         sourceIds = ids
 
-        // 换 Adapter 期间先摘掉监听，避免系统在重建时回调一次把偏好覆盖成默认值
-        binding.spinnerSource.onItemSelectedListener = null
+        spinnerSource.onItemSelectedListener = null
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerSource.adapter = adapter
-        binding.spinnerSource.setSelection(target)
-        binding.spinnerSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        spinnerSource.adapter = adapter
+        spinnerSource.setSelection(target)
+        spinnerSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p: AdapterView<*>, v: android.view.View?, pos: Int, id: Long) {
                 val chosen = ids.getOrNull(pos) ?: return
                 runCatching { HolidayPrefs.setSourcePref(this@MainActivity, chosen) }
@@ -163,208 +747,89 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** 后台拉取并缓存中国法定节假日；结果用 Snackbar 反馈，并显示实际采用的数据源。 */
     private fun syncHolidays() {
-        // 幂等短路：按钮已禁用时说明同步已在跑，直接忽略本次点击，不重复触发
-        if (binding.btnSyncHolidays.isEnabled) {
-            binding.btnSyncHolidays.isEnabled = false
-            binding.btnSyncHolidays.text = "同步中…"
+        if (btnSyncHolidays.isEnabled) {
+            btnSyncHolidays.isEnabled = false
+            btnSyncHolidays.text = "同步中…"
         }
         val pref = HolidayPrefs.getSourcePref(this)
         val prefId = if (pref == "auto") null else pref
         val app = applicationContext
         HolidaySync.sync(this, prefId) { res ->
             if (isFinishing || isDestroyed) return@sync
-            binding.btnSyncHolidays.isEnabled = true
-            binding.btnSyncHolidays.text = "同步法定节假日"
+            btnSyncHolidays.isEnabled = true
+            btnSyncHolidays.text = "同步法定节假日"
             val msg = if (res.success) {
-                // 同步后重新排程，使「跳过节假日」立即按最新数据生效。
-                // rescheduleAll 会读全表并逐条排程，必须放后台，否则规则一多主线程直接卡顿。
                 runIo { Scheduler.rescheduleAll(app) }
                 "已同步（来源：${res.sourceLabel}，${res.count} 天）"
             } else {
                 "节假日数据同步失败（已保留上次数据），定时规则不受影响，可稍后重试"
             }
-            runCatching { Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show() }
+            runCatching { Snackbar.make(binding.rootContainer, msg, Snackbar.LENGTH_SHORT).show() }
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        refresh()
-        setupSourceSpinner() // 从「管理数据源」返回后刷新下拉，纳入新增的自定义源
-        // 从悬浮窗授权页回来时权限可能刚变，重新对齐开关状态
-        syncAntiSleepUi()
-        // 后台即防息屏：授权已就绪且未手动关时，让常驻服务重新同步一次，
-        // 确保悬浮窗在「不拨开关」的情况下也能自动挂上。
-        if (ScreenOnOverlay.canDraw(this) && !AntiSleep.isDisabled(this)) {
-            KeepAliveService.start(this)
-        }
-    }
+    // ═══════════════════════════════════════════════════════════════════
+    // 防外屏息屏
+    // ═══════════════════════════════════════════════════════════════════
 
-    override fun onDestroy() {
-        io.shutdown()
-        super.onDestroy()
-    }
-
-    /** targetSdk 35+ 起系统强制边到边显示，不消费 insets 内容会被状态栏和导航栏压住。 */
-    private fun applyInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val bars: Insets = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-            insets
-        }
-    }
-
-    /** 列表读取是磁盘 IO，放后台执行，主线程只做 UI 提交。 */
-    private fun refresh() {
-        runIo {
-            // db.automationDao().getAll() 是磁盘 IO，放后台执行
-            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
-            postUi {
-                adapter.submit(automations)
-                binding.tvEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
-            }
-        }
-    }
-
-    private fun onToggle(automation: Automation, checked: Boolean) {
-        val app = applicationContext
-        runIo {
-            runCatching { db.automationDao().update(automation.copy(enabled = checked)) }
-            if (automation.triggerType == TriggerType.TIME) {
-                if (checked) Scheduler.schedule(app, automation.copy(enabled = true))
-                else Scheduler.cancel(app, automation)
-            }
-            postUi {
-                Snackbar.make(
-                    binding.root,
-                    if (checked) "已开启「${automation.name}」" else "已关闭「${automation.name}」",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    /** 删除入口：先弹二次确认，用户确认后才真正删库。 */
-    private fun onDelete(automation: Automation) {
-        runCatching {
-            MaterialAlertDialogBuilder(this)
-                .setTitle("删除自动化？")
-                .setMessage("「${automation.name}」将被删除，其定时任务会一并取消。")
-                .setPositiveButton("删除") { _, _ -> performDelete(automation) }
-                .setNegativeButton("取消", null)
-                .show()
-        }
-    }
-
-    /** 真正删除 + Snackbar 撤销。undoDelete 用原 Automation（含原 id）重插，保证 AlarmManager 的请求码不变。 */
-    private fun performDelete(automation: Automation) {
-        val app = applicationContext
-        runIo {
-            if (automation.triggerType == TriggerType.TIME) Scheduler.cancel(app, automation)
-            runCatching { db.automationDao().delete(automation) }
-            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
-            postUi {
-                adapter.submit(automations)
-                binding.tvEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
-                Snackbar.make(binding.root, "已删除「${automation.name}」", Snackbar.LENGTH_LONG)
-                    .setAction("撤销") { undoDelete(automation) } // 闭包持有原 Automation（含原 id）
-                    .show()
-            }
-        }
-    }
-
-    /**
-     * 撤销删除 = 用原 id 重插 + 若为已启用的定时规则则重新排程。
-     * 关键不变量：Room @PrimaryKey(autoGenerate=true) 显式带 id 会保留该 id，
-     * Scheduler 用来区分不同闹钟的请求码（automation.id.toInt()）因此与删除前一致，
-     * AlarmManager 不会出现重复闹钟/漏闹钟。
-     */
-    private fun undoDelete(automation: Automation) {
-        val app = applicationContext
-        runIo {
-            runCatching { db.automationDao().insert(automation) } // 显式带原 id，requestCode 不变
-            if (automation.triggerType == TriggerType.TIME && automation.enabled) Scheduler.schedule(app, automation)
-            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
-            postUi {
-                adapter.submit(automations)
-                binding.tvEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
-            }
-        }
-    }
-
-    // ---------- 防外屏息屏（root） ----------
-
-    /**
-     * 开关是否可用取决于悬浮窗权限（常亮悬浮窗是主力机制），不取决于 root。
-     * root 只用来顺手把系统超时也顶高，属于加分项，异步探测完再更新副标题。
-     */
     private fun setupAntiSleep() {
         syncAntiSleepUi()
-
         runIo {
             val rooted = RootUtils.hasRoot()
             postUi {
                 if (!ScreenOnOverlay.canDraw(this)) return@postUi
-                binding.tvAntiSleep.text =
+                tvAntiSleep.text =
                     if (rooted) "防外屏息屏（屏幕常亮，已叠加 root 增强）" else "防外屏息屏（屏幕常亮）"
             }
         }
     }
 
-    /** 按当前权限与保存的开关状态刷新这一行 UI（不触发开关回调）。 */
     private fun syncAntiSleepUi() {
-        if (!::binding.isInitialized) return
+        if (!::swAntiSleep.isInitialized) return
         val granted = ScreenOnOverlay.canDraw(this)
-        binding.tvAntiSleep.text =
+        tvAntiSleep.text =
             if (granted) "防外屏息屏（屏幕常亮）" else "防外屏息屏 —— 需要悬浮窗权限"
-        binding.swAntiSleep.setOnCheckedChangeListener(null)
-        binding.swAntiSleep.isChecked = AntiSleep.isEnabled(this) && granted
-        binding.swAntiSleep.isEnabled = true
+        swAntiSleep.setOnCheckedChangeListener(null)
+        swAntiSleep.isChecked = AntiSleep.isEnabled(this) && granted
+        swAntiSleep.isEnabled = true
         bindAntiSleepSwitch()
     }
 
     private fun bindAntiSleepSwitch() {
-        binding.swAntiSleep.setOnCheckedChangeListener { view, checked ->
+        swAntiSleep.setOnCheckedChangeListener { view, checked ->
             if (checked && !ScreenOnOverlay.canDraw(this)) {
-                // 没权限直接开不了，回滚开关并把用户送到授权页
                 resetAntiSleepSwitch(false)
-                Snackbar.make(binding.root, "需要悬浮窗权限才能防止外屏息屏", Snackbar.LENGTH_LONG)
+                Snackbar.make(binding.rootContainer, "需要悬浮窗权限才能防止外屏息屏", Snackbar.LENGTH_LONG)
                     .setAction("去授权") { requestOverlayPermission() }
                     .show()
                 return@setOnCheckedChangeListener
             }
-
             view.isEnabled = false
             val app = applicationContext
             runIo {
                 val ok = runCatching {
                     if (checked) AntiSleep.enable(app) else AntiSleep.disable(app)
                 }.getOrDefault(false)
-                // 悬浮窗挂在常驻服务上，Activity 退出后才好继续生效
                 if (checked) KeepAliveService.start(app)
                 postUi {
                     view.isEnabled = true
                     if (ok) {
                         val tip = if (checked) "已开启：屏幕（含外屏）保持常亮" else "已关闭：恢复系统默认息屏"
-                        Snackbar.make(binding.root, tip, Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(binding.rootContainer, tip, Snackbar.LENGTH_SHORT).show()
                     } else {
                         resetAntiSleepSwitch(!checked)
-                        Snackbar.make(binding.root, "开启失败，请检查悬浮窗权限是否被系统撤回", Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(binding.rootContainer, "开启失败，请检查悬浮窗权限是否被系统撤回", Snackbar.LENGTH_LONG).show()
                     }
                 }
             }
         }
     }
 
-    /** 改开关状态但不触发回调，避免回滚时递归。 */
     private fun resetAntiSleepSwitch(checked: Boolean) {
-        binding.swAntiSleep.setOnCheckedChangeListener(null)
-        binding.swAntiSleep.isChecked = checked
-        binding.swAntiSleep.isEnabled = true
+        swAntiSleep.setOnCheckedChangeListener(null)
+        swAntiSleep.isChecked = checked
+        swAntiSleep.isEnabled = true
         bindAntiSleepSwitch()
     }
 
@@ -376,20 +841,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ---------- 权限与厂商限制引导 ----------
+    // ═══════════════════════════════════════════════════════════════════
+    // 生命周期 / 权限
+    // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * 只在首次启动时集中引导一次，避免每次打开都往设置页跳。
-     * 用户跳过后可在系统设置里自行开启，不再打扰。
-     */
+    override fun onResume() {
+        super.onResume()
+        refreshRules()
+        setupSourceSpinner()
+        syncAntiSleepUi()
+        if (ScreenOnOverlay.canDraw(this) && !AntiSleep.isDisabled(this)) {
+            KeepAliveService.start(this)
+        }
+    }
+
+    override fun onDestroy() {
+        io.shutdown()
+        super.onDestroy()
+    }
+
+    private fun toast(msg: String) {
+        runCatching { Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() }
+    }
+
     private fun checkPermissionsOnce() {
         val sp = getSharedPreferences("quicklaunch", Context.MODE_PRIVATE)
         if (sp.getBoolean("guided", false)) return
 
-        // 运行时权限一次性申请：
-        // - POST_NOTIFICATIONS(13+)：兜底全屏通知的送达前提
-        // - BLUETOOTH_CONNECT(12+)：不授权就读不到 BluetoothDevice.name，
-        //   「连接指定蓝牙设备」这类规则会永远不触发（此前完全没申请过，属于静默失效）
         val wanted = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 add(Manifest.permission.POST_NOTIFICATIONS)
@@ -405,7 +883,6 @@ class MainActivity : AppCompatActivity() {
             runCatching { ActivityCompat.requestPermissions(this, wanted.toTypedArray(), 1) }
         }
 
-        // 各项系统查询在部分定制 ROM 上会抛异常，逐项容错，别让引导弹窗把首启弄崩
         val missing = buildList {
             if (runCatching { !Settings.canDrawOverlays(this@MainActivity) }.getOrDefault(false)) {
                 add("悬浮窗权限 —— 后台自动拉起应用的必备条件，不开则只能靠点通知启动")
@@ -425,7 +902,6 @@ class MainActivity : AppCompatActivity() {
             add("自启动 / 后台弹出界面 —— Motorola myui 等厂商 ROM 需在「应用管理」中单独放行")
         }
 
-        // Activity 已在销毁流程中时 show() 会抛「访问已销毁界面」异常
         if (isFinishing || isDestroyed) return
         runCatching {
             AlertDialog.Builder(this)
@@ -442,7 +918,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** 依次尝试跳转，跳不动就退回本应用的系统设置详情页（myui 等 ROM 常缺其中某些页面）。 */
     private fun openSettings() {
         val uri = Uri.parse("package:$packageName")
         val targets = listOf(
@@ -455,9 +930,18 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(action, uri))
                 return
             } catch (_: ActivityNotFoundException) {
-                // 该机型不支持此设置页，尝试下一个
             } catch (_: SecurityException) {
             }
         }
+    }
+
+    private companion object {
+        const val TAB_LAUNCH = 0
+        const val TAB_SYNC = 1
+
+        val saveExecutor: java.util.concurrent.ExecutorService =
+            java.util.concurrent.Executors.newSingleThreadExecutor { r ->
+                Thread(r, "create-save").apply { isDaemon = true }
+            }
     }
 }

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  暗黑极简胶囊风格（Dark Minimalist Capsule UI）
-  - 纯黑背景 #121212
-  - 深灰胶囊卡片
-  - 苹果绿强调色 #34C759
-  - 触发条件 / 重复模式 改为内嵌胶囊组，减少下拉弹窗跳转
-  - 时间选择保持滚轮 BottomSheet（已支持无限循环）
-  - 毛玻璃效果全部移除
+  Tab 1：车机质感快捷启动面板
+  - 顶部仪表盘双栏大卡片（已启用 / 下次触发）
+  - 触发条件 4 联排圆角独立卡片网格
+  - 深色立体卡片 + 微光描边 + 苹果绿高亮
+  - 不改动原有启动/保存/快捷逻辑
 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/launchScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_dark_root"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,10 +21,159 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- 页面标题 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="sans-serif-light"
+            android:text="我的自动化"
+            android:textColor="@color/dark_text_primary"
+            android:textSize="28sp" />
+
+        <!-- 仪表盘：双栏大卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="horizontal"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:text="已启用规则"
+                    android:textColor="@color/dark_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvDashboardEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="sans-serif"
+                    android:text="0"
+                    android:textColor="@color/dark_text_primary"
+                    android:textFontWeight="600"
+                    android:textSize="34sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1px"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                android:background="@color/dark_stroke" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:text="下次触发"
+                    android:textColor="@color/dark_text_secondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvDashboardNext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="sans-serif"
+                    android:text="--:--"
+                    android:textColor="@color/dark_accent_green"
+                    android:textFontWeight="600"
+                    android:textSize="28sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 触发条件：4 联排圆角独立卡片网格 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.05"
+                android:text="触发条件"
+                android:textAllCaps="true"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chipTrigger0"
+                    style="@style/Widget.QuickLaunch.Dark.GridChip.Selected"
+                    android:layout_width="0dp"
+                    android:layout_height="92dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:drawableTop="@drawable/ic_trigger_time"
+                    android:text="定时" />
+
+                <TextView
+                    android:id="@+id/chipTrigger1"
+                    style="@style/Widget.QuickLaunch.Dark.GridChip"
+                    android:layout_width="0dp"
+                    android:layout_height="92dp"
+                    android:layout_weight="1"
+                    android:drawableTop="@drawable/ic_trigger_charging"
+                    android:text="充电" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chipTrigger2"
+                    style="@style/Widget.QuickLaunch.Dark.GridChip"
+                    android:layout_width="0dp"
+                    android:layout_height="92dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:drawableTop="@drawable/ic_trigger_wifi"
+                    android:text="WiFi" />
+
+                <TextView
+                    android:id="@+id/chipTrigger3"
+                    style="@style/Widget.QuickLaunch.Dark.GridChip"
+                    android:layout_width="0dp"
+                    android:layout_height="92dp"
+                    android:layout_weight="1"
+                    android:drawableTop="@drawable/ic_trigger_bluetooth"
+                    android:text="蓝牙" />
+            </LinearLayout>
+        </LinearLayout>
+
         <!-- 名称输入卡片 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:background="@drawable/bg_dark_card_primary"
             android:orientation="vertical"
             android:padding="16dp">
@@ -56,62 +205,9 @@
             android:id="@+id/btnPickApp"
             style="@style/Widget.QuickLaunch.Dark.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="48dp"
             android:layout_marginTop="12dp"
             android:text="选择要启动的应用" />
-
-        <!-- 触发条件分组卡片（内嵌胶囊，不再下拉） -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_dark_card_primary"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-light"
-                android:text="触发条件"
-                android:textColor="@color/dark_text_secondary"
-                android:textSize="13sp"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/chipTrigger0"
-                        style="@style/Widget.QuickLaunch.Dark.Chip.Selected"
-                        android:text="定时" />
-
-                    <TextView
-                        android:id="@+id/chipTrigger1"
-                        style="@style/Widget.QuickLaunch.Dark.Chip"
-                        android:text="充电" />
-
-                    <TextView
-                        android:id="@+id/chipTrigger2"
-                        style="@style/Widget.QuickLaunch.Dark.Chip"
-                        android:text="WiFi" />
-
-                    <TextView
-                        android:id="@+id/chipTrigger3"
-                        style="@style/Widget.QuickLaunch.Dark.Chip"
-                        android:text="蓝牙" />
-                </LinearLayout>
-            </HorizontalScrollView>
-        </LinearLayout>
 
         <!-- 时间设置分组卡片 -->
         <LinearLayout
@@ -126,11 +222,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.05"
                 android:text="执行时间"
-                android:textColor="@color/dark_text_secondary"
-                android:textSize="13sp"
                 android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
 
             <LinearLayout
                 android:id="@+id/layoutTime"
@@ -143,17 +239,16 @@
                 <TextView
                     android:id="@+id/btnTime"
                     android:layout_width="wrap_content"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:background="@drawable/bg_dark_input"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif"
                     android:gravity="center"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp"
                     android:text="08:00"
                     android:textColor="@color/dark_accent_green"
-                    android:textSize="18sp"
-                    android:textStyle="normal" />
-
+                    android:textFontWeight="500"
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -205,7 +300,7 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
-            <!-- 自定义星期多选（胶囊组） -->
+            <!-- 自定义星期多选 -->
             <LinearLayout
                 android:id="@+id/layoutCustomDays"
                 android:layout_width="match_parent"
@@ -222,7 +317,6 @@
                     android:textColor="@color/dark_text_tertiary"
                     android:textSize="12sp" />
 
-                <!-- 星期胶囊选择组（7 个） -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -232,10 +326,10 @@
                     <TextView
                         android:id="@+id/tbDay0"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_dark_capsule_unselected"
-                        android:fontFamily="sans-serif-light"
+                        android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="日"
                         android:textColor="@color/dark_text_secondary"
@@ -244,11 +338,11 @@
                     <TextView
                         android:id="@+id/tbDay1"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_dark_capsule_unselected"
-                        android:fontFamily="sans-serif-light"
+                        android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="一"
                         android:textColor="@color/dark_text_secondary"
@@ -257,11 +351,11 @@
                     <TextView
                         android:id="@+id/tbDay2"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_dark_capsule_unselected"
-                        android:fontFamily="sans-serif-light"
+                        android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="二"
                         android:textColor="@color/dark_text_secondary"
@@ -270,11 +364,11 @@
                     <TextView
                         android:id="@+id/tbDay3"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_dark_capsule_unselected"
-                        android:fontFamily="sans-serif-light"
+                        android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="三"
                         android:textColor="@color/dark_text_secondary"
@@ -283,11 +377,11 @@
                     <TextView
                         android:id="@+id/tbDay4"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_dark_capsule_unselected"
-                        android:fontFamily="sans-serif-light"
+                        android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="四"
                         android:textColor="@color/dark_text_secondary"
@@ -296,11 +390,11 @@
                     <TextView
                         android:id="@+id/tbDay5"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_dark_capsule_unselected"
-                        android:fontFamily="sans-serif-light"
+                        android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="五"
                         android:textColor="@color/dark_text_secondary"
@@ -309,11 +403,11 @@
                     <TextView
                         android:id="@+id/tbDay6"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="40dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_dark_capsule_unselected"
-                        android:fontFamily="sans-serif-light"
+                        android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="六"
                         android:textColor="@color/dark_text_secondary"
@@ -363,10 +457,10 @@
                 <TextView
                     android:id="@+id/btnWinStart"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_dark_input"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="08:30"
                     android:textColor="@color/dark_accent_green"
@@ -386,10 +480,10 @@
                 <TextView
                     android:id="@+id/btnWinEnd"
                     android:layout_width="0dp"
-                    android:layout_height="44dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_dark_input"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="08:50"
                     android:textColor="@color/dark_accent_green"
@@ -432,13 +526,46 @@
 
         <!-- 保存按钮 -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
+            android:id="@+id/btnSaveRule"
             style="@style/Widget.QuickLaunch.Dark.Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="52dp"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"
-            android:text="保存" />
+            android:text="保存规则" />
+
+        <!-- 规则列表标题 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="sans-serif-light"
+            android:letterSpacing="0.05"
+            android:text="规则列表"
+            android:textAllCaps="true"
+            android:textColor="@color/dark_text_secondary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tvRulesEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingVertical="32dp"
+            android:text="还没有自动化规则"
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRules"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:minHeight="120dp"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"
+            android:paddingBottom="60dp" />
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

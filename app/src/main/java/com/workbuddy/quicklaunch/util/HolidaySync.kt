@@ -38,6 +38,7 @@ object HolidaySync {
         // 用 applicationContext，防止后台任务持有 Activity 导致内存泄漏
         val app = context.applicationContext
         // 原子地尝试把 running 从 false 改成 true；如果已经是 true 说明已有同步在跑，直接忽略本次请求
+        // 使用 AtomicBoolean 的 compareAndSet 方法：先比较当前值是否为 false，如果是则设为 true
         if (!running.compareAndSet(false, true)) {
             mainHandler.post { runCatching { onDone(Result(false, null, 0)) } }
             return
@@ -81,12 +82,12 @@ object HolidaySync {
             }.getOrDefault(emptyList())
 
             // 同一天可能被两年的数据重复给出，落库前按日期去重，防止数据库表变得过大
-            val distinct = holidays.distinctBy { it.date }
-            if (distinct.isNotEmpty()) {
-                val written = runCatching { dao.replaceAll(distinct) }.isSuccess
-                if (!written) continue          // 写库失败就试下一个源，不谎报成功
+            val distinctHolidays = holidays.distinctBy { it.date }
+            if (distinctHolidays.isNotEmpty()) {
+                val writeSuccess = runCatching { dao.replaceAll(distinctHolidays) }.isSuccess
+                if (!writeSuccess) continue          // 写库失败就试下一个源，不谎报成功
                 runCatching { HolidayPrefs.setLastGood(context, src.id) }
-                return Result(true, src.label, distinct.size)
+                return Result(true, src.label, distinctHolidays.size)
             }
         }
         return Result(false, null, 0)

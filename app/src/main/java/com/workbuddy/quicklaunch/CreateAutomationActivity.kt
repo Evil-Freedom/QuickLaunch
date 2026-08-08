@@ -1,12 +1,10 @@
 package com.workbuddy.quicklaunch
 
-import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,6 +13,8 @@ import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ActivityCreateBinding
 import com.workbuddy.quicklaunch.util.AppListLoader
+import com.workbuddy.quicklaunch.util.AppPickerBottomSheet
+import com.workbuddy.quicklaunch.util.DarkWheelTimePicker
 import com.workbuddy.quicklaunch.util.Scheduler
 import java.util.Calendar
 import java.util.Locale
@@ -38,6 +38,14 @@ class CreateAutomationActivity : AppCompatActivity() {
     /** 自定义星期选中状态：index = Calendar.DAY_OF_WEEK - 1（0=日 … 6=六） */
     private val selectedDays = BooleanArray(7)
 
+    /** 触发条件胶囊（平铺内嵌）：0=定时 1=充电 2=WiFi 3=蓝牙 */
+    private val triggerChips = mutableListOf<TextView>()
+    private var selectedTriggerIndex = 0
+
+    /** 重复模式胶囊（平铺内嵌）：0=每天 1=工作日 2=周末 3=自定义 4=一次性 */
+    private val repeatChips = mutableListOf<TextView>()
+    private var selectedRepeatIndex = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -60,75 +68,153 @@ class CreateAutomationActivity : AppCompatActivity() {
         updateTimeLabel()
 
         binding.btnPickApp.setOnClickListener { pickApp() }
-        binding.spinnerTrigger.onItemSelectedListener =
-            object : android.widget.AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(p: android.widget.AdapterView<*>, v: android.view.View?, pos: Int, id: Long) {
-                    updateTriggerUi(pos)
-                }
-                override fun onNothingSelected(p: android.widget.AdapterView<*>) {}
-            }
-        binding.spinnerRepeat.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(p: AdapterView<*>, v: android.view.View?, pos: Int, id: Long) {
-                    syncCustomDaysVisibility()
-                }
-                override fun onNothingSelected(p: AdapterView<*>) {}
-            }
-        // 星期多选开关：index 与二进制位对齐（0=日 … 6=六）
-        listOf(
-            binding.tbDay0, binding.tbDay1, binding.tbDay2, binding.tbDay3,
-            binding.tbDay4, binding.tbDay5, binding.tbDay6
-        ).forEachIndexed { idx, tb ->
-            tb.setOnCheckedChangeListener { _, checked -> selectedDays[idx] = checked }
-        }
+
+        setupTriggerChips()
+        setupRepeatChips()
+        setupDayCapsules()
+
         binding.btnTime.setOnClickListener { showTimePicker() }
         binding.btnSave.setOnClickListener { save() }
 
         // 随机窗口：勾选后显示起止时间，并隐藏固定时间按钮（二者互斥）
         binding.cbRandom.setOnCheckedChangeListener { _, checked ->
             randomWindow = checked
-            binding.layoutRandom.visibility = if (checked) android.view.View.VISIBLE else android.view.View.GONE
-            binding.btnTime.visibility = if (checked) android.view.View.GONE else android.view.View.VISIBLE
+            binding.layoutRandom.visibility = if (checked) View.VISIBLE else View.GONE
+            binding.btnTime.visibility = if (checked) View.GONE else View.VISIBLE
         }
         binding.btnWinStart.setOnClickListener { showWindowPicker(true) }
         binding.btnWinEnd.setOnClickListener { showWindowPicker(false) }
         binding.cbSkipHolidays.setOnCheckedChangeListener { _, checked -> skipHolidays = checked }
         updateWindowLabels()
 
-        updateTriggerUi(binding.spinnerTrigger.selectedItemPosition)
+        updateTriggerUi()
     }
 
-    private fun updateTriggerUi(pos: Int) {
-        val isTime = pos == 0
-        binding.layoutTime.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
-        binding.cbRandom.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
-        binding.cbSkipHolidays.visibility = if (isTime) android.view.View.VISIBLE else android.view.View.GONE
+    /** 触发条件胶囊初始化：点击切换选中态。 */
+    private fun setupTriggerChips() {
+        triggerChips.clear()
+        triggerChips.addAll(
+            listOf(
+                binding.chipTrigger0,
+                binding.chipTrigger1,
+                binding.chipTrigger2,
+                binding.chipTrigger3
+            )
+        )
+        triggerChips.forEachIndexed { index, textView ->
+            textView.setOnClickListener {
+                selectedTriggerIndex = index
+                updateTriggerUi()
+            }
+        }
+        selectedTriggerIndex = 0
+    }
+
+    /** 重复模式胶囊初始化：点击切换选中态。 */
+    private fun setupRepeatChips() {
+        repeatChips.clear()
+        repeatChips.addAll(
+            listOf(
+                binding.chipRepeat0,
+                binding.chipRepeat1,
+                binding.chipRepeat2,
+                binding.chipRepeat3,
+                binding.chipRepeat4
+            )
+        )
+        repeatChips.forEachIndexed { index, textView ->
+            textView.setOnClickListener {
+                selectedRepeatIndex = index
+                updateRepeatUi()
+            }
+        }
+        selectedRepeatIndex = 0
+    }
+
+    /** 星期胶囊点击切换：index 与二进制位对齐（0=日 … 6=六） */
+    private fun setupDayCapsules() {
+        val dayViews = listOf(
+            binding.tbDay0, binding.tbDay1, binding.tbDay2, binding.tbDay3,
+            binding.tbDay4, binding.tbDay5, binding.tbDay6
+        )
+        dayViews.forEachIndexed { idx, view ->
+            view.setOnClickListener {
+                selectedDays[idx] = !selectedDays[idx]
+                refreshDayCapsule(view, selectedDays[idx])
+            }
+        }
+    }
+
+    private fun refreshDayCapsule(view: TextView, selected: Boolean) {
+        view.setBackgroundResource(
+            if (selected) R.drawable.bg_dark_capsule_selected
+            else R.drawable.bg_dark_capsule_unselected
+        )
+        view.setTextColor(
+            if (selected) resources.getColor(R.color.dark_bg_primary, null)
+            else resources.getColor(R.color.dark_text_secondary, null)
+        )
+    }
+
+    /** 统一设置胶囊选中/未选中视觉。 */
+    private fun refreshChip(textView: TextView, selected: Boolean) {
+        if (selected) {
+            textView.setBackgroundResource(R.drawable.bg_dark_capsule_selected)
+            textView.setTextColor(resources.getColor(R.color.dark_bg_primary, null))
+            textView.setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+            textView.setBackgroundResource(R.drawable.bg_dark_capsule_unselected)
+            textView.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
+            textView.setTypeface(null, android.graphics.Typeface.NORMAL)
+        }
+    }
+
+    /** 触发条件切换：控制时间设置、随机窗口、跳过节假日、蓝牙名称的显隐。 */
+    private fun updateTriggerUi() {
+        triggerChips.forEachIndexed { index, textView ->
+            refreshChip(textView, index == selectedTriggerIndex)
+        }
+
+        val isTime = selectedTriggerIndex == 0
+        binding.layoutTime.visibility = if (isTime) View.VISIBLE else View.GONE
+        binding.cbRandom.visibility = if (isTime) View.VISIBLE else View.GONE
+        binding.cbSkipHolidays.visibility = if (isTime) View.VISIBLE else View.GONE
         if (!isTime) {
-            binding.layoutRandom.visibility = android.view.View.GONE
-            binding.btnTime.visibility = android.view.View.VISIBLE
+            binding.layoutRandom.visibility = View.GONE
+            binding.btnTime.visibility = View.VISIBLE
             binding.cbRandom.isChecked = false
             binding.cbSkipHolidays.isChecked = false
-            binding.layoutCustomDays.visibility = android.view.View.GONE
             randomWindow = false
             skipHolidays = false
-        } else {
-            syncCustomDaysVisibility()
         }
+        updateRepeatUi()
         binding.layoutBt.visibility =
-            if (pos == 3) android.view.View.VISIBLE else android.view.View.GONE
+            if (selectedTriggerIndex == 3) View.VISIBLE else View.GONE
     }
 
-    /** 仅当选中「自定义」重复模式时显示星期多选，否则隐藏。 */
-    private fun syncCustomDaysVisibility() {
-        val isCustom = binding.spinnerRepeat.selectedItem?.toString() == "自定义"
-        binding.layoutCustomDays.visibility = if (isCustom) android.view.View.VISIBLE else android.view.View.GONE
+    /** 重复模式切换：仅「自定义」显示星期多选。 */
+    private fun updateRepeatUi() {
+        repeatChips.forEachIndexed { index, textView ->
+            refreshChip(textView, index == selectedRepeatIndex)
+        }
+        val isCustom = selectedRepeatIndex == 3
+        binding.layoutCustomDays.visibility = if (isCustom) View.VISIBLE else View.GONE
     }
 
-    private fun currentTriggerType(): String = when (binding.spinnerTrigger.selectedItemPosition) {
+    private fun currentTriggerType(): String = when (selectedTriggerIndex) {
         0 -> TriggerType.TIME
         1 -> TriggerType.CHARGING
         2 -> TriggerType.WIFI
         else -> TriggerType.BLUETOOTH
+    }
+
+    private fun currentRepeatKey(): String = when (selectedRepeatIndex) {
+        0 -> "daily"
+        1 -> "weekdays"
+        2 -> "weekend"
+        3 -> "custom"
+        4 -> "once"
+        else -> "daily"
     }
 
     // 固定 Locale.US：某些语言环境下 %02d 会输出本地数字，时间标签变成乱码般的字符
@@ -142,30 +228,35 @@ class CreateAutomationActivity : AppCompatActivity() {
     }
 
     private fun showTimePicker() {
-        TimePickerDialog(this, { _, h, m ->
-            hour = h
-            minute = m
-            updateTimeLabel()
-        }, hour, minute, true).show()
+        DarkWheelTimePicker.newInstance(hour, minute)
+            .setOnConfirmListener { h, m ->
+                hour = h
+                minute = m
+                updateTimeLabel()
+            }
+            .show(supportFragmentManager, "dark_wheel_time_picker")
     }
 
     private fun showWindowPicker(isStart: Boolean) {
         val (h, m) = if (isStart) winStartHour to winStartMinute else winEndHour to winEndMinute
-        TimePickerDialog(this, { _, pickedH, pickedM ->
-            if (isStart) {
-                winStartHour = pickedH
-                winStartMinute = pickedM
-            } else {
-                winEndHour = pickedH
-                winEndMinute = pickedM
+        DarkWheelTimePicker.newInstance(h, m)
+            .setOnConfirmListener { pickedH, pickedM ->
+                if (isStart) {
+                    winStartHour = pickedH
+                    winStartMinute = pickedM
+                } else {
+                    winEndHour = pickedH
+                    winEndMinute = pickedM
+                }
+                updateWindowLabels()
             }
-            updateWindowLabels()
-        }, h, m, true).show()
+            .show(supportFragmentManager, "dark_wheel_window_picker")
     }
 
     /**
      * 选择应用。加载列表要对每个应用做 loadLabel（读 APK 资源），几百个应用能耗时 1~2 秒，
-     * 原来直接在主线程跑会明显卡顿甚至 ANR，改为后台加载 + 回到主线程弹窗。
+     * 原来直接在主线程跑会明显卡顿甚至 ANR，改为后台加载 + 回到主线程弹 BottomSheet。
+     * 暗黑风格：带真实图标 + 吸顶搜索框的 BottomSheetDialog。
      */
     private fun pickApp() {
         binding.btnPickApp.isEnabled = false
@@ -176,17 +267,14 @@ class CreateAutomationActivity : AppCompatActivity() {
                 toast("未找到可启动的应用")
                 return@loadAsync
             }
-            val names = apps.map { it.appName }.toTypedArray()
             runCatching {
-                AlertDialog.Builder(this)
-                    .setTitle("选择应用")
-                    .setItems(names) { _, i ->
-                        val app = apps.getOrNull(i) ?: return@setItems
+                AppPickerBottomSheet.newInstance(apps)
+                    .setOnSelectedListener { app ->
                         selectedPackage = app.packageName
                         selectedAppName = app.appName
                         binding.btnPickApp.text = "已选择：$selectedAppName"
                     }
-                    .show()
+                    .show(supportFragmentManager, "app_picker")
             }
         }
     }
@@ -198,13 +286,7 @@ class CreateAutomationActivity : AppCompatActivity() {
             return
         }
         val name = binding.etName.text.toString().ifBlank { selectedAppName ?: "自动化" }
-        val repeatKey = when (binding.spinnerRepeat.selectedItem?.toString()) {
-            "工作日" -> "weekdays"
-            "周末" -> "weekend"
-            "一次性" -> "once"
-            "自定义" -> "custom"
-            else -> "daily"
-        }
+        val repeatKey = currentRepeatKey()
         val repeatDaysMask = if (repeatKey == "custom") {
             var mask = 0
             for (i in 0..6) if (selectedDays[i]) mask = mask or (1 shl i)

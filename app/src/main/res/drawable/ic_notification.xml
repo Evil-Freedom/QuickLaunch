@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  通知栏 small icon：纯白/单色透明背景矢量图
+  - Android 通知图标必须是无色填充（通常纯白），系统会自动应用灰色调色板
+  - 与桌面启动图标 ic_launcher_foreground 同形，但颜色改为 #FFFFFF
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M13,4 L8,13 h5 l-2,7 l7,-9 h-5 Z" />
+</vector>

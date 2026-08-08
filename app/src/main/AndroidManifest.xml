@@ -48,13 +48,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.QuickLaunch"
+        android:theme="@style/Theme.QuickLaunch.Dark"
         tools:targetApi="34">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.QuickLaunch.iOS18">
+            android:theme="@style/Theme.QuickLaunch.Dark">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -64,22 +64,22 @@
         <activity
             android:name=".CreateAutomationActivity"
             android:exported="false"
-            android:theme="@style/Theme.QuickLaunch" />
+            android:theme="@style/Theme.QuickLaunch.Dark" />
 
         <activity
             android:name=".HolidayManageActivity"
             android:exported="false"
-            android:theme="@style/Theme.QuickLaunch" />
+            android:theme="@style/Theme.QuickLaunch.Dark" />
 
         <activity
             android:name=".SourceManageActivity"
             android:exported="false"
-            android:theme="@style/Theme.QuickLaunch" />
+            android:theme="@style/Theme.QuickLaunch.Dark" />
 
         <activity
             android:name=".ThemeSettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.QuickLaunch" />
+            android:theme="@style/Theme.QuickLaunch.Dark" />
 
         <!-- 透明中转页：定时/条件触发时先拉起它，由它选屏 + 点亮屏幕 + 绕过锁屏后启动目标 App。
              exported=false 足够——它由本应用的前台服务与通知 PendingIntent 唤起，无需对外暴露。 -->

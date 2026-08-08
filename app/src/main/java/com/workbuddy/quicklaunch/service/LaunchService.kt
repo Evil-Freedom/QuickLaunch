@@ -20,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.workbuddy.quicklaunch.LaunchProxyActivity
+import com.workbuddy.quicklaunch.R
 
 /**
  * 前台服务：保证触发瞬间进程存活，并把启动动作交给 LaunchProxyActivity。
@@ -82,7 +83,7 @@ class LaunchService : Service() {
 /** 通知构建与兜底启动。前台服务和各异常分支共用同一套，避免多处重复。 */
 object Notifier {
     const val NOTIF_ID = 1001
-    private const val CHANNEL_ID = "quicklaunch_launch"
+    private const val CHANNEL_ID = "quicklaunch_launch_v2"
 
     fun build(context: Context, pkg: String, appName: String, ongoing: Boolean): Notification {
         ensureChannel(context)
@@ -96,7 +97,7 @@ object Notifier {
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("正在启动 $appName")
             .setContentText("正在启动 $appName · 若未自动打开，点此立即启动")
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(R.drawable.ic_notification_stat)
             .setContentIntent(pi)
             .setFullScreenIntent(pi, true)   // 系统级豁免：允许直接拉起 Activity
             .setPriority(NotificationCompat.PRIORITY_HIGH)

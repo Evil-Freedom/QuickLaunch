@@ -6,12 +6,31 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.Parcel
+import android.os.Parcelable
 import java.text.Collator
 import java.util.Locale
 import java.util.concurrent.Executors
 
-/** 已安装、可启动（有桌面入口）的应用。 */
-data class AppInfo(val packageName: String, val appName: String)
+/** 已安装、可启动（有桌面入口）的应用。手动实现 Parcelable，便于传给 BottomSheet 并耐受旋转重建。 */
+data class AppInfo(val packageName: String, val appName: String) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString() ?: "",
+        parcel.readString() ?: ""
+    )
+
+    override fun describeContents(): Int = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(packageName)
+        dest.writeString(appName)
+    }
+
+    companion object CREATOR : Parcelable.Creator<AppInfo> {
+        override fun createFromParcel(parcel: Parcel): AppInfo = AppInfo(parcel)
+        override fun newArray(size: Int): Array<AppInfo?> = arrayOfNulls(size)
+    }
+}
 
 object AppListLoader {
 

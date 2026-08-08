@@ -161,15 +161,57 @@
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
     </style>
 
-    <!-- 透明中转页专用：一闪而过绝不留白，合盖外屏触发时也无缝。
-         windowIsTranslucent 在 targetSdk 35+ 下自动豁免边到边强制，无需消费 Insets。 -->
-    <style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorPrimary">@color/preset_mint_primary</item>
+    <!-- ════════════════════════════════════════════════════════════════
+         暗黑极简胶囊主题（Dark）—— OLED 纯黑 + 深灰胶囊 + 苹果绿
+         ════════════════════════════════════════════════════════════════ -->
+    <style name="Theme.QuickLaunch.Dark" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 主色：苹果绿 -->
+        <item name="colorPrimary">@color/dark_accent_green</item>
+        <item name="colorOnPrimary">@color/dark_bg_primary</item>
+        <item name="colorPrimaryContainer">@color/dark_accent_green</item>
+        <item name="colorOnPrimaryContainer">@color/dark_bg_primary</item>
+
+        <!-- 次要色：深灰 -->
+        <item name="colorSecondary">@color/dark_card_primary</item>
+        <item name="colorOnSecondary">@color/dark_text_primary</item>
+        <item name="colorSecondaryContainer">@color/dark_card_secondary</item>
+        <item name="colorOnSecondaryContainer">@color/dark_text_primary</item>
+
+        <!-- 第三色：浅灰 -->
+        <item name="colorTertiary">@color/dark_text_secondary</item>
+        <item name="colorOnTertiary">@color/dark_bg_primary</item>
+        <item name="colorTertiaryContainer">@color/dark_divider</item>
+        <item name="colorOnTertiaryContainer">@color/dark_text_primary</item>
+
+        <!-- 错误色 -->
+        <item name="colorError">#FF453A</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="colorErrorContainer">#3A2A2A</item>
+        <item name="colorOnErrorContainer">#FF453A</item>
+
+        <!-- 背景：OLED 纯黑 -->
+        <item name="android:colorBackground">@color/dark_bg_primary</item>
+        <item name="colorOnBackground">@color/dark_text_primary</item>
+        <item name="colorSurface">@color/dark_bg_primary</item>
+        <item name="colorOnSurface">@color/dark_text_primary</item>
+        <item name="colorSurfaceVariant">@color/dark_card_primary</item>
+        <item name="colorOnSurfaceVariant">@color/dark_text_primary</item>
+        <item name="colorOutline">@color/dark_divider</item>
+        <item name="colorOutlineVariant">@color/dark_divider</item>
+        <item name="colorSurfaceContainerLow">@color/dark_bg_primary</item>
+        <item name="colorSurfaceContainer">@color/dark_card_primary</item>
+        <item name="colorSurfaceContainerHigh">@color/dark_card_secondary</item>
+        <item name="colorSurfaceInverse">@color/dark_text_primary</item>
+        <item name="colorOnSurfaceInverse">@color/dark_bg_primary</item>
+        <item name="colorPrimaryInverse">@color/dark_accent_green</item>
+
+        <!-- 窗口背景：OLED 纯黑 -->
+        <item name="android:windowBackground">@color/dark_bg_primary</item>
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+
+        <!-- 纤细无衬线字体 -->
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textAppearance">@style/TextAppearance.QuickLaunch.Body</item>
     </style>
 
     <!-- ════════════════════════════════════════════════════════════════
@@ -225,6 +267,38 @@
         <!-- 纤细无衬线字体 -->
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textAppearance">@style/TextAppearance.QuickLaunch.Body</item>
+    </style>
+
+    <!-- 透明中转页专用：一闪而过绝不留白，合盖外屏触发时也无缝。
+         windowIsTranslucent 在 targetSdk 35+ 下自动豁免边到边强制，无需消费 Insets。 -->
+    <style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorPrimary">@color/preset_mint_primary</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+    </style>
+
+    <!-- 暗黑 BottomSheetDialog 主题（时间选择器 / 应用选择器共用） -->
+    <style name="DarkBottomSheetDialogTheme" parent="Theme.Material3.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/DarkBottomSheetStyle</item>
+        <item name="android:windowIsFloating">false</item>
+        <!-- 全遮罩渐变背景，彻底盖住下方页面，消除半屏悬浮的割裂感 -->
+        <item name="android:windowBackground">@drawable/bg_dialog_scrim</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/dark_bg_primary</item>
+    </style>
+
+    <style name="DarkBottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/dark_bg_primary</item>
+        <item name="shapeAppearance">@style/DarkBottomSheetShape</item>
+    </style>
+
+    <!-- 28dp 大圆角，四个角统一，居中或全屏展开都保持一致的胶囊感 -->
+    <style name="DarkBottomSheetShape" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
     </style>
 
 </resources>
