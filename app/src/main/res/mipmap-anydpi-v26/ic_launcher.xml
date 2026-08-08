@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  API 26+ 自适应图标：渐变薄荷绿底 + 精致白闪电前景。
+  背景改为 drawable/ic_launcher_background.xml（渐变 + 高光），
+  替代原来的纯色 @color/ic_launcher_bg。
+-->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/ic_launcher_bg" />
+    <background android:drawable="@drawable/ic_launcher_background" />
     <foreground android:drawable="@drawable/ic_launcher_foreground" />
 </adaptive-icon>

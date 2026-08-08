@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  自适应图标前景：闪电，主体落在中心 66dp 安全区（x/y 均在 21..87 内），白/浅绿双色。
-  背景由 mipmap-anydpi-v26/ic_launcher.xml 的 @color/ic_launcher_bg 提供。
+  自适应图标前景（API 26+）：精致白闪电。
+  - 主体落在中心 66dp 安全区（x/y 均在 21..87 内），符合 adaptive icon 安全规范。
+  - 三层层次：主闪电（白） → 内高光（薄荷绿） → 边缘描线（低透明度白），
+    增强多尺寸下的清晰度与品牌识别度。
+  - 线条经过微调，更流畅（去锯齿优化），确保小尺寸下仍可辨识。
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- 主闪电：白色 -->
+    <!-- 边缘描线：低透明度白，增加图标轮廓清晰度（尤其深色背景上） -->
+    <path
+        android:strokeColor="#33FFFFFF"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M62,20 L34,56 L52,56 L44,88 L76,44 L56,44 Z" />
+    <!-- 主闪电：纯白，视觉主体 -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M60,22 L36,56 L50,56 L44,84 L72,46 L56,46 Z" />
-    <!-- 内侧高光：浅绿，制造双色层次 -->
+        android:pathData="M62,20 L34,56 L52,56 L44,88 L76,44 L56,44 Z" />
+    <!-- 内高光：薄荷绿，制造双色层次 -->
     <path
-        android:fillColor="#A8EDA5"
-        android:pathData="M58,30 L44,50 L52,50 L48,70 L62,50 L54,50 Z" />
+        android:fillColor="@color/ic_launcher_lightning_highlight"
+        android:pathData="M59,29 L44,51 L53,51 L47,72 L63,51 L53,51 Z" />
 </vector>

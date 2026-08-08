@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-      M3 主题色板（暗模式）—— 与 values/colors.xml 同名覆盖。
-      深色差异只写在这里，不在 values-night/themes.xml 里堆色值。
+      M3 主题色板（暗模式）—— 薄荷绿默认。
+      与 values/colors.xml 同名覆盖。
     -->
 
-    <!-- primary -->
-    <color name="m3_primary">#8BD58C</color>
-    <color name="m3_on_primary">#00390A</color>
+    <!-- primary（品牌主色 - 薄荷绿暗色版） -->
+    <color name="m3_primary">#8BD5C0</color>
+    <color name="m3_on_primary">#00210A</color>
     <color name="m3_primary_container">#17541F</color>
-    <color name="m3_on_primary_container">#A8EDA5</color>
+    <color name="m3_on_primary_container">#B8E6D4</color>
 
     <!-- secondary -->
     <color name="m3_secondary">#BBCBB0</color>
@@ -51,9 +51,107 @@
     <!-- inverse -->
     <color name="m3_inverse_surface">#E1E5DC</color>
     <color name="m3_inverse_on_surface">#2E322B</color>
-    <color name="m3_inverse_primary">#2E7D32</color>
+    <color name="m3_inverse_primary">#5EA88B</color>
 
-    <!-- 业务色：状态色点 -->
-    <color name="status_enabled">#8BD58C</color>
+    <!-- 业务色：状态色点（薄荷绿主题暗色版 - 高对比度） -->
+    <color name="status_enabled">#8BD5C0</color>
+    <!-- 停用灰：vs 卡片底 #191C17 对比度 4.53:1 -->
     <color name="status_disabled">#7E857A</color>
+
+    <!-- 自适应图标渐变背景（暗色版，更深沉） -->
+    <color name="ic_launcher_bg_top">#5EA88B</color>
+    <color name="ic_launcher_bg_bottom">#1B4A38</color>
+    <!-- 闪电内高光（暗色版，与背景同色系） -->
+    <color name="ic_launcher_lightning_highlight">#8BD5C0</color>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         暗色模式预设色板（用户可切换）
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- 薄荷绿暗色（Mint Night） -->
+    <color name="preset_mint_primary">#8BD5C0</color>
+    <color name="preset_mint_on_primary">#00210A</color>
+    <color name="preset_mint_primary_container">#17541F</color>
+    <color name="preset_mint_on_primary_container">#B8E6D4</color>
+    <color name="preset_mint_secondary">#BBCBB0</color>
+    <color name="preset_mint_on_secondary">#263524</color>
+    <color name="preset_mint_secondary_container">#3C4B38</color>
+    <color name="preset_mint_on_secondary_container">#D5E8CB</color>
+    <color name="preset_mint_tertiary">#9CCDD3</color>
+    <color name="preset_mint_on_tertiary">#00363D</color>
+    <color name="preset_mint_tertiary_container">#204D53</color>
+    <color name="preset_mint_on_tertiary_container">#BCE8EE</color>
+    <color name="preset_mint_error">#FFB4AB</color>
+    <color name="preset_mint_on_error">#690005</color>
+    <color name="preset_mint_error_container">#93000A</color>
+    <color name="preset_mint_on_error_container">#FFDAD6</color>
+    <color name="preset_mint_background">#11140F</color>
+    <color name="preset_mint_on_background">#E1E5DC</color>
+    <color name="preset_mint_surface">#11140F</color>
+    <color name="preset_mint_on_surface">#E1E5DC</color>
+    <color name="preset_mint_surface_variant">#43483E</color>
+    <color name="preset_mint_on_surface_variant">#C3C9BC</color>
+    <color name="preset_mint_outline">#8D9386</color>
+    <color name="preset_mint_outline_variant">#43483E</color>
+    <color name="preset_mint_inverse_surface">#E1E5DC</color>
+    <color name="preset_mint_inverse_on_surface">#2E322B</color>
+    <color name="preset_mint_inverse_primary">#5EA88B</color>
+
+    <!-- 丁香紫暗色（Lavender Night） -->
+    <color name="preset_lavender_primary">#B89FE0</color>
+    <color name="preset_lavender_on_primary">#1A0A30</color>
+    <color name="preset_lavender_primary_container">#2E1A50</color>
+    <color name="preset_lavender_on_primary_container">#D4C4ED</color>
+    <color name="preset_lavender_secondary">#B8A0D0</color>
+    <color name="preset_lavender_on_secondary">#2A1A40</color>
+    <color name="preset_lavender_secondary_container">#3A2A55</color>
+    <color name="preset_lavender_on_secondary_container">#E0D4F0</color>
+    <color name="preset_lavender_tertiary">#C0A0E5</color>
+    <color name="preset_lavender_on_tertiary">#251040</color>
+    <color name="preset_lavender_tertiary_container">#352050</color>
+    <color name="preset_lavender_on_tertiary_container">#D8CCEB</color>
+    <color name="preset_lavender_error">#FFB4AB</color>
+    <color name="preset_lavender_on_error">#690005</color>
+    <color name="preset_lavender_error_container">#93000A</color>
+    <color name="preset_lavender_on_error_container">#FFDAD6</color>
+    <color name="preset_lavender_background">#151320</color>
+    <color name="preset_lavender_on_background">#E0DAEB</color>
+    <color name="preset_lavender_surface">#151320</color>
+    <color name="preset_lavender_on_surface">#E0DAEB</color>
+    <color name="preset_lavender_surface_variant">#454055</color>
+    <color name="preset_lavender_on_surface_variant">#C8C2D2</color>
+    <color name="preset_lavender_outline">#8A8095</color>
+    <color name="preset_lavender_outline_variant">#454055</color>
+    <color name="preset_lavender_inverse_surface">#E0DAEB</color>
+    <color name="preset_lavender_inverse_on_surface">#2E2B38</color>
+    <color name="preset_lavender_inverse_primary">#9B7EC4</color>
+
+    <!-- 经典绿暗色（Classic Night） -->
+    <color name="preset_classic_primary">#8BD58C</color>
+    <color name="preset_classic_on_primary">#00390A</color>
+    <color name="preset_classic_primary_container">#17541F</color>
+    <color name="preset_classic_on_primary_container">#A8EDA5</color>
+    <color name="preset_classic_secondary">#BBCBB0</color>
+    <color name="preset_classic_on_secondary">#263524</color>
+    <color name="preset_classic_secondary_container">#3C4B38</color>
+    <color name="preset_classic_on_secondary_container">#D5E8CB</color>
+    <color name="preset_classic_tertiary">#9CCDD3</color>
+    <color name="preset_classic_on_tertiary">#00363D</color>
+    <color name="preset_classic_tertiary_container">#204D53</color>
+    <color name="preset_classic_on_tertiary_container">#BCE8EE</color>
+    <color name="preset_classic_error">#FFB4AB</color>
+    <color name="preset_classic_on_error">#690005</color>
+    <color name="preset_classic_error_container">#93000A</color>
+    <color name="preset_classic_on_error_container">#FFDAD6</color>
+    <color name="preset_classic_background">#11140F</color>
+    <color name="preset_classic_on_background">#E1E5DC</color>
+    <color name="preset_classic_surface">#11140F</color>
+    <color name="preset_classic_on_surface">#E1E5DC</color>
+    <color name="preset_classic_surface_variant">#43483E</color>
+    <color name="preset_classic_on_surface_variant">#C3C9BC</color>
+    <color name="preset_classic_outline">#8D9386</color>
+    <color name="preset_classic_outline_variant">#43483E</color>
+    <color name="preset_classic_inverse_surface">#E1E5DC</color>
+    <color name="preset_classic_inverse_on_surface">#2E322B</color>
+    <color name="preset_classic_inverse_primary">#2E7D32</color>
 </resources>

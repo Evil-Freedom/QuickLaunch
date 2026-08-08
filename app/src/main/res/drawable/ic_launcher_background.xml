@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  API 24-25 兜底图标：渐变薄荷绿底 + 精致白闪电。
-  与 adaptive icon 视觉一致（仅无安全区缩放），保证低版本体验统一。
+  自适应图标背景：薄荷绿渐变。
+  - 108dp 视口，线性渐变从左上到右下，模拟光影质感。
+  - 颜色引用 @color/ic_launcher_bg_top / bottom，可在 values-night 覆盖。
+  - API 26+ 自适应图标使用此 drawable 作为 <background>。
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
@@ -9,7 +11,6 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- 渐变背景 -->
     <path android:pathData="M0,0h108v108h-108z">
         <aapt:attr name="android:fillColor">
             <gradient
@@ -22,16 +23,8 @@
                 android:endColor="@color/ic_launcher_bg_bottom" />
         </aapt:attr>
     </path>
-    <!-- 顶部高光 -->
+    <!-- 微妙高光：顶部 1/3 白色低透明度叠加，增加立体感 -->
     <path
         android:fillColor="#22FFFFFF"
         android:pathData="M0,0 L108,0 L108,42 Q54,54 0,42 Z" />
-    <!-- 主闪电（白色）- 更精致的路径 -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M62,20 L34,56 L52,56 L44,88 L76,44 L56,44 Z" />
-    <!-- 闪电内高光（薄荷绿）- 增加层次感 -->
-    <path
-        android:fillColor="@color/ic_launcher_lightning_highlight"
-        android:pathData="M60,28 L44,50 L54,50 L48,72 L64,50 L54,50 Z" />
 </vector>

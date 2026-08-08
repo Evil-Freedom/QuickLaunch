@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!--
       深色模式主题。
@@ -6,50 +7,160 @@
       attr -> @color/m3_* 映射；色值本身由 values-night/colors.xml 同名覆盖提供
       （不在 night 主题里写死色值）。
     -->
+
+    <!-- ════════════════════════════════════════════════════════════════
+         默认薄荷绿暗色主题
+         ════════════════════════════════════════════════════════════════ -->
     <style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/m3_primary</item>
-        <item name="colorOnPrimary">@color/m3_on_primary</item>
-        <item name="colorPrimaryContainer">@color/m3_primary_container</item>
-        <item name="colorOnPrimaryContainer">@color/m3_on_primary_container</item>
-        <item name="colorSecondary">@color/m3_secondary</item>
-        <item name="colorOnSecondary">@color/m3_on_secondary</item>
-        <item name="colorSecondaryContainer">@color/m3_secondary_container</item>
-        <item name="colorOnSecondaryContainer">@color/m3_on_secondary_container</item>
-        <item name="colorTertiary">@color/m3_tertiary</item>
-        <item name="colorOnTertiary">@color/m3_on_tertiary</item>
-        <item name="colorTertiaryContainer">@color/m3_tertiary_container</item>
-        <item name="colorOnTertiaryContainer">@color/m3_on_tertiary_container</item>
-        <item name="colorError">@color/m3_error</item>
-        <item name="colorOnError">@color/m3_on_error</item>
-        <item name="colorErrorContainer">@color/m3_error_container</item>
-        <item name="colorOnErrorContainer">@color/m3_on_error_container</item>
-        <item name="android:colorBackground">@color/m3_background</item>
-        <item name="colorOnBackground">@color/m3_on_background</item>
-        <item name="colorSurface">@color/m3_surface</item>
-        <item name="colorOnSurface">@color/m3_on_surface</item>
-        <item name="colorSurfaceVariant">@color/m3_surface_variant</item>
-        <item name="colorOnSurfaceVariant">@color/m3_on_surface_variant</item>
-        <item name="colorOutline">@color/m3_outline</item>
-        <item name="colorOutlineVariant">@color/m3_outline_variant</item>
-        <item name="colorSurfaceContainerLowest">@color/m3_surface_container_lowest</item>
-        <item name="colorSurfaceContainerLow">@color/m3_surface_container_low</item>
-        <item name="colorSurfaceContainer">@color/m3_surface_container</item>
-        <item name="colorSurfaceContainerHigh">@color/m3_surface_container_high</item>
-        <item name="colorSurfaceContainerHighest">@color/m3_surface_container_highest</item>
-        <item name="colorSurfaceInverse">@color/m3_inverse_surface</item>
-        <item name="colorOnSurfaceInverse">@color/m3_inverse_on_surface</item>
-        <item name="colorPrimaryInverse">@color/m3_inverse_primary</item>
-        <item name="android:windowBackground">@color/m3_background</item>
+        <item name="colorPrimary">@color/preset_mint_primary</item>
+        <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_mint_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_mint_secondary</item>
+        <item name="colorOnSecondary">@color/preset_mint_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_mint_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_mint_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_mint_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_mint_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_mint_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_mint_on_tertiary_container</item>
+        <item name="colorError">@color/preset_mint_error</item>
+        <item name="colorOnError">@color/preset_mint_on_error</item>
+        <item name="colorErrorContainer">@color/preset_mint_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_mint_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_mint_background</item>
+        <item name="colorOnBackground">@color/preset_mint_on_background</item>
+        <item name="colorSurface">@color/preset_mint_surface</item>
+        <item name="colorOnSurface">@color/preset_mint_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_mint_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_mint_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_mint_outline</item>
+        <item name="colorOutlineVariant">@color/preset_mint_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_mint_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_mint_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_mint_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_mint_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_mint_background</item>
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
     </style>
 
-    <!-- 透明中转页专用：一闪而过绝不留白，合盖外屏触发时也无缝。 -->
+    <!-- 薄荷绿暗色 -->
+    <style name="Theme.QuickLaunch.Mint" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/preset_mint_primary</item>
+        <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_mint_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_mint_secondary</item>
+        <item name="colorOnSecondary">@color/preset_mint_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_mint_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_mint_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_mint_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_mint_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_mint_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_mint_on_tertiary_container</item>
+        <item name="colorError">@color/preset_mint_error</item>
+        <item name="colorOnError">@color/preset_mint_on_error</item>
+        <item name="colorErrorContainer">@color/preset_mint_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_mint_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_mint_background</item>
+        <item name="colorOnBackground">@color/preset_mint_on_background</item>
+        <item name="colorSurface">@color/preset_mint_surface</item>
+        <item name="colorOnSurface">@color/preset_mint_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_mint_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_mint_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_mint_outline</item>
+        <item name="colorOutlineVariant">@color/preset_mint_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_mint_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_mint_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_mint_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_mint_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_mint_background</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+    </style>
+
+    <!-- 丁香紫暗色 -->
+    <style name="Theme.QuickLaunch.Lavender" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/preset_lavender_primary</item>
+        <item name="colorOnPrimary">@color/preset_lavender_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_lavender_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_lavender_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_lavender_secondary</item>
+        <item name="colorOnSecondary">@color/preset_lavender_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_lavender_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_lavender_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_lavender_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_lavender_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_lavender_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_lavender_on_tertiary_container</item>
+        <item name="colorError">@color/preset_lavender_error</item>
+        <item name="colorOnError">@color/preset_lavender_on_error</item>
+        <item name="colorErrorContainer">@color/preset_lavender_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_lavender_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_lavender_background</item>
+        <item name="colorOnBackground">@color/preset_lavender_on_background</item>
+        <item name="colorSurface">@color/preset_lavender_surface</item>
+        <item name="colorOnSurface">@color/preset_lavender_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_lavender_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_lavender_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_lavender_outline</item>
+        <item name="colorOutlineVariant">@color/preset_lavender_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_lavender_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_lavender_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_lavender_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_lavender_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_lavender_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_lavender_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_lavender_background</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+    </style>
+
+    <!-- 经典绿暗色 -->
+    <style name="Theme.QuickLaunch.Classic" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/preset_classic_primary</item>
+        <item name="colorOnPrimary">@color/preset_classic_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_classic_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_classic_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_classic_secondary</item>
+        <item name="colorOnSecondary">@color/preset_classic_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_classic_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_classic_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_classic_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_classic_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_classic_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_classic_on_tertiary_container</item>
+        <item name="colorError">@color/preset_classic_error</item>
+        <item name="colorOnError">@color/preset_classic_on_error</item>
+        <item name="colorErrorContainer">@color/preset_classic_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_classic_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_classic_background</item>
+        <item name="colorOnBackground">@color/preset_classic_on_background</item>
+        <item name="colorSurface">@color/preset_classic_surface</item>
+        <item name="colorOnSurface">@color/preset_classic_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_classic_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_classic_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_classic_outline</item>
+        <item name="colorOutlineVariant">@color/preset_classic_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_classic_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_classic_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_classic_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_classic_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_classic_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_classic_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_classic_background</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+    </style>
+
+    <!-- 透明中转页专用 -->
     <style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorPrimary">@color/m3_primary</item>
+        <item name="android:colorPrimary">@color/preset_mint_primary</item>
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
     </style>
 </resources>
