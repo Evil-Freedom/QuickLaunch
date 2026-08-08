@@ -112,17 +112,17 @@ object ThemePrefs {
      * 自定义颜色不影响此返回值（自定义通过 applyCustomColor 在运行时覆盖）。
      */
     fun getPresetPrimaryRes(preset: String): Int = when (preset) {
-        PRESET_LAVENDER -> com.workbuddy.quicklaunch.R.color.m3_primary_lavender
-        PRESET_CLASSIC -> com.workbuddy.quicklaunch.R.color.m3_primary_classic
-        else -> com.workbuddy.quicklaunch.R.color.m3_primary_mint // 默认薄荷绿
+        PRESET_LAVENDER -> com.workbuddy.quicklaunch.R.color.preset_lavender_primary
+        PRESET_CLASSIC -> com.workbuddy.quicklaunch.R.color.preset_classic_primary
+        else -> com.workbuddy.quicklaunch.R.color.preset_mint_primary // 默认薄荷绿
     }
 
     /**
      * 根据当前预设色板返回对应的暗色模式主色资源 ID。
      */
     fun getPresetPrimaryNightRes(preset: String): Int = when (preset) {
-        PRESET_LAVENDER -> com.workbuddy.quicklaunch.R.color.m3_primary_lavender_night
-        PRESET_CLASSIC -> com.workbuddy.quicklaunch.R.color.m3_primary_classic_night
-        else -> com.workbuddy.quicklaunch.R.color.m3_primary_mint_night // 默认薄荷绿暗色
+        PRESET_LAVENDER -> com.workbuddy.quicklaunch.R.color.preset_lavender_primary
+        PRESET_CLASSIC -> com.workbuddy.quicklaunch.R.color.preset_classic_primary
+        else -> com.workbuddy.quicklaunch.R.color.preset_mint_primary // 默认薄荷绿暗色
     }
 }
