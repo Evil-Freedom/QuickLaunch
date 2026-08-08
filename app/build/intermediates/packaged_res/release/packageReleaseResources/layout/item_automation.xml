@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  iOS 26 Liquid Glass 自动化规则项
+  - 毛玻璃卡片
+  - 纤细文字
+  - iOS 风格开关
+-->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    android:layout_marginHorizontal="@dimen/ios_space_lg"
+    android:layout_marginVertical="@dimen/ios_space_sm"
+    app:cardBackgroundColor="@color/ios_glass_surface_light"
+    app:cardCornerRadius="@dimen/ios_radius_lg"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/ios_glass_border"
+    app:strokeWidth="@dimen/ios_border_hairline">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:padding="@dimen/ios_space_lg">
 
         <!-- 顶行：状态色点 + 名称 + 开关 -->
         <LinearLayout
@@ -31,11 +40,11 @@
                 android:id="@+id/tvName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="@dimen/ios_space_md"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textSize="16sp"
+                android:textAppearance="@style/TextAppearance.QuickLaunch.Subhead"
                 android:textStyle="bold" />
 
             <androidx.appcompat.widget.SwitchCompat
@@ -44,25 +53,25 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- 描述行：次要文字色，长文案省略 -->
+        <!-- 描述行 -->
         <TextView
             android:id="@+id/tvDesc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="@dimen/ios_space_sm"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="13sp" />
+            android:textAppearance="@style/TextAppearance.QuickLaunch.Caption" />
 
-        <!-- 删除：TextButton 风格，右下，48dp 触达高度 -->
+        <!-- 删除按钮：iOS 风格 -->
         <Button
             android:id="@+id/btnDelete"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/ios_button_height"
             android:layout_gravity="end"
-            android:minHeight="48dp"
+            android:layout_marginTop="@dimen/ios_space_sm"
+            android:minHeight="@dimen/ios_button_height"
             android:text="删除" />
     </LinearLayout>
 

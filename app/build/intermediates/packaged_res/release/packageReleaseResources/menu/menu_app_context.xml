@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  iOS 3D Touch 风格上下文菜单
+  长按应用图标时弹出
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_app_info"
+        android:title="应用信息" />
+    <item
+        android:id="@+id/action_uninstall"
+        android:title="卸载" />
+    <item
+        android:id="@+id/action_add_to_dock"
+        android:title="添加到 Dock" />
+</menu>

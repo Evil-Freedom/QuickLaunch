@@ -119,6 +119,14 @@
         <item name="android:textColor">@color/ios_text_secondary</item>
     </style>
 
+    <!-- 分组小标题样式（供 TextView 直接引用） -->
+    <style name="TextAppearance.QuickLaunch.Group.Header" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/ios_text_secondary</item>
+        <item name="android:textSize">@dimen/ios_text_caption</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
     <!-- ═══════════════════════════════════════════════════════════════
          按钮样式
          ═══════════════════════════════════════════════════════════════ -->

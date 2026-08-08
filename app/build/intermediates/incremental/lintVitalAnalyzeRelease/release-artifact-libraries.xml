@@ -117,6 +117,19 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
+      name="androidx.dynamicanimation:dynamicanimation:1.0.0@aar"
+      jars="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\1d9772aa8ce14f3e6cac3542d12973be\transformed\dynamicanimation-1.0.0\jars\classes.jar"
+      resolved="androidx.dynamicanimation:dynamicanimation:1.0.0"
+      folder="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\1d9772aa8ce14f3e6cac3542d12973be\transformed\dynamicanimation-1.0.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name="androidx.drawerlayout:drawerlayout:1.1.1@aar"
       jars="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\5531653606bcafdf088229d23c68b4a6\transformed\drawerlayout-1.1.1\jars\classes.jar"
       resolved="androidx.drawerlayout:drawerlayout:1.1.1"
@@ -134,19 +147,6 @@
       jars="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\1691857a1d760583b5c496d91bc9a58c\transformed\coordinatorlayout-1.1.0\jars\classes.jar"
       resolved="androidx.coordinatorlayout:coordinatorlayout:1.1.0"
       folder="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\1691857a1d760583b5c496d91bc9a58c\transformed\coordinatorlayout-1.1.0"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="androidx.dynamicanimation:dynamicanimation:1.0.0@aar"
-      jars="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\1d9772aa8ce14f3e6cac3542d12973be\transformed\dynamicanimation-1.0.0\jars\classes.jar"
-      resolved="androidx.dynamicanimation:dynamicanimation:1.0.0"
-      folder="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\1d9772aa8ce14f3e6cac3542d12973be\transformed\dynamicanimation-1.0.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -493,19 +493,6 @@
       jars="C:\Users\Administrator\.gradle\caches\modules-2\files-2.1\androidx.arch.core\core-common\2.2.0\5e1b8b81dfd5f52c56a8d53b18ca759c19a301f3\core-common-2.2.0.jar"
       resolved="androidx.arch.core:core-common:2.2.0"/>
   <library
-      name="androidx.interpolator:interpolator:1.0.0@aar"
-      jars="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\a7c6e50f70de0c01dbcb3b7256a06719\transformed\interpolator-1.0.0\jars\classes.jar"
-      resolved="androidx.interpolator:interpolator:1.0.0"
-      folder="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\a7c6e50f70de0c01dbcb3b7256a06719\transformed\interpolator-1.0.0"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
       name="androidx.collection:collection-jvm:1.4.2@jar"
       jars="C:\Users\Administrator\.gradle\caches\modules-2\files-2.1\androidx.collection\collection-jvm\1.4.2\bc60b5568a66d765a9fe8e266fd0c6c727e0b50b\collection-jvm-1.4.2.jar"
       resolved="androidx.collection:collection-jvm:1.4.2"/>
@@ -540,6 +527,19 @@
       jars="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\0a23479c502be734abe2c53e0acfebac\transformed\print-1.0.0\jars\classes.jar"
       resolved="androidx.print:print:1.0.0"
       folder="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\0a23479c502be734abe2c53e0acfebac\transformed\print-1.0.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="androidx.interpolator:interpolator:1.0.0@aar"
+      jars="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\a7c6e50f70de0c01dbcb3b7256a06719\transformed\interpolator-1.0.0\jars\classes.jar"
+      resolved="androidx.interpolator:interpolator:1.0.0"
+      folder="C:\Users\Administrator\.gradle\caches\8.11.1\transforms\a7c6e50f70de0c01dbcb3b7256a06719\transformed\interpolator-1.0.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"

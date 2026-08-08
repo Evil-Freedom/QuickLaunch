@@ -40,6 +40,9 @@ public final class ActivityMainBinding implements ViewBinding {
   public final MaterialCardView cardOperations;
 
   @NonNull
+  public final MaterialCardView cardTitle;
+
+  @NonNull
   public final FloatingActionButton fabAdd;
 
   @NonNull
@@ -56,6 +59,9 @@ public final class ActivityMainBinding implements ViewBinding {
 
   @NonNull
   public final RecyclerView recycler;
+
+  @NonNull
+  public final ConstraintLayout rootContainer;
 
   @NonNull
   public final Spinner spinnerSource;
@@ -78,9 +84,10 @@ public final class ActivityMainBinding implements ViewBinding {
   private ActivityMainBinding(@NonNull ConstraintLayout rootView,
       @NonNull MaterialButton btnManageHolidays, @NonNull MaterialButton btnManageSources,
       @NonNull MaterialButton btnSyncHolidays, @NonNull MaterialCardView cardOperations,
-      @NonNull FloatingActionButton fabAdd, @NonNull ImageView ivEmptyIcon,
-      @NonNull LinearLayout layoutAntiSleep, @NonNull LinearLayout layoutHolidayActions,
-      @NonNull LinearLayout layoutSource, @NonNull RecyclerView recycler,
+      @NonNull MaterialCardView cardTitle, @NonNull FloatingActionButton fabAdd,
+      @NonNull ImageView ivEmptyIcon, @NonNull LinearLayout layoutAntiSleep,
+      @NonNull LinearLayout layoutHolidayActions, @NonNull LinearLayout layoutSource,
+      @NonNull RecyclerView recycler, @NonNull ConstraintLayout rootContainer,
       @NonNull Spinner spinnerSource, @NonNull SwitchCompat swAntiSleep,
       @NonNull TextView tvAntiSleep, @NonNull LinearLayout tvEmpty, @NonNull TextView tvEmptyText,
       @NonNull TextView tvTitle) {
@@ -89,12 +96,14 @@ public final class ActivityMainBinding implements ViewBinding {
     this.btnManageSources = btnManageSources;
     this.btnSyncHolidays = btnSyncHolidays;
     this.cardOperations = cardOperations;
+    this.cardTitle = cardTitle;
     this.fabAdd = fabAdd;
     this.ivEmptyIcon = ivEmptyIcon;
     this.layoutAntiSleep = layoutAntiSleep;
     this.layoutHolidayActions = layoutHolidayActions;
     this.layoutSource = layoutSource;
     this.recycler = recycler;
+    this.rootContainer = rootContainer;
     this.spinnerSource = spinnerSource;
     this.swAntiSleep = swAntiSleep;
     this.tvAntiSleep = tvAntiSleep;
@@ -154,6 +163,12 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.cardTitle;
+      MaterialCardView cardTitle = ViewBindings.findChildViewById(rootView, id);
+      if (cardTitle == null) {
+        break missingId;
+      }
+
       id = R.id.fabAdd;
       FloatingActionButton fabAdd = ViewBindings.findChildViewById(rootView, id);
       if (fabAdd == null) {
@@ -189,6 +204,8 @@ public final class ActivityMainBinding implements ViewBinding {
       if (recycler == null) {
         break missingId;
       }
+
+      ConstraintLayout rootContainer = (ConstraintLayout) rootView;
 
       id = R.id.spinnerSource;
       Spinner spinnerSource = ViewBindings.findChildViewById(rootView, id);
@@ -227,9 +244,9 @@ public final class ActivityMainBinding implements ViewBinding {
       }
 
       return new ActivityMainBinding((ConstraintLayout) rootView, btnManageHolidays,
-          btnManageSources, btnSyncHolidays, cardOperations, fabAdd, ivEmptyIcon, layoutAntiSleep,
-          layoutHolidayActions, layoutSource, recycler, spinnerSource, swAntiSleep, tvAntiSleep,
-          tvEmpty, tvEmptyText, tvTitle);
+          btnManageSources, btnSyncHolidays, cardOperations, cardTitle, fabAdd, ivEmptyIcon,
+          layoutAntiSleep, layoutHolidayActions, layoutSource, recycler, rootContainer,
+          spinnerSource, swAntiSleep, tvAntiSleep, tvEmpty, tvEmptyText, tvTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

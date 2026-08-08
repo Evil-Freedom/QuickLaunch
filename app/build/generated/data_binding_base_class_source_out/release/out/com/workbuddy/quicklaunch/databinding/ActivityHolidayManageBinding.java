@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
@@ -20,6 +21,12 @@ import java.lang.String;
 public final class ActivityHolidayManageBinding implements ViewBinding {
   @NonNull
   private final ConstraintLayout rootView;
+
+  @NonNull
+  public final MaterialCardView cardHint;
+
+  @NonNull
+  public final MaterialCardView cardTitle;
 
   @NonNull
   public final FloatingActionButton fabAdd;
@@ -37,9 +44,12 @@ public final class ActivityHolidayManageBinding implements ViewBinding {
   public final TextView tvTitle;
 
   private ActivityHolidayManageBinding(@NonNull ConstraintLayout rootView,
+      @NonNull MaterialCardView cardHint, @NonNull MaterialCardView cardTitle,
       @NonNull FloatingActionButton fabAdd, @NonNull RecyclerView recycler,
       @NonNull TextView tvEmpty, @NonNull TextView tvHint, @NonNull TextView tvTitle) {
     this.rootView = rootView;
+    this.cardHint = cardHint;
+    this.cardTitle = cardTitle;
     this.fabAdd = fabAdd;
     this.recycler = recycler;
     this.tvEmpty = tvEmpty;
@@ -74,6 +84,18 @@ public final class ActivityHolidayManageBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.cardHint;
+      MaterialCardView cardHint = ViewBindings.findChildViewById(rootView, id);
+      if (cardHint == null) {
+        break missingId;
+      }
+
+      id = R.id.cardTitle;
+      MaterialCardView cardTitle = ViewBindings.findChildViewById(rootView, id);
+      if (cardTitle == null) {
+        break missingId;
+      }
+
       id = R.id.fabAdd;
       FloatingActionButton fabAdd = ViewBindings.findChildViewById(rootView, id);
       if (fabAdd == null) {
@@ -104,8 +126,8 @@ public final class ActivityHolidayManageBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityHolidayManageBinding((ConstraintLayout) rootView, fabAdd, recycler,
-          tvEmpty, tvHint, tvTitle);
+      return new ActivityHolidayManageBinding((ConstraintLayout) rootView, cardHint, cardTitle,
+          fabAdd, recycler, tvEmpty, tvHint, tvTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -1512,6 +1512,7 @@ module_dependencies {
   dependency_index: 64
   dependency_index: 68
   dependency_index: 72
+  dependency_index: 59
 }
 repositories {
   maven_repo {

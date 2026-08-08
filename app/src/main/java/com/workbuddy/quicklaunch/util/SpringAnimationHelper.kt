@@ -1,6 +1,7 @@
 package com.workbuddy.quicklaunch.util
 
 import android.view.View
+import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 
@@ -13,13 +14,13 @@ object SpringAnimationHelper {
     /**
      * 为 View 创建弹性回弹动画
      * @param view 目标 View
-     * @param property 动画属性
+     * @param property 动画属性（如 SpringAnimation.SCALE_X）
      * @param finalPosition 最终位置
      */
     @JvmStatic
     fun spring(
         view: View,
-        property: SpringAnimation.ViewProperty,
+        property: FloatPropertyCompat<View>,
         finalPosition: Float
     ) {
         SpringAnimation(view, property, finalPosition).apply {

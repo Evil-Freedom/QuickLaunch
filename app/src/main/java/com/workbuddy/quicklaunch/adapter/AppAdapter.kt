@@ -59,8 +59,8 @@ class AppAdapter(
         }
 
         // 长按弹出上下文菜单
-        holder.binding.root.setOnLongClickListener {
-            onAppLongClick(it, holder.binding.root)
+        holder.binding.root.setOnLongClickListener { view ->
+            onAppLongClick(item, view)
             true
         }
     }

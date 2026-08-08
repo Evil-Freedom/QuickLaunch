@@ -14,8 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -26,10 +27,10 @@ public final class ActivityCreateBinding implements ViewBinding {
   private final ScrollView rootView;
 
   @NonNull
-  public final Button btnPickApp;
+  public final MaterialButton btnPickApp;
 
   @NonNull
-  public final Button btnSave;
+  public final MaterialButton btnSave;
 
   @NonNull
   public final Button btnTime;
@@ -53,7 +54,7 @@ public final class ActivityCreateBinding implements ViewBinding {
   public final TextInputEditText etName;
 
   @NonNull
-  public final TextInputLayout layoutBt;
+  public final MaterialCardView layoutBt;
 
   @NonNull
   public final LinearLayout layoutCustomDays;
@@ -91,11 +92,11 @@ public final class ActivityCreateBinding implements ViewBinding {
   @NonNull
   public final ToggleButton tbDay6;
 
-  private ActivityCreateBinding(@NonNull ScrollView rootView, @NonNull Button btnPickApp,
-      @NonNull Button btnSave, @NonNull Button btnTime, @NonNull Button btnWinEnd,
+  private ActivityCreateBinding(@NonNull ScrollView rootView, @NonNull MaterialButton btnPickApp,
+      @NonNull MaterialButton btnSave, @NonNull Button btnTime, @NonNull Button btnWinEnd,
       @NonNull Button btnWinStart, @NonNull CheckBox cbRandom, @NonNull CheckBox cbSkipHolidays,
       @NonNull TextInputEditText etBtName, @NonNull TextInputEditText etName,
-      @NonNull TextInputLayout layoutBt, @NonNull LinearLayout layoutCustomDays,
+      @NonNull MaterialCardView layoutBt, @NonNull LinearLayout layoutCustomDays,
       @NonNull LinearLayout layoutRandom, @NonNull LinearLayout layoutTime,
       @NonNull Spinner spinnerRepeat, @NonNull Spinner spinnerTrigger, @NonNull ToggleButton tbDay0,
       @NonNull ToggleButton tbDay1, @NonNull ToggleButton tbDay2, @NonNull ToggleButton tbDay3,
@@ -153,13 +154,13 @@ public final class ActivityCreateBinding implements ViewBinding {
     int id;
     missingId: {
       id = R.id.btnPickApp;
-      Button btnPickApp = ViewBindings.findChildViewById(rootView, id);
+      MaterialButton btnPickApp = ViewBindings.findChildViewById(rootView, id);
       if (btnPickApp == null) {
         break missingId;
       }
 
       id = R.id.btnSave;
-      Button btnSave = ViewBindings.findChildViewById(rootView, id);
+      MaterialButton btnSave = ViewBindings.findChildViewById(rootView, id);
       if (btnSave == null) {
         break missingId;
       }
@@ -207,7 +208,7 @@ public final class ActivityCreateBinding implements ViewBinding {
       }
 
       id = R.id.layoutBt;
-      TextInputLayout layoutBt = ViewBindings.findChildViewById(rootView, id);
+      MaterialCardView layoutBt = ViewBindings.findChildViewById(rootView, id);
       if (layoutBt == null) {
         break missingId;
       }

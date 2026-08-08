@@ -23,11 +23,13 @@ import java.util.UUID
  */
 class SourceManageActivity : AppCompatActivity() {
 
-    /** 用一个普通年份测试网址格式是否合法，不关心具体是哪年。 */
-    private const val URL_VALIDATION_YEAR = 2000
-
     private lateinit var binding: ActivitySourceManageBinding
     private val items = mutableListOf<Row>()
+
+    /** 用一个普通年份测试网址格式是否合法，不关心具体是哪年。 */
+    private companion object {
+        const val URL_VALIDATION_YEAR = 2000
+    }
     private val adapter = object : androidx.recyclerview.widget.RecyclerView.Adapter<RowVH>() {
         override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): RowVH {
             val v = layoutInflater.inflate(R.layout.item_source, parent, false)

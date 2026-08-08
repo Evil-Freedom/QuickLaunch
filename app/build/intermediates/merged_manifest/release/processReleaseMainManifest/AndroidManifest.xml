@@ -71,7 +71,7 @@
         <activity
             android:name="com.workbuddy.quicklaunch.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.QuickLaunch" >
+            android:theme="@style/Theme.QuickLaunch.iOS18" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
