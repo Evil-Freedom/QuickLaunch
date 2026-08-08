@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      M3 主题色板（暗模式）—— 与 values/colors.xml 同名覆盖。
+      深色差异只写在这里，不在 values-night/themes.xml 里堆色值。
+    -->
+
+    <!-- primary -->
+    <color name="m3_primary">#8BD58C</color>
+    <color name="m3_on_primary">#00390A</color>
+    <color name="m3_primary_container">#17541F</color>
+    <color name="m3_on_primary_container">#A8EDA5</color>
+
+    <!-- secondary -->
+    <color name="m3_secondary">#BBCBB0</color>
+    <color name="m3_on_secondary">#263524</color>
+    <color name="m3_secondary_container">#3C4B38</color>
+    <color name="m3_on_secondary_container">#D5E8CB</color>
+
+    <!-- tertiary -->
+    <color name="m3_tertiary">#9CCDD3</color>
+    <color name="m3_on_tertiary">#00363D</color>
+    <color name="m3_tertiary_container">#204D53</color>
+    <color name="m3_on_tertiary_container">#BCE8EE</color>
+
+    <!-- error -->
+    <color name="m3_error">#FFB4AB</color>
+    <color name="m3_on_error">#690005</color>
+    <color name="m3_error_container">#93000A</color>
+    <color name="m3_on_error_container">#FFDAD6</color>
+
+    <!-- background / surface -->
+    <color name="m3_background">#11140F</color>
+    <color name="m3_on_background">#E1E5DC</color>
+    <color name="m3_surface">#11140F</color>
+    <color name="m3_on_surface">#E1E5DC</color>
+    <color name="m3_surface_variant">#43483E</color>
+    <color name="m3_on_surface_variant">#C3C9BC</color>
+
+    <!-- outline -->
+    <color name="m3_outline">#8D9386</color>
+    <color name="m3_outline_variant">#43483E</color>
+
+    <!-- surface container 层级 -->
+    <color name="m3_surface_container_lowest">#0C0F0A</color>
+    <color name="m3_surface_container_low">#191C17</color>
+    <color name="m3_surface_container">#1D211B</color>
+    <color name="m3_surface_container_high">#272B25</color>
+    <color name="m3_surface_container_highest">#32362F</color>
+
+    <!-- inverse -->
+    <color name="m3_inverse_surface">#E1E5DC</color>
+    <color name="m3_inverse_on_surface">#2E322B</color>
+    <color name="m3_inverse_primary">#2E7D32</color>
+
+    <!-- 业务色：状态色点 -->
+    <color name="status_enabled">#8BD58C</color>
+    <color name="status_disabled">#7E857A</color>
+</resources>

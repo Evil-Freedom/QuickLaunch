@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:gravity="center_vertical"
+    android:orientation="horizontal"
     android:padding="12dp">
 
     <LinearLayout
@@ -23,21 +23,23 @@
             android:id="@+id/tvUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="#666666" />
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/tvTag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="#2980b9" />
+            android:textColor="?attr/colorTertiary"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <Button
         android:id="@+id/btnDelete"
+        style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
         android:text="删除" />
 
 </LinearLayout>

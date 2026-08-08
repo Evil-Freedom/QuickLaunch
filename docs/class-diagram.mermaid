@@ -1,0 +1,61 @@
+classDiagram
+    class Automation {
+        +Long id
+        +String name
+        +String targetPackage
+        +String targetAppName
+        +String triggerType
+        +Int timeHour
+        +Int timeMinute
+        +String repeatMode
+        +Int repeatDays
+        +Boolean skipHolidays
+        +String bluetoothName
+        +Boolean enabled
+        +Long createdAt
+        +Boolean randomWindow
+        +Int windowStartMin
+        +Int windowEndMin
+    }
+    class AutomationAdapter {
+        -List~Automation~ items
+        -onToggle: (Automation, Boolean) -> Unit
+        -onDelete: (Automation) -> Unit
+        +submit(list: List~Automation~)
+        +onBindViewHolder(holder: VH, position: Int)
+        -statusDotRes(enabled: Boolean): Int
+        -triggerLabel(a: Automation): String
+    }
+    class MainActivity {
+        -adapter: AutomationAdapter
+        -db: AppDatabase
+        -io: ExecutorService
+        +onCreate(savedInstanceState: Bundle?)
+        +onResume()
+        -refresh()
+        -onToggle(a: Automation, checked: Boolean)
+        -onDelete(a: Automation)
+        -performDelete(a: Automation)
+        -undoDelete(a: Automation)
+        -syncHolidays()
+        -applyInsets()
+    }
+    class AutomationDao {
+        <<interface>>
+        +getAll(): List~Automation~
+        +insert(a: Automation): Long
+        +update(a: Automation)
+        +delete(a: Automation)
+    }
+    class Scheduler {
+        <<object>>
+        +schedule(context: Context, a: Automation, holidays: HolidayChecker?)
+        +cancel(context: Context, a: Automation)
+        +rescheduleAll(context: Context)
+    }
+    MainActivity --> AutomationAdapter : 构造注入回调
+    AutomationAdapter ..> Automation : 绑定/展示
+    MainActivity --> AutomationDao : 增删改查
+    MainActivity --> Scheduler : 排程/取消（仅 TIME）
+    AutomationAdapter ..> "R.drawable.status_dot_on/off" : 状态点
+    MainActivity ..> "Snackbar + MaterialAlertDialogBuilder" : 交互反馈

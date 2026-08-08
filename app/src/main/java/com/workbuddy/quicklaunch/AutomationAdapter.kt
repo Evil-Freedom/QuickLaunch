@@ -33,6 +33,8 @@ class AutomationAdapter(
         val a = items[position]
         holder.b.tvName.text = a.name
         holder.b.tvDesc.text = "${triggerLabel(a)} → ${a.targetAppName}"
+        // 状态色点：启用绿 / 停用灰，颜色随 values-night 自动切换
+        holder.b.vStatusDot.setBackgroundResource(statusDotRes(a.enabled))
         // 必须先摘掉旧监听：复用 ViewHolder 时 isChecked 赋值会触发上一条规则的回调，导致误改数据
         holder.b.switchEnabled.setOnCheckedChangeListener(null)
         holder.b.switchEnabled.isChecked = a.enabled
@@ -41,6 +43,10 @@ class AutomationAdapter(
     }
 
     override fun getItemCount(): Int = items.size
+
+    /** 状态色点资源：启用绿 / 停用灰。 */
+    private fun statusDotRes(enabled: Boolean): Int =
+        if (enabled) R.drawable.status_dot_on else R.drawable.status_dot_off
 
     private fun triggerLabel(a: Automation): String = when (a.triggerType) {
         TriggerType.TIME ->

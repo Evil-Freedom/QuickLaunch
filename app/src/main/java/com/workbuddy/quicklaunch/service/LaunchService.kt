@@ -95,7 +95,7 @@ object Notifier {
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("正在启动 $appName")
-            .setContentText("若未自动打开，点此立即启动")
+            .setContentText("正在启动 $appName · 若未自动打开，点此立即启动")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(pi)
             .setFullScreenIntent(pi, true)   // 系统级豁免：允许直接拉起 Activity

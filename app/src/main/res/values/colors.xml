@@ -1,4 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+      M3 主题色板（光模式）。
+      品牌种子色沿用 Android 绿 #3DDC84：光模式主色取深绿 #2E7D32 保证对比度，
+      品牌亮绿下沉为 primaryContainer，保留视觉血缘。
+      深色差异统一写在 values-night/colors.xml 同名覆盖，本文件只维护光模式。
+    -->
+
+    <!-- primary（品牌主色） -->
+    <color name="m3_primary">#2E7D32</color>
+    <color name="m3_on_primary">#FFFFFF</color>
+    <color name="m3_primary_container">#A8EDA5</color>
+    <color name="m3_on_primary_container">#002105</color>
+
+    <!-- secondary -->
+    <color name="m3_secondary">#52634D</color>
+    <color name="m3_on_secondary">#FFFFFF</color>
+    <color name="m3_secondary_container">#D5E8CB</color>
+    <color name="m3_on_secondary_container">#121F0E</color>
+
+    <!-- tertiary（数据源 tag 等点缀色） -->
+    <color name="m3_tertiary">#38656B</color>
+    <color name="m3_on_tertiary">#FFFFFF</color>
+    <color name="m3_tertiary_container">#BCE8EE</color>
+    <color name="m3_on_tertiary_container">#001F24</color>
+
+    <!-- error -->
+    <color name="m3_error">#BA1A1A</color>
+    <color name="m3_on_error">#FFFFFF</color>
+    <color name="m3_error_container">#FFDAD6</color>
+    <color name="m3_on_error_container">#410002</color>
+
+    <!-- background / surface -->
+    <color name="m3_background">#F9FAF3</color>
+    <color name="m3_on_background">#191D17</color>
+    <color name="m3_surface">#F9FAF3</color>
+    <color name="m3_on_surface">#191D17</color>
+    <color name="m3_surface_variant">#DFE5D8</color>
+    <color name="m3_on_surface_variant">#43483E</color>
+
+    <!-- outline -->
+    <color name="m3_outline">#73796C</color>
+    <color name="m3_outline_variant">#C3C9BC</color>
+
+    <!-- surface container 层级（操作区卡片等） -->
+    <color name="m3_surface_container_lowest">#FFFFFF</color>
+    <color name="m3_surface_container_low">#F3F5EC</color>
+    <color name="m3_surface_container">#EDF1E6</color>
+    <color name="m3_surface_container_high">#E7EBE1</color>
+    <color name="m3_surface_container_highest">#E1E6DB</color>
+
+    <!-- inverse -->
+    <color name="m3_inverse_surface">#2E322B</color>
+    <color name="m3_inverse_on_surface">#F0F4EA</color>
+    <color name="m3_inverse_primary">#8BD58C</color>
+
+    <!-- 业务色：状态色点 -->
+    <color name="status_enabled">#2E7D32</color>
+    <color name="status_disabled">#8D938A</color>
+
+    <!-- 自适应图标背景（深绿，与主题 primary 同族） -->
+    <color name="ic_launcher_bg">#1B7A3D</color>
+
+    <!-- 旧名兼容（保留，勿删）：供 T02 完成前的过渡编译；T04 清理后仅兜底可能引用 -->
     <color name="green">#3DDC84</color>
     <color name="green_dark">#2BB673</color>
     <color name="black">#FF000000</color>

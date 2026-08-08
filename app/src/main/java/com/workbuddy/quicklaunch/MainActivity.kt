@@ -35,6 +35,7 @@ import com.workbuddy.quicklaunch.util.HolidaySync
 import com.workbuddy.quicklaunch.util.HolidaySources
 import com.workbuddy.quicklaunch.util.HolidayPrefs
 import com.workbuddy.quicklaunch.util.Scheduler
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.Executors
 
@@ -149,20 +150,24 @@ class MainActivity : AppCompatActivity() {
 
     /** 后台拉取并缓存中国法定节假日；结果用 Snackbar 反馈，并显示实际采用的数据源。 */
     private fun syncHolidays() {
-        if (binding.btnSyncHolidays.isEnabled) binding.btnSyncHolidays.isEnabled = false
+        if (binding.btnSyncHolidays.isEnabled) {
+            binding.btnSyncHolidays.isEnabled = false
+            binding.btnSyncHolidays.text = "同步中…"
+        }
         val pref = HolidayPrefs.getSourcePref(this)
         val prefId = if (pref == "auto") null else pref
         val app = applicationContext
         HolidaySync.sync(this, prefId) { res ->
             if (isFinishing || isDestroyed) return@sync
             binding.btnSyncHolidays.isEnabled = true
+            binding.btnSyncHolidays.text = "同步法定节假日"
             val msg = if (res.success) {
                 // 同步后重新排程，使「跳过节假日」立即按最新数据生效。
                 // rescheduleAll 会读全表并逐条排程，必须放后台，否则规则一多主线程直接卡顿。
                 runIo { Scheduler.rescheduleAll(app) }
                 "已同步（来源：${res.sourceLabel}，${res.count} 天）"
             } else {
-                "所有数据源同步失败，请检查网络后重试"
+                "节假日数据同步失败（已保留上次数据），定时规则不受影响，可稍后重试"
             }
             runCatching { Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show() }
         }
@@ -216,14 +221,56 @@ class MainActivity : AppCompatActivity() {
                 if (checked) Scheduler.schedule(app, a.copy(enabled = true))
                 else Scheduler.cancel(app, a)
             }
+            postUi {
+                Snackbar.make(
+                    binding.root,
+                    if (checked) "已开启「${a.name}」" else "已关闭「${a.name}」",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
+    /** 删除入口：先弹二次确认，用户确认后才真正删库。 */
     private fun onDelete(a: Automation) {
+        runCatching {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("删除自动化？")
+                .setMessage("「${a.name}」将被删除，其定时任务会一并取消。")
+                .setPositiveButton("删除") { _, _ -> performDelete(a) }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+    }
+
+    /** 真正删除 + Snackbar 撤销。undoDelete 用原 Automation（含原 id）重插，保证 PendingIntent requestCode 不变。 */
+    private fun performDelete(a: Automation) {
         val app = applicationContext
         runIo {
             if (a.triggerType == TriggerType.TIME) Scheduler.cancel(app, a)
             runCatching { db.automationDao().delete(a) }
+            val items = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            postUi {
+                adapter.submit(items)
+                binding.tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+                Snackbar.make(binding.root, "已删除「${a.name}」", Snackbar.LENGTH_LONG)
+                    .setAction("撤销") { undoDelete(a) } // 闭包持有原 Automation（含原 id）
+                    .show()
+            }
+        }
+    }
+
+    /**
+     * 撤销删除 = 用原 id 重插 + 若为已启用的定时规则则重新排程。
+     * 关键不变量：Room @PrimaryKey(autoGenerate=true) 显式带 id 会保留该 id，
+     * Scheduler.pendingIntent 的 requestCode（a.id.toInt()）因此与删除前一致，
+     * AlarmManager 不会出现重复闹钟/漏闹钟。
+     */
+    private fun undoDelete(a: Automation) {
+        val app = applicationContext
+        runIo {
+            runCatching { db.automationDao().insert(a) } // 显式带原 id，requestCode 不变
+            if (a.triggerType == TriggerType.TIME && a.enabled) Scheduler.schedule(app, a)
             val items = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             postUi {
                 adapter.submit(items)

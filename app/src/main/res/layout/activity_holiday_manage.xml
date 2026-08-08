@@ -23,8 +23,8 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:text="点击下方 + 添加休息日（含调休），定时规则勾选「跳过节假日」时即生效。"
+        android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="13sp"
-        android:textColor="#666666"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />

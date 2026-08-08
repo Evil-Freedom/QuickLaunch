@@ -1,11 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!--
-      M3 主题：完整映射 m3_* 色板到 Material 3 属性。
-      - android:windowBackground 显式指定 m3_background（night 感知）：冷启动/切深色瞬间
-        窗口不再默认白底，杜绝「白闪」。
-      - android:forceDarkAllowed=false：防止系统强暗把 M3 深色再叠一遍（二次变暗）。
-      - targetSdk 35+ 起 android:statusBarColor / navigationBarColor 已失效（系统强制边到边），
-        这里不再设置，改由 Activity 中消费 WindowInsets 来避让状态栏与导航栏。
+      深色模式主题。
+      注意：Android 的 style 资源不会跨配置（values/ 与 values-night/）合并，
+      night 版本会整体替换日间版本，因此这里必须与日间主题保持相同的
+      attr -> @color/m3_* 映射；色值本身由 values-night/colors.xml 同名覆盖提供
+      （不在 night 主题里写死色值）。
     -->
     <style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/m3_primary</item>
@@ -37,8 +36,6 @@
         <item name="colorSurfaceContainer">@color/m3_surface_container</item>
         <item name="colorSurfaceContainerHigh">@color/m3_surface_container_high</item>
         <item name="colorSurfaceContainerHighest">@color/m3_surface_container_highest</item>
-        <!-- Material 1.12.0 的属性名是 colorSurfaceInverse / colorOnSurfaceInverse / colorPrimaryInverse
-             （colorInverseSurface 等并不存在，会导致 AAPT2 resource linking 失败）。 -->
         <item name="colorSurfaceInverse">@color/m3_inverse_surface</item>
         <item name="colorOnSurfaceInverse">@color/m3_inverse_on_surface</item>
         <item name="colorPrimaryInverse">@color/m3_inverse_primary</item>
@@ -46,8 +43,7 @@
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
     </style>
 
-    <!-- 透明中转页专用：一闪而过绝不留白，合盖外屏触发时也无缝。
-         windowIsTranslucent 在 targetSdk 35+ 下自动豁免边到边强制，无需消费 Insets。 -->
+    <!-- 透明中转页专用：一闪而过绝不留白，合盖外屏触发时也无缝。 -->
     <style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
