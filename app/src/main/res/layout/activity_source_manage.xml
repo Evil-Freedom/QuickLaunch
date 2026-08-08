@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:text="内置源已够用；你也可添加自己的节假日 API（URL 需含 {year} 占位符）。"
+        android:text="内置源已够用；你也可添加自己的节假日 API（网址里要有「年份」标记，如 2026）。"
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="13sp"
         app:layout_constraintEnd_toEndOf="parent"

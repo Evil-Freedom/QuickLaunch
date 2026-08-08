@@ -61,15 +61,17 @@ object HolidaySync {
         }.getOrDefault(emptyList())
         val sources = HolidaySources.ordered(pref, lastGood, custom)
         val dao = AppDatabase.get(context).holidayDao()
-        val year = Calendar.getInstance().get(Calendar.YEAR)
+        // 获取当前真实的年份，比如现在是 2026 年，currentYear 就是 2026
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
         for (src in sources) {
-            // 单个源的任何异常（非法 URL、解析崩溃、OOM）都只淘汰该源，
+            // 单个源的任何异常（非法网址、解析崩溃、内存不足）都只淘汰该源，
             // 绝不能中断整个回退链 —— 否则第一个坏源就会让后面所有好源失去机会。
             val holidays = runCatching {
                 val acc = mutableListOf<Holiday>()
-                for (y in year..year + 1) {
-                    val url = runCatching { src.urlForYear(y) }.getOrNull() ?: continue
+                // 拉取当前年份和下一年的数据，这样跨年时不会漏掉节假日
+                for (targetYear in currentYear..currentYear + 1) {
+                    val url = runCatching { src.urlForYear(targetYear) }.getOrNull() ?: continue
                     val json = fetchText(url) ?: continue
                     acc.addAll(runCatching { src.parse(json) }.getOrDefault(emptyList()))
                 }

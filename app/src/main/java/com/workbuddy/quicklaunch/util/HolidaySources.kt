@@ -4,80 +4,92 @@ import com.workbuddy.quicklaunch.data.Holiday
 import org.json.JSONObject
 
 /**
- * 日报/节假日 API 接口结构重构
+ * 节假日数据源管理
  *
- * 核心设计：所有 URL 模板统一包含 {year} 占位符，
- * 运行时根据年份动态替换，实现年份参数与路由的精确匹配。
+ * 核心思路：
+ * 每个数据接口的网址里都有一个叫「年份」的标记，
+ * 程序运行时，会根据当前真实的年份（比如 2026）把这个标记替换掉，
+ * 这样就能拿到那一年的节假日数据。
  *
- * 架构层次：
- *   URL 模板（含 {year} 占位符）
- *     ↓
- *   resolveUrl(template, year) → 生成最终 URL
- *     ↓
- *   HTTP 请求 → 原始 JSON
- *     ↓
- *   Parser 解析 → List<Holiday>
+ * 工作流程：
+ *   1. 准备好网址模板（里面写着「年份」作为标记）
+ *   2. 把「年份」替换成真实的年份 → 得到最终网址
+ *   3. 用最终网址去请求数据 → 拿到原始 JSON
+ *   4. 把 JSON 解析成节假日列表
  *
- * 向后兼容：自定义源（CustomSource）已支持 {year} 模板，本重构仅优化内置源。
+ * 多个数据源的设计：
+ *   优先使用国内访问快的 timor.tech，
+ *   如果连不上，就自动切换到 GitHub 或 jsDelivr 上的镜像数据，
+ *   用户也可以自己添加其他数据源。
  */
 
-/** 解析器类型：决定如何解析某源返回的原始 JSON。 */
+/** 解析器类型：决定用哪种方式解析某个数据源返回的 JSON 数据。 */
 enum class ParserType { TIMOR, NATE_SCARLET }
 
 /**
  * 节假日数据源。
  *
- * 每个源提供：
- * - urlTemplate: 含 {year} 占位符的 URL 模板（如 "https://timor.tech/api/holiday/year/{year}"）
- * - urlForYear(year): 将模板中的 {year} 替换为实际年份
- * - parse(json): 解析原始 JSON → List<Holiday>
- *
- * 多源设计：境内优先 timor.tech；若失败回退到 NateScarlet/holiday-cn
- * （GitHub raw 与 jsDelivr CDN 两份镜像，互为兜底，提升国内可达性）。
- * 此外用户可在「管理数据源」里手动添加自己的源（见 [CustomSource]）。
+ * 每个数据源包含：
+ * - id：数据源的唯一标识（比如 "timor"）
+ * - label：给用户看的名字（比如 "timor.tech"）
+ * - urlTemplate：网址模板，里面用「年份」作为占位标记
+ * - urlForYear：把「年份」替换成真实年份后得到的最终网址
+ * - parse：解析 JSON 数据的方法
+ * - builtIn：是否是内置数据源（用户自己添加的为 false）
  */
 data class HolidaySource(
     val id: String,
     val label: String,
-    val urlTemplate: String,        // 含 {year} 占位符
-    val urlForYear: (Int) -> String, // 年份替换后的实际 URL
+    val urlTemplate: String,        // 网址模板，里面包含「年份」标记
+    val urlForYear: (Int) -> String, // 把「年份」替换成真实年份后的网址
     val parse: (String) -> List<Holiday>,
     val builtIn: Boolean = true
 )
 
 /**
- * 解析 URL 模板，将 {year} 占位符替换为实际年份。
+ * 把网址模板里的「年份」标记替换成真实的年份。
  *
- * 设计要点：
- * - 只替换 {year}，不替换其他可能存在的占位符（如 {month}、{day}），避免误伤
- * - 模板中不含 {year} 时，视为静态 URL，不做替换（向后兼容）
- * - 年份参数必须为正整数，否则返回空字符串
+ * 注意：
+ * - 只替换「年份」这个标记，不会碰其他标记
+ * - 如果网址模板里没有「年份」标记，说明是固定网址，直接返回原样
+ * - 年份必须是正数（大于 0），否则返回空字符串表示无效
  *
- * @param template URL 模板，如 "https://example.com/api/holiday/{year}.json"
- * @param year 年份，如 2026
- * @return 替换后的实际 URL，或空字符串（参数无效时）
+ * @param template 网址模板，比如 "https://timor.tech/api/holiday/year/【年份】"
+ * @param targetYear 真实的年份，比如 2026
+ * @return 替换后的最终网址，如果年份无效则返回空字符串
  */
-fun resolveUrl(template: String, year: Int): String {
-    if (year <= 0) return ""
-    return template.replace("{year}", year.toString())
+fun resolveUrl(template: String, targetYear: Int): String {
+    if (targetYear <= 0) return ""
+    return template.replace("【年份】", targetYear.toString())
 }
 
-/** 用户自定义源的可序列化描述，持久化到 SharedPreferences。 */
+/**
+ * 用户自己添加的数据源（会被保存到手机里）。
+ *
+ * @param id 数据源唯一标识
+ * @param label 显示名称
+ * @param urlTemplate 网址模板，里面包含「年份」标记
+ * @param parser 用哪种解析器解析这个数据源的数据
+ */
 data class CustomSource(
     val id: String,
     val label: String,
-    val urlTemplate: String, // 含 {year} 占位符，如 https://example.com/{year}.json
+    val urlTemplate: String, // 网址模板，里面包含「年份」标记
     val parser: ParserType
 )
 
-/** 把可序列化的自定义源转成运行时 [HolidaySource]。 */
+/**
+ * 把用户自定义的数据源转成程序内部使用的 HolidaySource 对象。
+ *
+ * 转换时，会自动把网址模板里的「年份」标记绑定到替换逻辑上。
+ */
 fun CustomSource.toHolidaySource(): HolidaySource {
-    val tpl = urlTemplate
+    val template = urlTemplate
     return HolidaySource(
         id = id,
         label = label,
-        urlTemplate = tpl,
-        urlForYear = { y -> resolveUrl(tpl, y) },
+        urlTemplate = template,
+        urlForYear = { targetYear -> resolveUrl(template, targetYear) },
         parse = if (parser == ParserType.TIMOR) ::parseTimor else ::parseNateScarlet,
         builtIn = false
     )
@@ -86,23 +98,24 @@ fun CustomSource.toHolidaySource(): HolidaySource {
 object HolidaySources {
 
     // ═══════════════════════════════════════════════════════════════
-    // 内置数据源 URL 模板（含 {year} 占位符）
+    // 内置数据源的网址模板
+    // 每个模板里的「年份」标记会在请求时被替换成真实的年份
     // ═══════════════════════════════════════════════════════════════
 
     private const val TIMOR_TEMPLATE =
-        "https://timor.tech/api/holiday/year/{year}"
+        "https://timor.tech/api/holiday/year/【年份】"
 
     private const val NATESCARLET_RAW_TEMPLATE =
-        "https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/{year}.json"
+        "https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/【年份】.json"
 
     private const val NATESCARLET_CDN_TEMPLATE =
-        "https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/{year}.json"
+        "https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/【年份】.json"
 
     private val TIMOR = HolidaySource(
         id = "timor",
         label = "timor.tech",
         urlTemplate = TIMOR_TEMPLATE,
-        urlForYear = { resolveUrl(TIMOR_TEMPLATE, it) },
+        urlForYear = { targetYear -> resolveUrl(TIMOR_TEMPLATE, targetYear) },
         parse = ::parseTimor
     )
 
@@ -110,7 +123,7 @@ object HolidaySources {
         id = "natescarlet_raw",
         label = "holiday-cn (GitHub)",
         urlTemplate = NATESCARLET_RAW_TEMPLATE,
-        urlForYear = { resolveUrl(NATESCARLET_RAW_TEMPLATE, it) },
+        urlForYear = { targetYear -> resolveUrl(NATESCARLET_RAW_TEMPLATE, targetYear) },
         parse = ::parseNateScarlet
     )
 
@@ -118,42 +131,47 @@ object HolidaySources {
         id = "natescarlet_cdn",
         label = "holiday-cn (jsDelivr)",
         urlTemplate = NATESCARLET_CDN_TEMPLATE,
-        urlForYear = { resolveUrl(NATESCARLET_CDN_TEMPLATE, it) },
+        urlForYear = { targetYear -> resolveUrl(NATESCARLET_CDN_TEMPLATE, targetYear) },
         parse = ::parseNateScarlet
     )
 
-    /** 全部内置数据源（默认尝试顺序）。 */
+    /** 所有内置数据源（按默认顺序尝试）。 */
     val ALL: List<HolidaySource> = listOf(TIMOR, NATESCARLET_RAW, NATESCARLET_CDN)
 
     /**
-     * 计算实际尝试顺序：把用户偏好(pref)与上次成功源(lastGood)前置，
-     * 其余按 ALL + 自定义源顺序跟随。两者为空则直接用 ALL + 自定义源。
+     * 计算实际尝试顺序。
      *
-     * @param pref 用户偏好的源 id
-     * @param lastGood 上次成功拉取的源 id
-     * @param custom 用户自定义源列表
-     * @return 按优先级排序的源列表
+     * 规则：
+     * - 用户手动指定的数据源优先尝试
+     * - 上次成功拉取过的数据源也优先尝试
+     * - 剩下的按默认顺序排队
+     * - 如果用户指定的和上次成功的是同一个，不会重复请求
+     *
+     * @param pref 用户偏好的数据源 id（null 表示没特别偏好）
+     * @param lastGood 上次成功拉取的数据源 id（null 表示没有记录）
+     * @param custom 用户自己添加的数据源列表
+     * @return 按优先级排好序的数据源列表
      */
     fun ordered(
         pref: String?,
         lastGood: String?,
         custom: List<HolidaySource> = emptyList()
     ): List<HolidaySource> {
-        // 自定义源可能与内置源 id 冲突，先按 id 去重，避免同一个源被请求两次。
-        val all = (ALL + custom).distinctBy { it.id }
-        val prefSrc = all.firstOrNull { it.id == pref }
-        val lastSrc = all.firstOrNull { it.id == lastGood }
-        val rest = all.filter { it !== prefSrc && it !== lastSrc }
-        // pref == lastGood 时 listOfNotNull 会产生同一个源两次，distinct 消除重复网络请求。
-        return (listOfNotNull(prefSrc, lastSrc) + rest).distinctBy { it.id }
+        // 用户添加的数据源可能和内置的 id 重复，先按 id 去重，避免同一个源请求两次
+        val allSources = (ALL + custom).distinctBy { it.id }
+        val preferredSource = allSources.firstOrNull { it.id == pref }
+        val lastGoodSource = allSources.firstOrNull { it.id == lastGood }
+        val remainingSources = allSources.filter { it !== preferredSource && it !== lastGoodSource }
+        // 当用户偏好和上次成功的是同一个源时，listOfNotNull 会放两次，用 distinct 去掉重复的
+        return (listOfNotNull(preferredSource, lastGoodSource) + remainingSources).distinctBy { it.id }
     }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// 解析器实现（保持不变，仅移动到底部以突出 URL 模板重构的核心变更）
+// 下面这些是 JSON 解析器的实现，和网址替换逻辑无关，保持不变
 // ═══════════════════════════════════════════════════════════════════════
 
-/** 严格校验 yyyy-MM-dd（含月/日范围），避免把脏数据写进 holidays 表。 */
+/** 严格校验日期格式 yyyy-MM-dd（包括月份和日期的合理范围），防止脏数据写入数据库。 */
 private val DATE_RE = Regex("""^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$""")
 
 private fun validDateOrNull(s: String?): String? {
@@ -162,12 +180,14 @@ private fun validDateOrNull(s: String?): String? {
 }
 
 /**
- * timor.tech：code==0 时 holiday 对象里 holiday==true 的项为休息日。
+ * 解析 timor.tech 返回的 JSON 数据。
  *
- * 注意真实接口的键是 "01-01"（MM-dd）而非完整日期，完整日期在值对象的 date 字段里；
- * 少数镜像会把键写成完整 yyyy-MM-dd，故两者都兼容，且最终统一校验为 yyyy-MM-dd。
+ * 判断规则：当 code 字段等于 0 时，holiday 对象里 holiday 等于 true 的项就是休息日。
  *
- * API 响应示例：
+ * 注意：真实接口里的键通常是 "01-01"（月-日），完整日期在值对象的 date 字段里；
+ * 少数镜像会把键写成完整的 yyyy-MM-dd，所以两种格式都兼容。
+ *
+ * 接口返回示例：
  * {
  *   "code": 0,
  *   "holiday": {
@@ -186,7 +206,7 @@ private fun parseTimor(json: String): List<Holiday> {
         val k = keys.next()
         val obj = holiday.optJSONObject(k) ?: continue
         if (!obj.optBoolean("holiday", false)) continue
-        // 优先使用对象内的 date 字段（yyyy-MM-dd），否则尝试用键（兼容两种格式）
+        // 优先使用对象内的 date 字段（完整日期），否则用键的值（兼容两种格式）
         val date = validDateOrNull(obj.optString("date", "")) ?: validDateOrNull(k) ?: continue
         out.add(Holiday(date = date, name = obj.optString("name", "")))
     }
@@ -194,19 +214,20 @@ private fun parseTimor(json: String): List<Holiday> {
 }
 
 /**
- * NateScarlet/holiday-cn：days 数组里 isOffDay==true 的 date 为休息日。
+ * 解析 NateScarlet/holiday-cn 返回的 JSON 数据。
  *
- * API 响应示例（JSON 数组）：
- * [
- *   { "date": "2026-01-01", "name": "元旦", "isOffDay": true },
- *   { "date": "2026-01-02", "name": "", "isOffDay": false }
- * ]
+ * 判断规则：days 数组里 isOffDay 等于 true 的日期就是休息日。
  *
- * 注：某些镜像的顶层可能是 { "days": [...] } 对象而非直接数组，此处两种都兼容。
+ * 接口返回示例（JSON 对象，里面有个 days 数组）：
+ * {
+ *   "days": [
+ *     { "date": "2026-01-01", "name": "元旦", "isOffDay": true },
+ *     { "date": "2026-01-02", "name": "", "isOffDay": false }
+ *   ]
+ * }
  */
 private fun parseNateScarlet(json: String): List<Holiday> {
     val root = runCatching { JSONObject(json) }.getOrNull() ?: return emptyList()
-    // 兼容两种顶层结构：直接是 days 数组，或 days 是对象的字段
     val days = root.optJSONArray("days") ?: return emptyList()
     val out = mutableListOf<Holiday>()
     for (i in 0 until days.length()) {

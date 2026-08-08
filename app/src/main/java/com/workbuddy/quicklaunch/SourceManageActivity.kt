@@ -18,7 +18,7 @@ import java.util.UUID
 
 /**
  * 管理节假日数据源：列出内置源与用户自定义源；用户可新增自定义源
- * （填名称、URL 模板含 {year}、选择解析格式），删除自己的源。
+ * （填名称、网址模板含「年份」标记、选择解析格式），删除自己的源。
  * 自定义源会被接入多源回退链，在主界面「同步法定节假日」时一起尝试。
  */
 class SourceManageActivity : AppCompatActivity() {
@@ -69,7 +69,7 @@ class SourceManageActivity : AppCompatActivity() {
 
     private fun addSource() {
         val labelInput = EditText(this).apply { hint = "名称，如 我的节假日API" }
-        val urlInput = EditText(this).apply { hint = "https://example.com/{year}.json" }
+        val urlInput = EditText(this).apply { hint = "https://example.com/【年份】.json" }
         val parserSpinner = Spinner(this).apply {
             adapter = ArrayAdapter(
                 this@SourceManageActivity,
@@ -94,13 +94,14 @@ class SourceManageActivity : AppCompatActivity() {
                     android.widget.Toast.makeText(this, "名称和 URL 不能为空", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                if (!url.contains("{year}")) {
-                    android.widget.Toast.makeText(this, "URL 必须包含 {year} 占位符", android.widget.Toast.LENGTH_SHORT).show()
+                if (!url.contains("【年份】")) {
+                    android.widget.Toast.makeText(this, "网址里必须包含「年份」标记", android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                // 校验协议与可解析性：非法 URL 曾会在同步时抛异常并中断整条回退链，
+                // 校验协议与可解析性：非法网址曾会在同步时抛异常并中断整条回退链，
                 // 现在同步侧已做容错，但在入口就拦住能给用户明确反馈。
-                val probe = url.replace("{year}", "2000")
+                // 校验方法：把「年份」标记替换成 2000，看看能不能生成合法的网址格式
+                val probe = url.replace("【年份】", "2000")
                 val validUrl = runCatching { java.net.URL(probe).protocol.lowercase(Locale.US) }
                     .getOrNull()
                 if (validUrl != "http" && validUrl != "https") {
