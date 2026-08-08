@@ -76,6 +76,11 @@
             android:exported="false"
             android:theme="@style/Theme.QuickLaunch" />
 
+        <activity
+            android:name=".ThemeSettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QuickLaunch" />
+
         <!-- 透明中转页：定时/条件触发时先拉起它，由它选屏 + 点亮屏幕 + 绕过锁屏后启动目标 App。
              exported=false 足够——它由本应用的前台服务与通知 PendingIntent 唤起，无需对外暴露。 -->
         <activity

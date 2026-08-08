@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">快捷启动</string>
+    <string name="theme_settings">主题设置</string>
+    <string name="theme_mint">薄荷绿</string>
+    <string name="theme_lavender">丁香紫</string>
+    <string name="theme_classic">经典绿</string>
+    <string name="theme_mode_light">浅色</string>
+    <string name="theme_mode_dark">深色</string>
+    <string name="theme_mode_system">跟随系统</string>
+    <string name="theme_apply">应用</string>
+    <string name="theme_cancel">取消</string>
 </resources>
