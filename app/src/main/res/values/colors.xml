@@ -57,7 +57,8 @@
 
     <!-- 业务色：状态色点 -->
     <color name="status_enabled">#2E7D32</color>
-    <color name="status_disabled">#8D938A</color>
+    <!-- 停用灰：光模式需 vs 卡片底 colorSurfaceContainerLow(#F3F5EC) ≥3:1；#6E7468=4.38:1 达标 -->
+    <color name="status_disabled">#6E7468</color>
 
     <!-- 自适应图标背景（深绿，与主题 primary 同族） -->
     <color name="ic_launcher_bg">#1B7A3D</color>
