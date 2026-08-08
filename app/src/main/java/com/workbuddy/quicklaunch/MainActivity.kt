@@ -34,6 +34,7 @@ import com.workbuddy.quicklaunch.util.ScreenOnOverlay
 import com.workbuddy.quicklaunch.util.HolidaySync
 import com.workbuddy.quicklaunch.util.HolidaySources
 import com.workbuddy.quicklaunch.util.HolidayPrefs
+import com.workbuddy.quicklaunch.util.LiquidGlassHelper
 import com.workbuddy.quicklaunch.util.Scheduler
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -81,6 +82,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.recycler.layoutManager = LinearLayoutManager(this)
         binding.recycler.adapter = adapter
+        // 去除原生 OverScroll 阴影，改用 iOS 弹性回弹
+        binding.recycler.overScrollMode = View.OVER_SCROLL_NEVER
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, CreateAutomationActivity::class.java))
         }
@@ -97,12 +100,24 @@ class MainActivity : AppCompatActivity() {
         setupAntiSleep()
         checkPermissionsOnce()
 
+        // 初始化 iOS 26 毛玻璃效果
+        setupLiquidGlass()
+
         // 首次启动（本地无节假日数据）自动同步一次，便于「跳过节假日」立即生效。
         // count() 是磁盘 IO，放后台查，避免拖慢冷启动首帧。
         runIo {
             val empty = runCatching { db.holidayDao().count() == 0 }.getOrDefault(false)
             if (empty) postUi { syncHolidays() }
         }
+    }
+
+    /**
+     * 初始化 iOS 26 Liquid Glass 毛玻璃效果
+     * 为顶部操作卡片施加硬件级高斯模糊
+     */
+    private fun setupLiquidGlass() {
+        // 操作区卡片：轻微毛玻璃
+        LiquidGlassHelper.apply(binding.cardOperations)
     }
 
     /**

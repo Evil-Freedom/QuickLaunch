@@ -163,4 +163,39 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="text_hint">#666666</color>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         iOS 极质感毛玻璃 & 莫兰迪调色板（浅色模式）
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- 毛玻璃基色 -->
+    <color name="ios_glass_surface_light">#80FFFFFF</color>
+    <color name="ios_glass_search_light">#99FFFFFF</color>
+    <color name="ios_glass_dock_light">#75FFFFFF</color>
+    <color name="ios_glass_group_light">#B3FFFFFF</color>
+    <color name="ios_glass_border">#50FFFFFF</color>
+
+    <!-- 莫兰迪低饱和色板 -->
+    <color name="ios_morand_blush">#E8C4C4</color>
+    <color name="ios_morand_lavender">#C4B7D4</color>
+    <color name="ios_morand_mint">#B5D5C5</color>
+    <color name="ios_morand_sky">#B8D4E3</color>
+    <color name="ios_morand_sand">#D5C9B5</color>
+    <color name="ios_morand_peach">#E8CFC4</color>
+    <color name="ios_morand_rose">#D4B5B5</color>
+
+    <!-- 文字颜色 -->
+    <color name="ios_text_primary">#1C1C1E</color>
+    <color name="ios_text_secondary">#8E8E93</color>
+    <color name="ios_text_tertiary">#AEAEB2</color>
+
+    <!-- iOS 系统色（分段控制、开关等） -->
+    <color name="ios_blue">#007AFF</color>
+    <color name="ios_green">#34C759</color>
+    <color name="ios_orange">#FF9500</color>
+    <color name="ios_red">#FF3B30</color>
+    <color name="ios_purple">#AF52DE</color>
+    <color name="ios_pink">#FF2D55</color>
+    <color name="ios_teal">#5AC8FA</color>
+
 </resources>

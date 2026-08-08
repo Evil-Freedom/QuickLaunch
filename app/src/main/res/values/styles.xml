@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      iOS 极质感组件样式
+      包括：毛玻璃卡片、iOS 胶囊搜索栏、Squircle 图标、分组卡片
+    -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         毛玻璃容器样式
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- 通用毛玻璃卡片：24dp 圆角 + 半透明背景 + 微光描边 -->
+    <style name="Widget.QuickLaunch.Glass.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/ios_radius_lg</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/ios_glass_surface_light</item>
+        <item name="contentPadding">@dimen/ios_space_lg</item>
+        <item name="strokeColor">@color/ios_glass_border</item>
+        <item name="strokeWidth">@dimen/ios_border_hairline</item>
+        <item name="android:layout_marginHorizontal">@dimen/ios_space_lg</item>
+        <item name="android:layout_marginVertical">@dimen/ios_space_sm</item>
+    </style>
+
+    <!-- Dock 栏专用毛玻璃：更厚实的模糊底座 -->
+    <style name="Widget.QuickLaunch.Glass.Dock" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/ios_radius_xl</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/ios_glass_dock_light</item>
+        <item name="strokeColor">@color/ios_glass_border</item>
+        <item name="strokeWidth">@dimen/ios_border_hairline</item>
+        <item name="contentPadding">@dimen/ios_space_md</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         胶囊搜索栏样式
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <style name="Widget.QuickLaunch.Search.Pill" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/ios_radius_pill</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/ios_glass_search_light</item>
+        <item name="strokeColor">@color/ios_glass_border</item>
+        <item name="strokeWidth">@dimen/ios_border_hairline</item>
+        <item name="android:layout_margin">@dimen/ios_space_lg</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Squircle 超椭圆图标样式
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <style name="Widget.QuickLaunch.Icon.Squircle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">22%</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">@drawable/bg_icon_squircle</item>
+    </style>
+
+    <!-- Dock 栏图标：更大圆角 + 悬浮阴影 -->
+    <style name="Widget.QuickLaunch.Icon.Squircle.Dock" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24%</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:elevation">@dimen/ios_elevation_md</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         iOS 分组卡片样式（Inset Grouped）
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <style name="Widget.QuickLaunch.Group.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/ios_radius_lg</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/ios_glass_group_light</item>
+        <item name="contentPadding">0dp</item>
+        <item name="android:layout_marginHorizontal">@dimen/ios_space_lg</item>
+        <item name="android:layout_marginVertical">@dimen/ios_space_sm</item>
+        <item name="strokeColor">@color/ios_glass_border</item>
+        <item name="strokeWidth">@dimen/ios_border_hairline</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Group.Header" parent="">
+        <item name="android:textColor">@color/ios_text_secondary</item>
+        <item name="android:textSize">@dimen/ios_text_caption</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:paddingHorizontal">@dimen/ios_space_lg</item>
+        <item name="android:paddingTop">@dimen/ios_space_lg</item>
+        <item name="android:paddingBottom">@dimen/ios_space_xs</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         文字样式（纤细无衬线）
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <style name="TextAppearance.QuickLaunch.LargeTitle" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">@dimen/ios_text_large_title</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textColor">@color/ios_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">@dimen/ios_text_title</item>
+        <item name="android:textFontWeight">300</item>
+        <item name="android:textColor">@color/ios_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Subhead" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">@dimen/ios_text_subhead</item>
+        <item name="android:textColor">@color/ios_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">@dimen/ios_text_body</item>
+        <item name="android:textColor">@color/ios_text_primary</item>
+    </style>
+
+    <style name="TextAppearance.QuickLaunch.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">@dimen/ios_text_caption</item>
+        <item name="android:textColor">@color/ios_text_secondary</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         按钮样式
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <style name="Widget.QuickLaunch.Button.Pill" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/ios_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/ios_text_body</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:paddingHorizontal">@dimen/ios_space_xl</item>
+        <item name="android:paddingVertical">@dimen/ios_space_md</item>
+    </style>
+
+</resources>

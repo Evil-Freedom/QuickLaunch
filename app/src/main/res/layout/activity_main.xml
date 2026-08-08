@@ -1,66 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  iOS 26 Liquid Glass 主界面（保留原有业务逻辑）
+  - 顶部毛玻璃操作卡片：防息屏开关 + 数据源选择 + 同步按钮 + 管理按钮
+  - 中部弹性回滚列表：自动化规则
+  - 悬浮 FAB 按钮
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_ios26_wallpaper">
 
-    <!-- 标题栏：surfaceContainer 底色 + headlineSmall 字号 + 加粗，视觉与 M3 对齐 -->
-    <TextView
-        android:id="@+id/tvTitle"
+    <!-- 标题栏：iOS 毛玻璃悬浮卡片 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardTitle"
+        style="@style/Widget.QuickLaunch.Glass.Card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurfaceContainer"
-        android:paddingStart="16dp"
-        android:paddingTop="12dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="12dp"
-        android:text="@string/app_name"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall"
-        android:textStyle="bold"
+        android:layout_marginStart="@dimen/ios_space_lg"
+        android:layout_marginTop="@dimen/ios_space_3xl"
+        android:layout_marginEnd="@dimen/ios_space_lg"
+        app:cardBackgroundColor="@color/ios_glass_search_light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- 操作区：整组收纳进一张卡片，固定高度不随列表压缩 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/ios_space_lg"
+            android:paddingTop="@dimen/ios_space_lg"
+            android:paddingEnd="@dimen/ios_space_lg"
+            android:paddingBottom="@dimen/ios_space_md"
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.QuickLaunch.Title"
+            android:textStyle="bold" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 操作区：iOS 分组卡片 -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardOperations"
+        style="@style/Widget.QuickLaunch.Group.Card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        app:cardBackgroundColor="?attr/colorSurfaceContainer"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="1dp"
+        android:layout_marginStart="@dimen/ios_space_lg"
+        android:layout_marginTop="@dimen/ios_space_md"
+        android:layout_marginEnd="@dimen/ios_space_lg"
+        app:cardBackgroundColor="@color/ios_glass_group_light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+        app:layout_constraintTop_toBottomOf="@id/cardTitle">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
+            android:padding="@dimen/ios_space_sm">
 
+            <!-- 防外屏息屏开关行 -->
             <LinearLayout
                 android:id="@+id/layoutAntiSleep"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
+                android:paddingStart="@dimen/ios_space_lg"
+                android:paddingEnd="@dimen/ios_space_lg"
+                android:paddingTop="@dimen/ios_space_md"
+                android:paddingBottom="@dimen/ios_space_md">
 
                 <TextView
                     android:id="@+id/tvAntiSleep"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="防外屏息屏（需 root）"
-                    android:textSize="15sp" />
+                    android:text="防外屏息屏"
+                    android:textAppearance="@style/TextAppearance.QuickLaunch.Body" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/swAntiSleep"
@@ -69,63 +86,67 @@
                     android:enabled="false" />
             </LinearLayout>
 
+            <!-- iOS 风格分割线 -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="?attr/colorOutlineVariant" />
+                android:layout_height="@dimen/ios_border_hairline"
+                android:layout_marginStart="@dimen/ios_space_lg"
+                android:background="@color/ios_glass_border" />
 
+            <!-- 数据源选择行 -->
             <LinearLayout
                 android:id="@+id/layoutSource"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
+                android:paddingStart="@dimen/ios_space_lg"
+                android:paddingEnd="@dimen/ios_space_lg"
+                android:paddingTop="@dimen/ios_space_md"
+                android:paddingBottom="@dimen/ios_space_md">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="数据源"
-                    android:textSize="15sp" />
+                    android:textAppearance="@style/TextAppearance.QuickLaunch.Body" />
 
                 <Spinner
                     android:id="@+id/spinnerSource"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="@dimen/ios_space_sm"
                     android:layout_weight="1" />
             </LinearLayout>
 
+            <!-- 同步节假日按钮 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSyncHolidays"
+                style="@style/Widget.QuickLaunch.Button.Pill"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="16dp"
+                android:layout_height="@dimen/ios_button_height"
+                android:layout_marginStart="@dimen/ios_space_lg"
+                android:layout_marginTop="@dimen/ios_space_sm"
+                android:layout_marginEnd="@dimen/ios_space_lg"
                 android:text="同步法定节假日" />
 
+            <!-- 管理按钮组 -->
             <LinearLayout
                 android:id="@+id/layoutHolidayActions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
+                android:paddingStart="@dimen/ios_space_lg"
+                android:paddingEnd="@dimen/ios_space_lg"
+                android:paddingTop="@dimen/ios_space_sm"
+                android:paddingBottom="@dimen/ios_space_lg">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnManageHolidays"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:layout_height="@dimen/ios_button_height"
+                    android:layout_marginEnd="@dimen/ios_space_sm"
                     android:layout_weight="1"
                     android:text="手动管理节假日" />
 
@@ -133,15 +154,15 @@
                     android:id="@+id/btnManageSources"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_height="@dimen/ios_button_height"
+                    android:layout_marginStart="@dimen/ios_space_sm"
                     android:layout_weight="1"
                     android:text="管理数据源" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 空状态：图标 + 文案，与 recycler 同区域叠放（visible 互斥） -->
+    <!-- 空状态 -->
     <LinearLayout
         android:id="@+id/tvEmpty"
         android:layout_width="0dp"
@@ -157,44 +178,48 @@
 
         <ImageView
             android:id="@+id/ivEmptyIcon"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="@dimen/ios_icon_xl"
+            android:layout_height="@dimen/ios_icon_xl"
             android:contentDescription="@null"
             android:src="@drawable/ic_empty_state"
-            app:tint="?attr/colorOnSurfaceVariant" />
+            app:tint="@color/ios_text_tertiary" />
 
         <TextView
             android:id="@+id/tvEmptyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/ios_space_md"
             android:text="还没有自动化规则"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp" />
+            android:textAppearance="@style/TextAppearance.QuickLaunch.Caption" />
     </LinearLayout>
 
+    <!-- 列表：去除原生 OverScroll，改用 iOS 弹性 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/ios_space_md"
         android:clipToPadding="false"
-        android:paddingStart="8dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="88dp"
+        android:overScrollMode="never"
+        android:paddingStart="@dimen/ios_space_sm"
+        android:paddingEnd="@dimen/ios_space_sm"
+        android:paddingBottom="@dimen/ios_space_3xl"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardOperations" />
 
+    <!-- iOS 风格悬浮操作按钮 -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_width="@dimen/ios_fab_size"
+        android:layout_height="@dimen/ios_fab_size"
+        android:layout_margin="@dimen/ios_space_xl"
         android:contentDescription="新建"
+        android:src="@drawable/ic_add_ios"
+        app:backgroundTint="@color/ios_blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:tint="@color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

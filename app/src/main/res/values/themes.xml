@@ -171,4 +171,60 @@
         <item name="android:colorPrimary">@color/preset_mint_primary</item>
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
     </style>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         iOS 极质感主题（iOS18）—— 无边框沉浸式、毛玻璃、纤细字体
+         ════════════════════════════════════════════════════════════════ -->
+    <style name="Theme.QuickLaunch.iOS18" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 主色使用薄荷绿 -->
+        <item name="colorPrimary">@color/preset_mint_primary</item>
+        <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_mint_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_mint_secondary</item>
+        <item name="colorOnSecondary">@color/preset_mint_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_mint_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_mint_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_mint_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_mint_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_mint_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_mint_on_tertiary_container</item>
+        <item name="colorError">@color/preset_mint_error</item>
+        <item name="colorOnError">@color/preset_mint_on_error</item>
+        <item name="colorErrorContainer">@color/preset_mint_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_mint_on_error_container</item>
+
+        <!-- 背景透明（毛玻璃 View 自行绘制半透明背景） -->
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="colorOnBackground">@color/preset_mint_on_background</item>
+        <item name="colorSurface">@android:color/transparent</item>
+        <item name="colorOnSurface">@color/preset_mint_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_mint_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_mint_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_mint_outline</item>
+        <item name="colorOutlineVariant">@color/preset_mint_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@android:color/transparent</item>
+        <item name="colorSurfaceContainer">@android:color/transparent</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_mint_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_mint_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_mint_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_mint_inverse_primary</item>
+
+        <!-- 无边框沉浸式：窗口背景透明，View 自行消费 Insets -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+
+        <!-- 禁用系统强制暗色 -->
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+
+        <!-- 纤细无衬线字体 -->
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textAppearance">@style/TextAppearance.QuickLaunch.Body</item>
+    </style>
+
 </resources>
