@@ -142,10 +142,10 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 底部 spacer，避免被自定义毛玻璃底栏遮挡 -->
+        <!-- 底部留白：手势条已由 WindowInsets 消费，这里只留视觉呼吸 -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/car_bottom_nav_height" />
+            android:layout_height="@dimen/dark_scroll_bottom_gap" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

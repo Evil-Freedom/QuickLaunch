@@ -1,48 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  iOS 26 Liquid Glass 背景 — 三层叠加
-  第1层：底层模糊（运行时 RenderEffect 动态施加）
-  第2层：半透明遮罩（浅色 #CCFFFFFF / 夜间 #CC1C1C1E）
-  第3层：边缘折射高光（1px 顶部/底部渐变）
+  【已收编】原 iOS 26 Liquid Glass 亮白毛玻璃。
+  在纯暗色控制中心语境下，白色玻璃是本次「冷暖割裂」的主要来源之一
+  （节假日项、数据源项一整块发白）。这里统一降级为标准石墨卡片，
+  保留资源名以兼容历史引用。
 -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 第1层：半透明基底 -->
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/ios_glass_surface_light" />
-            <corners android:radius="@dimen/ios_radius_lg" />
-        </shape>
-    </item>
-
-    <!-- 第2层：顶部折射高光（模拟玻璃边缘光线折射） -->
-    <item
-        android:bottom="0dp"
-        android:end="0dp"
-        android:start="0dp"
-        android:top="0dp">
-        <shape android:shape="rectangle">
-            <gradient
-                android:angle="270"
-                android:endColor="#00FFFFFF"
-                android:startColor="#40FFFFFF"
-                android:type="linear" />
-            <corners android:radius="@dimen/ios_radius_lg" />
-        </shape>
-    </item>
-
-    <!-- 第3层：底部微光反射 -->
-    <item
-        android:bottom="0dp"
-        android:end="0dp"
-        android:start="0dp"
-        android:top="0dp">
-        <shape android:shape="rectangle">
-            <gradient
-                android:angle="90"
-                android:endColor="#00FFFFFF"
-                android:startColor="#15FFFFFF"
-                android:type="linear" />
-            <corners android:radius="@dimen/ios_radius_lg" />
-        </shape>
-    </item>
-</layer-list>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bg_card" />
+    <corners android:radius="@dimen/dark_radius_card" />
+    <stroke
+        android:width="@dimen/dark_stroke_width"
+        android:color="@color/stroke_hairline" />
+</shape>

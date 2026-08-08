@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  iOS 26 Liquid Glass 节假日项
-  - 毛玻璃背景
-  - 大圆角
-  - iOS 纤细文字
+  节假日项 —— 统一冷暗卡片（bg_liquid_glass 已收敛为石墨卡片）
+  - 日期单行不换行（15sp 粗体），杜绝日期过长被挤压成两行
+  - 紧凑内边距与间距，整行更紧致
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/ios_space_lg"
-    android:layout_marginVertical="@dimen/ios_space_sm"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="4dp"
     android:background="@drawable/bg_liquid_glass"
     android:gravity="center_vertical"
+    android:minHeight="48dp"
     android:orientation="horizontal"
-    android:padding="@dimen/ios_space_lg">
+    android:padding="12dp">
 
     <TextView
         android:id="@+id/tvDate"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:singleLine="true"
         android:textAppearance="@style/TextAppearance.QuickLaunch.Subhead"
+        android:textSize="15sp"
         android:textStyle="bold" />
 
     <TextView
@@ -28,14 +32,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:textAppearance="@style/TextAppearance.QuickLaunch.Body" />
 
     <Button
         android:id="@+id/btnDelete"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/ios_button_height"
-        android:minHeight="@dimen/ios_button_height"
-        android:text="删除" />
+        android:layout_height="36dp"
+        android:minHeight="36dp"
+        android:text="删除"
+        android:textSize="13sp" />
 
 </LinearLayout>

@@ -1,59 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- ═══════════════════════════════════════════════════════════════
-         车机质感暗色主题色板（Car Dashboard Dark）
-         深邃夜空暗蓝 → 纯黑渐变背景 + 深灰蓝立体卡片 + 微光描边
-         高亮色：#34C759（状态绿）/ #007AFF（苹果蓝）
+         统一冷暗色 Design Token（Car Control Center Dark）
+
+         唯一色源。所有 layout / drawable / style 只允许引用本文件的
+         语义色名，禁止硬编码色值。历史上「暖灰 #1C1E26 与冷灰 #252833
+         混用、蓝绿双强调色」的割裂在此彻底收口。
+
+           bg_root    #121212   纯暗底（全局背景，唯一根色）
+           bg_card    #212124   深石墨（一级卡片 / 容器）
+           bg_widget  #2A2A2E   中灰（输入框 / 悬浮 / 小选项）
+           stroke     #333338   1px 半透明感描边
+           accent     #34C759   苹果荧光绿（唯一强调色，禁止第二种绿）
+           text       #FFFFFF / #A1A1AA / #71717A
          ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- 根背景：深邃夜空暗蓝，与渐变底对齐 -->
-    <color name="dark_root">#0F111A</color>
-    <color name="dark_bg_primary">#0F111A</color>
+    <!-- ─────────── 背景层（三阶，仅此三阶） ─────────── -->
+    <color name="bg_root">#121212</color>
+    <color name="bg_card">#212124</color>
+    <color name="bg_widget">#2A2A2E</color>
+    <color name="stroke_hairline">#333338</color>
 
-    <!-- 一阶卡片背景：深色立体卡片 -->
-    <color name="dark_card_primary">#1C1E26</color>
-    <!-- 二阶容器/输入框背景 -->
-    <color name="dark_card_secondary">#252833</color>
-    <!-- 深色按钮/选项背景 -->
-    <color name="dark_button_bg">#252833</color>
-    <!-- 深色分割线 -->
-    <color name="dark_divider">#2C2E3A</color>
-    <!-- 微光描边 -->
-    <color name="dark_stroke">#333542</color>
-    <!-- 输入框/选择框背景 -->
-    <color name="dark_input_bg">@color/dark_card_secondary</color>
-    <!-- 搜索框背景 -->
-    <color name="dark_search_bg">#1F2129</color>
+    <!-- ─────────── 品牌强调（唯一绿） ─────────── -->
+    <color name="brand_accent">#34C759</color>
+    <color name="brand_accent_press">#2DB14E</color>
+    <!-- 强调色 12% 填充：选中态卡片底，避免整块实心绿刺眼 -->
+    <color name="brand_accent_surface">#1F34C759</color>
 
-    <!-- 主文字（纯白） -->
-    <color name="dark_text_primary">#FFFFFF</color>
-    <!-- 次要文字（浅灰） -->
-    <color name="dark_text_secondary">#A1A1AA</color>
-    <!-- 辅助文字（更暗） -->
-    <color name="dark_text_tertiary">#71717A</color>
-    <!-- 占位符/提示文字 -->
-    <color name="dark_text_hint">#4A4D5A</color>
+    <!-- ─────────── 文字（三级，仅此三级） ─────────── -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#A1A1AA</color>
+    <color name="text_tertiary">#71717A</color>
 
-    <!-- 品牌强调色：状态绿（电量进度、开启态） -->
-    <color name="dark_accent">#34C759</color>
-    <color name="dark_accent_green">#34C759</color>
-    <color name="dark_accent_press">#2DBD4E</color>
-    <!-- 苹果蓝（选中态、高亮） -->
-    <color name="dark_accent_blue">#007AFF</color>
+    <!-- ─────────── 语义色 ─────────── -->
+    <color name="destructive">#FF453A</color>
 
-    <!-- Switch 控件颜色 -->
-    <color name="dark_switch_thumb">#34C759</color>
-    <color name="dark_switch_track">#333542</color>
+    <!-- ═══════════════════════════════════════════════════════════════
+         兼容别名：老资源名全部收敛指向上方 Token，
+         保证既有布局零改动也能拿到统一后的新色。
+         ═══════════════════════════════════════════════════════════════ -->
+    <color name="dark_root">@color/bg_root</color>
+    <color name="dark_bg_primary">@color/bg_root</color>
+    <color name="dark_card_primary">@color/bg_card</color>
+    <color name="dark_card_secondary">@color/bg_widget</color>
+    <color name="dark_button_bg">@color/bg_widget</color>
+    <color name="dark_input_bg">@color/bg_widget</color>
+    <color name="dark_search_bg">@color/bg_widget</color>
+    <color name="dark_divider">@color/stroke_hairline</color>
+    <color name="dark_stroke">@color/stroke_hairline</color>
 
-    <!-- 危险/删除 -->
-    <color name="dark_destructive">#FF453A</color>
+    <color name="dark_text_primary">@color/text_primary</color>
+    <color name="dark_text_secondary">@color/text_secondary</color>
+    <color name="dark_text_tertiary">@color/text_tertiary</color>
+    <color name="dark_text_hint">@color/text_tertiary</color>
 
-    <!-- 底部导航毛玻璃背景：带透明度的深色 -->
-    <color name="car_bottom_nav_bg">#C0121212</color>
-    <!-- 底栏上沿微光 -->
-    <color name="car_bottom_nav_stroke">#333542</color>
+    <color name="dark_accent">@color/brand_accent</color>
+    <color name="dark_accent_green">@color/brand_accent</color>
+    <color name="dark_accent_press">@color/brand_accent_press</color>
 
-    <!-- 白色/黑色 -->
+    <color name="dark_switch_thumb">@color/brand_accent</color>
+    <color name="dark_switch_track">@color/stroke_hairline</color>
+    <color name="dark_destructive">@color/destructive</color>
+
+    <!-- 白色/黑色（仅供系统控件兜底，业务禁用） -->
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
 

@@ -3,7 +3,7 @@
     <!-- 主体：深色半透明毛玻璃感 -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/car_bottom_nav_bg" />
+            <solid android:color="@color/bg_card" />
             <corners
                 android:topLeftRadius="24dp"
                 android:topRightRadius="24dp" />
@@ -18,7 +18,7 @@
         <shape android:shape="rectangle">
             <stroke
                 android:width="1px"
-                android:color="@color/car_bottom_nav_stroke" />
+                android:color="@color/stroke_hairline" />
             <corners
                 android:topLeftRadius="24dp"
                 android:topRightRadius="24dp" />

@@ -205,9 +205,28 @@
         <item name="colorOnSurfaceInverse">@color/dark_bg_primary</item>
         <item name="colorPrimaryInverse">@color/dark_accent_green</item>
 
-        <!-- 窗口背景：OLED 纯黑 -->
-        <item name="android:windowBackground">@color/dark_bg_primary</item>
+        <!-- 窗口背景：统一 bg_root #121212，冷启动瞬间就是最终底色，无跳色 -->
+        <item name="android:windowBackground">@color/bg_root</item>
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+
+        <!-- ═══════════════ Edge-to-Edge 沉浸式 ═══════════════
+             状态栏 / 导航栏全透明，窗口自绘系统栏背景，内容延伸到屏幕物理边缘。
+             系统栏留白由 Activity 消费 WindowInsets 施加 padding，不靠主题色块顶。
+             注意：网上常写的 windowDrawsSystemBarOverlays 并不存在，
+             真实属性名是 android:windowDrawsSystemBarBackgrounds。 -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarDividerColor" tools:targetApi="28">@android:color/transparent</item>
+        <!-- 暗底 → 系统图标必须是浅色 -->
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <!-- 关闭系统自动补的半透明对比遮罩，否则底部会出现一条灰带，
+             正是「底部导航栏硬边割裂感」的元凶 -->
+        <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+        <!-- 挖孔屏延伸绘制；cutout 留白同样由 Insets 消费 -->
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="27">shortEdges</item>
 
         <!-- 纤细无衬线字体 -->
         <item name="android:fontFamily">sans-serif-light</item>
@@ -287,7 +306,9 @@
         <!-- 全遮罩渐变背景，彻底盖住下方页面，消除半屏悬浮的割裂感 -->
         <item name="android:windowBackground">@drawable/bg_dialog_scrim</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/dark_bg_primary</item>
+        <!-- 与主题保持一致：抽屉弹出时导航栏也保持全透明，不再出现硬边灰带 -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
     </style>
 
     <style name="DarkBottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">

@@ -50,17 +50,24 @@
     <dimen name="ios_elevation_high">8dp</dimen>
 
     <!--
-      暗黑极简胶囊 UI 设计 Token（Dark Minimalist Capsule UI）
-      原则：所有暗黑布局统一引用这些变量，禁止硬编码颜色/圆角。
+      统一形状 Token（Car Control Center Dark）
+      原则：所有布局统一引用这些变量，禁止硬编码颜色/圆角。
+
+        大卡片 / 容器      20dp
+        按钮 / 输入框 / 小选项 / 抽屉   28dp 胶囊
+        应用图标           14dp iOS Squircle
     -->
-    <!-- 圆角：大卡片 20dp（车机风） / 按钮、输入框、选择框、弹窗抽屉 28dp -->
     <dimen name="dark_radius_card">20dp</dimen>
     <dimen name="dark_radius_pill">28dp</dimen>
+    <dimen name="dark_radius_icon">14dp</dimen>
 
-    <!-- 车机底栏 -->
-    <dimen name="car_bottom_nav_height">56dp</dimen>
-    <dimen name="car_bottom_nav_margin">12dp</dimen>
-    <dimen name="car_nav_item_glow">44dp</dimen>
+    <!-- 顶部 Header Segment 分段控件 -->
+    <dimen name="dark_segment_height">40dp</dimen>
+    <dimen name="dark_segment_inset">4dp</dimen>
+    <dimen name="dark_header_padding_vertical">10dp</dimen>
+
+    <!-- 滚动内容底部留白：手势条已由 Insets 消费，这里只留视觉呼吸 -->
+    <dimen name="dark_scroll_bottom_gap">24dp</dimen>
     <!-- 描边 -->
     <dimen name="dark_stroke_width">1px</dimen>
     <!-- 组件高度 -->

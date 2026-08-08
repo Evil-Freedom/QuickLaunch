@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <gradient
-        android:type="linear"
-        android:angle="270"
-        android:startColor="#0F111A"
-        android:endColor="#14161F" />
+    <!-- 统一纯暗底：取消暗蓝渐变，杜绝与石墨灰卡片之间的冷暖割裂 -->
+    <solid android:color="@color/bg_root" />
 </shape>

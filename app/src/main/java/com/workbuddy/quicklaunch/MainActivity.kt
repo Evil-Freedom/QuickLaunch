@@ -12,11 +12,10 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
-import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -30,6 +29,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.workbuddy.quicklaunch.data.AppDatabase
@@ -64,17 +64,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var db: AppDatabase
 
-    // ---------- Tab 容器 ----------
+    // ---------- Tab 容器（独立 inflate 后注入 ViewPager2，见 setupViewPager） ----------
     private lateinit var launchBinding: ViewLaunchBinding
     private lateinit var syncBinding: ViewSyncBinding
-
-    // ---------- 自定义毛玻璃底栏 ----------
-    private lateinit var navLaunch: View
-    private lateinit var navSync: View
-    private lateinit var ivNavLaunch: ImageView
-    private lateinit var ivNavSync: ImageView
-    private lateinit var tvNavLaunch: TextView
-    private lateinit var tvNavSync: TextView
 
     // ---------- 规则列表 ----------
     private lateinit var rvRules: RecyclerView
@@ -109,7 +101,6 @@ class MainActivity : AppCompatActivity() {
 
     private var selectedPackage: String? = null
     private var selectedAppName: String? = null
-    private var selectedTab = TAB_LAUNCH
     private var hour = 8
     private var minute = 0
     private var randomWindow = false
@@ -156,8 +147,9 @@ class MainActivity : AppCompatActivity() {
         db = AppDatabase.get(this)
         WifiReceiver.register(this)
 
-        bindContainers()
-        setupBottomNav()
+        launchBinding = ViewLaunchBinding.inflate(layoutInflater)
+        syncBinding = ViewSyncBinding.inflate(layoutInflater)
+        setupViewPager()
         setupLaunchTab()
         setupSyncTab()
         setupAntiSleep() // 必须在 setupSyncTab 之后，因需引用 swAntiSleep / tvAntiSleep
@@ -184,58 +176,61 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    // Tab 容器
+    // 顶部 Segment + ViewPager2（取代原底部 BottomNavigationView）
+    // 不复用原 launchContainer / syncContainer（已从 activity_main 移除），
+    // 直接 inflate 两份独立页面注入 ViewPager2；launchBinding / syncBinding
+    // 上的全部表单、列表、开关逻辑零改动。
     // ═══════════════════════════════════════════════════════════════════
 
-    private fun bindContainers() {
-        launchBinding = binding.launchContainer
-        syncBinding = binding.syncContainer
-
-        navLaunch = binding.navLaunch
-        navSync = binding.navSync
-        ivNavLaunch = binding.ivNavLaunch
-        ivNavSync = binding.ivNavSync
-        tvNavLaunch = binding.tvNavLaunch
-        tvNavSync = binding.tvNavSync
-    }
-
-    private fun setupBottomNav() {
-        navLaunch.setOnClickListener { selectTab(TAB_LAUNCH) }
-        navSync.setOnClickListener { selectTab(TAB_SYNC) }
-        selectTab(TAB_LAUNCH)
-    }
-
-    private fun selectTab(tab: Int) {
-        selectedTab = tab
-        when (tab) {
-            TAB_LAUNCH -> {
-                launchBinding.root.visibility = View.VISIBLE
-                syncBinding.root.visibility = View.GONE
-                ivNavLaunch.setBackgroundResource(R.drawable.bg_nav_item_selected)
-                ivNavLaunch.setColorFilter(resources.getColor(R.color.dark_accent_blue, null))
-                tvNavLaunch.setTextColor(resources.getColor(R.color.dark_accent_blue, null))
-                ivNavSync.background = null
-                ivNavSync.setColorFilter(resources.getColor(R.color.dark_text_secondary, null))
-                tvNavSync.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
-                refreshRules()
+    private fun setupViewPager() {
+        val pages = listOf(launchBinding.root, syncBinding.root)
+        binding.viewPager.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+            private val items = pages
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                val v = items[viewType]
+                v.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                return object : RecyclerView.ViewHolder(v) {}
             }
-            TAB_SYNC -> {
-                launchBinding.root.visibility = View.GONE
-                syncBinding.root.visibility = View.VISIBLE
-                ivNavLaunch.background = null
-                ivNavLaunch.setColorFilter(resources.getColor(R.color.dark_text_secondary, null))
-                tvNavLaunch.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
-                ivNavSync.setBackgroundResource(R.drawable.bg_nav_item_selected)
-                ivNavSync.setColorFilter(resources.getColor(R.color.dark_accent_blue, null))
-                tvNavSync.setTextColor(resources.getColor(R.color.dark_accent_blue, null))
-                setupSourceSpinner()
-                syncAntiSleepUi()
-            }
+            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {}
+            override fun getItemCount(): Int = items.size
+            override fun getItemViewType(position: Int): Int = position
         }
+        setupSegment()
     }
 
-    private fun showLaunch() = selectTab(TAB_LAUNCH)
-    private fun showSync() = selectTab(TAB_SYNC)
+    private fun setupSegment() {
+        binding.segLaunch.setOnClickListener { binding.viewPager.currentItem = TAB_LAUNCH }
+        binding.segSync.setOnClickListener { binding.viewPager.currentItem = TAB_SYNC }
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                applySegmentStyle(binding.segLaunch, position == TAB_LAUNCH)
+                applySegmentStyle(binding.segSync, position == TAB_SYNC)
+                if (position == TAB_SYNC) {
+                    setupSourceSpinner()
+                    syncAntiSleepUi()
+                } else {
+                    refreshRules()
+                }
+            }
+        })
+        applySegmentStyle(binding.segLaunch, true)
+        applySegmentStyle(binding.segSync, false)
+    }
+
+    private fun applySegmentStyle(tv: TextView, selected: Boolean) {
+        tv.setBackgroundResource(
+            if (selected) R.drawable.bg_segment_selected else R.drawable.bg_segment_unselected
+        )
+        tv.setTextColor(
+            resources.getColor(
+                if (selected) R.color.bg_root else R.color.text_secondary, null
+            )
+        )
+        tv.setTypeface(null, if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     // Tab 1：快捷启动（创建表单 + 规则列表）

@@ -190,11 +190,31 @@
         <item name="android:letterSpacing">0.05</item>
     </style>
 
-    <!-- 底部导航标签：10sp 小字，与 20dp 图标组成紧凑 Tab -->
-    <style name="TextAppearance.QuickLaunch.BottomNav" parent="TextAppearance.Material3.LabelSmall">
-        <item name="android:textSize">10sp</item>
-        <item name="android:textColor">@color/dark_text_secondary</item>
-        <item name="android:letterSpacing">0.02</item>
+    <!-- ═══════════════════════════════════════════════════════════════
+         顶部 Header Segment 分段控件
+         取代原底部 BottomNavigationView（蓝色圆圈 + 笨重底坞）。
+         选中 = 强调绿实心胶囊 + 纯暗字；未选中 = 透明 + 次级灰字。
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="Widget.QuickLaunch.Dark.Segment" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/bg_segment_unselected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Dark.Segment.Selected" parent="Widget.QuickLaunch.Dark.Segment">
+        <item name="android:background">@drawable/bg_segment_selected</item>
+        <item name="android:textColor">@color/bg_root</item>
+        <item name="android:textFontWeight">600</item>
     </style>
 
     <!-- 兼容旧代码的文字样式引用 -->
@@ -251,16 +271,18 @@
         <item name="cardBackgroundColor">@color/dark_card_primary</item>
     </style>
 
-    <style name="Widget.QuickLaunch.Icon.Squircle" parent="">
-        <item name="android:layout_width">56dp</item>
-        <item name="android:layout_height">56dp</item>
-        <item name="android:background">@drawable/bg_icon_squircle</item>
+    <!-- 应用图标 14dp iOS Squircle。
+         注意：这两个 style 是给 ShapeableImageView 的 app:shapeAppearanceOverlay 用的，
+         之前误写成 layout_width/height/background 的布局 style，导致图标实际
+         一点圆角都没吃到、渲染成硬方块。这里改回正确的 ShapeAppearance。 -->
+    <style name="Widget.QuickLaunch.Icon.Squircle" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/dark_radius_icon</item>
     </style>
 
-    <style name="Widget.QuickLaunch.Icon.Squircle.Dock" parent="">
-        <item name="android:layout_width">48dp</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:background">@drawable/bg_icon_squircle</item>
+    <style name="Widget.QuickLaunch.Icon.Squircle.Dock" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/dark_radius_icon</item>
     </style>
 
     <!-- ═══════════════════════════════════════════════════════════════
