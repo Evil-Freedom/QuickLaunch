@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Tab 2：同步源
+  Tab 2：同步源（Oreo 大胶囊紧凑版）
   - 法定节假日同步、数据源选择、手动管理、自定义源管理
-  - 纯 OLED 暗黑 + 胶囊卡片
+  - 所有卡片统一 28dp 大胶囊圆角 + 1px 半透明白描边 + 压缩 padding
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -16,14 +16,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp">
 
         <!-- 页面标题 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
             android:fontFamily="sans-serif-light"
             android:text="同步源"
             android:textColor="@color/dark_text_primary"
@@ -36,7 +36,7 @@
             android:background="@drawable/bg_dark_card_primary"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="16dp">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/tvAntiSleep"
@@ -61,10 +61,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_dark_card_primary"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="12dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -80,7 +80,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -106,8 +106,8 @@
                 android:id="@+id/btnSyncHolidays"
                 style="@style/Widget.QuickLaunch.Dark.Button.Primary"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginTop="12dp"
+                android:layout_height="@dimen/dark_button_height"
+                android:layout_marginTop="10dp"
                 android:text="同步法定节假日" />
 
             <!-- 管理按钮组 -->
@@ -121,7 +121,7 @@
                     android:id="@+id/btnManageHolidays"
                     style="@style/Widget.QuickLaunch.Dark.Button.Action"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="@dimen/dark_button_height"
                     android:layout_marginBottom="8dp"
                     android:ellipsize="end"
                     android:maxLines="1"
@@ -133,7 +133,7 @@
                     android:id="@+id/btnManageSources"
                     style="@style/Widget.QuickLaunch.Dark.Button.Action"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="@dimen/dark_button_height"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:paddingHorizontal="16dp"
@@ -142,7 +142,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 底部留白：手势条已由 WindowInsets 消费，这里只留视觉呼吸 -->
+        <!-- 底部留白：避让悬浮底栏 + 系统手势条 -->
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/dark_scroll_bottom_gap" />

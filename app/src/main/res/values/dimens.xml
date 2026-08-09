@@ -53,32 +53,33 @@
       统一形状 Token（Car Control Center Dark）
       原则：所有布局统一引用这些变量，禁止硬编码颜色/圆角。
 
-        大卡片 / 容器      20dp
-        按钮 / 输入框 / 小选项 / 抽屉   28dp 胶囊
+        大卡片 / 容器      28dp  Oreo 大胶囊
+        按钮 / 输入框 / 小选项 / 抽屉   32dp 大胶囊
         应用图标           14dp iOS Squircle
     -->
-    <dimen name="dark_radius_card">20dp</dimen>
-    <dimen name="dark_radius_pill">28dp</dimen>
+    <dimen name="dark_radius_card">28dp</dimen>
+    <dimen name="dark_radius_pill">32dp</dimen>
     <dimen name="dark_radius_icon">14dp</dimen>
 
-    <!-- 顶部 Header Segment 分段控件 -->
-    <dimen name="dark_segment_height">40dp</dimen>
-    <dimen name="dark_segment_inset">4dp</dimen>
-    <dimen name="dark_header_padding_vertical">10dp</dimen>
+    <!-- iOS 风格悬浮毛玻璃底栏 -->
+    <dimen name="dark_floating_bar_height">64dp</dimen>
+    <dimen name="dark_floating_bar_margin">16dp</dimen>
+    <dimen name="dark_floating_bar_radius">32dp</dimen>
+    <dimen name="dark_floating_bar_item_icon">24dp</dimen>
 
-    <!-- 滚动内容底部留白：手势条已由 Insets 消费，这里只留视觉呼吸 -->
-    <dimen name="dark_scroll_bottom_gap">24dp</dimen>
     <!-- 描边 -->
     <dimen name="dark_stroke_width">1px</dimen>
     <!-- 组件高度 -->
-    <dimen name="dark_button_height">44dp</dimen>
-    <dimen name="dark_input_height">44dp</dimen>
-    <dimen name="dark_chip_height">36dp</dimen>
-    <!-- 间距 -->
+    <dimen name="dark_button_height">48dp</dimen>
+    <dimen name="dark_input_height">48dp</dimen>
+    <dimen name="dark_chip_height">34dp</dimen>
+    <!-- 间距（整体压缩 30% 左右，让界面更紧致） -->
     <dimen name="dark_card_margin_horizontal">16dp</dimen>
-    <dimen name="dark_card_margin_vertical">8dp</dimen>
-    <dimen name="dark_card_padding">16dp</dimen>
-    <dimen name="dark_section_gap">12dp</dimen>
+    <dimen name="dark_card_margin_vertical">6dp</dimen>
+    <dimen name="dark_card_padding">12dp</dimen>
+    <dimen name="dark_section_gap">10dp</dimen>
+    <!-- 滚动内容底部留白：避让悬浮底栏 + 系统手势条 -->
+    <dimen name="dark_scroll_bottom_gap">80dp</dimen>
 
     <!-- iOS 3D 滚轮时间选择器 -->
     <dimen name="wheel_item_height">48dp</dimen>

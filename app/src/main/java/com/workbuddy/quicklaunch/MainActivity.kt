@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -67,6 +68,16 @@ class MainActivity : AppCompatActivity() {
     // ---------- Tab 容器（独立 inflate 后注入 ViewPager2，见 setupViewPager） ----------
     private lateinit var launchBinding: ViewLaunchBinding
     private lateinit var syncBinding: ViewSyncBinding
+
+    // ---------- 底部悬浮导航 ----------
+    private lateinit var bottomNavLaunch: View
+    private lateinit var bottomNavSync: View
+    private lateinit var ivNavLaunch: ImageView
+    private lateinit var ivNavSync: ImageView
+    private lateinit var tvNavLaunch: TextView
+    private lateinit var tvNavSync: TextView
+    private lateinit var indicatorLaunch: View
+    private lateinit var indicatorSync: View
 
     // ---------- 规则列表 ----------
     private lateinit var rvRules: RecyclerView
@@ -176,7 +187,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    // 顶部 Segment + ViewPager2（取代原底部 BottomNavigationView）
+    // 底部悬浮毛玻璃底栏 + ViewPager2
     // 不复用原 launchContainer / syncContainer（已从 activity_main 移除），
     // 直接 inflate 两份独立页面注入 ViewPager2；launchBinding / syncBinding
     // 上的全部表单、列表、开关逻辑零改动。
@@ -198,16 +209,24 @@ class MainActivity : AppCompatActivity() {
             override fun getItemCount(): Int = items.size
             override fun getItemViewType(position: Int): Int = position
         }
-        setupSegment()
+        setupFloatingBottomBar()
     }
 
-    private fun setupSegment() {
-        binding.segLaunch.setOnClickListener { binding.viewPager.currentItem = TAB_LAUNCH }
-        binding.segSync.setOnClickListener { binding.viewPager.currentItem = TAB_SYNC }
+    private fun setupFloatingBottomBar() {
+        bottomNavLaunch = binding.bottomNavLaunch
+        bottomNavSync = binding.bottomNavSync
+        ivNavLaunch = binding.ivNavLaunch
+        ivNavSync = binding.ivNavSync
+        tvNavLaunch = binding.tvNavLaunch
+        tvNavSync = binding.tvNavSync
+        indicatorLaunch = binding.indicatorLaunch
+        indicatorSync = binding.indicatorSync
+
+        bottomNavLaunch.setOnClickListener { binding.viewPager.currentItem = TAB_LAUNCH }
+        bottomNavSync.setOnClickListener { binding.viewPager.currentItem = TAB_SYNC }
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                applySegmentStyle(binding.segLaunch, position == TAB_LAUNCH)
-                applySegmentStyle(binding.segSync, position == TAB_SYNC)
+                applyBottomNavStyle(position == TAB_LAUNCH)
                 if (position == TAB_SYNC) {
                     setupSourceSpinner()
                     syncAntiSleepUi()
@@ -216,20 +235,20 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-        applySegmentStyle(binding.segLaunch, true)
-        applySegmentStyle(binding.segSync, false)
+        applyBottomNavStyle(true)
     }
 
-    private fun applySegmentStyle(tv: TextView, selected: Boolean) {
-        tv.setBackgroundResource(
-            if (selected) R.drawable.bg_segment_selected else R.drawable.bg_segment_unselected
-        )
-        tv.setTextColor(
-            resources.getColor(
-                if (selected) R.color.bg_root else R.color.text_secondary, null
-            )
-        )
-        tv.setTypeface(null, if (selected) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+    private fun applyBottomNavStyle(isLaunch: Boolean) {
+        val accent = resources.getColor(R.color.brand_accent, null)
+        val secondary = resources.getColor(R.color.text_secondary, null)
+
+        ivNavLaunch.setColorFilter(if (isLaunch) accent else secondary)
+        tvNavLaunch.setTextColor(if (isLaunch) accent else secondary)
+        indicatorLaunch.visibility = if (isLaunch) View.VISIBLE else View.INVISIBLE
+
+        ivNavSync.setColorFilter(if (isLaunch) secondary else accent)
+        tvNavSync.setTextColor(if (isLaunch) secondary else accent)
+        indicatorSync.visibility = if (isLaunch) View.INVISIBLE else View.VISIBLE
     }
 
     // ═══════════════════════════════════════════════════════════════════

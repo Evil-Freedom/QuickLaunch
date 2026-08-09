@@ -15,7 +15,7 @@
         <item name="contentPadding">@dimen/dark_card_padding</item>
         <item name="android:layout_marginHorizontal">@dimen/dark_card_margin_horizontal</item>
         <item name="android:layout_marginVertical">@dimen/dark_card_margin_vertical</item>
-        <item name="strokeColor">@color/dark_stroke</item>
+        <item name="strokeColor">@color/stroke_glass</item>
         <item name="strokeWidth">@dimen/dark_stroke_width</item>
     </style>
 
@@ -120,13 +120,13 @@
     <style name="Widget.QuickLaunch.Dark.GridChip" parent="">
         <item name="android:background">@drawable/bg_trigger_grid_item</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">8dp</item>
         <item name="android:textColor">@color/dark_text_secondary</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:drawableTint">@color/dark_text_secondary</item>
-        <item name="android:drawablePadding">10dp</item>
+        <item name="android:drawablePadding">8dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
@@ -134,13 +134,13 @@
     <style name="Widget.QuickLaunch.Dark.GridChip.Selected" parent="">
         <item name="android:background">@drawable/bg_trigger_grid_item_selected</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">8dp</item>
         <item name="android:textColor">@color/dark_accent_green</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:drawableTint">@color/dark_accent_green</item>
-        <item name="android:drawablePadding">10dp</item>
+        <item name="android:drawablePadding">8dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
@@ -215,6 +215,30 @@
         <item name="android:background">@drawable/bg_segment_selected</item>
         <item name="android:textColor">@color/bg_root</item>
         <item name="android:textFontWeight">600</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         底部悬浮毛玻璃底栏（Floating Bottom Bar）
+         取代顶部 Segment，iOS 风格双项导航。
+         ═══════════════════════════════════════════════════════════════════ -->
+    <style name="Widget.QuickLaunch.Dark.BottomNav.Item" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.QuickLaunch.Dark.BottomNav.Text" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <!-- 兼容旧代码的文字样式引用 -->

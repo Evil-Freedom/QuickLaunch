@@ -5,5 +5,5 @@
     <corners android:radius="@dimen/dark_radius_card" />
     <stroke
         android:width="@dimen/dark_stroke_width"
-        android:color="@color/stroke_hairline" />
+        android:color="@color/stroke_glass" />
 </shape>

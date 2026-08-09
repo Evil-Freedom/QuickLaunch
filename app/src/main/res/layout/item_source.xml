@@ -13,7 +13,7 @@
     android:background="@drawable/bg_liquid_glass"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="@dimen/ios_space_lg">
+    android:padding="12dp">
 
     <LinearLayout
         android:layout_width="0dp"

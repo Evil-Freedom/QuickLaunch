@@ -20,6 +20,8 @@
     <color name="bg_card">#212124</color>
     <color name="bg_widget">#2A2A2E</color>
     <color name="stroke_hairline">#333338</color>
+    <color name="stroke_glass">#10FFFFFF</color>
+    <color name="bg_floating_bar">#C0121212</color>
 
     <!-- ─────────── 品牌强调（唯一绿） ─────────── -->
     <color name="brand_accent">#34C759</color>
