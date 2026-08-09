@@ -34,8 +34,9 @@
             android:textColor="@color/text_white"
             android:textSize="28sp" />
 
-        <!-- 仪表盘：双栏大卡片（高密度瘦身） -->
+        <!-- 仪表盘：双栏大卡片（高密度瘦身 + Glassmorphism） -->
         <LinearLayout
+            android:id="@+id/layoutDashboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card_dark"
@@ -391,7 +392,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:buttonTint="@color/text_white"
+                android:button="@drawable/cb_glass"
                 android:fontFamily="sans-serif-light"
                 android:text="跳过中国法定节假日（含调休休息日）不触发"
                 android:textColor="@color/text_white"
@@ -403,7 +404,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:buttonTint="@color/text_white"
+                android:button="@drawable/cb_glass"
                 android:fontFamily="sans-serif-light"
                 android:text="随机时间（在窗口内，避免每天固定打卡）"
                 android:textColor="@color/text_white"

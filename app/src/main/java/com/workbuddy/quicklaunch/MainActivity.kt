@@ -46,6 +46,7 @@ import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.AppListLoader
 import com.workbuddy.quicklaunch.util.AppPickerBottomSheet
 import com.workbuddy.quicklaunch.util.DarkWheelTimePicker
+import com.workbuddy.quicklaunch.util.GlassBlurHelper
 import com.workbuddy.quicklaunch.util.HolidayPrefs
 import com.workbuddy.quicklaunch.util.HolidaySources
 import com.workbuddy.quicklaunch.util.HolidaySync
@@ -84,6 +85,7 @@ class MainActivity : AppCompatActivity() {
     private val ruleAdapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
 
     // ---------- 仪表盘 ----------
+    private lateinit var layoutDashboard: View
     private lateinit var tvDashboardEnabled: TextView
     private lateinit var tvDashboardNext: TextView
 
@@ -131,6 +133,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnManageHolidays: MaterialButton
     private lateinit var btnManageSources: MaterialButton
     private var sourceIds: List<String> = emptyList()
+
+    // ---------- 同步源页面卡片 ----------
+    private lateinit var layoutAntiSleep: View
+    private lateinit var layoutHolidayCard: View
 
     // ---------- 防息屏 ----------
     private lateinit var tvAntiSleep: TextView
@@ -238,6 +244,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
         applyBottomNavStyle(true)
+
+        // Glassmorphism：底部悬浮 Tab 药丸模糊
+        GlassBlurHelper.apply(bottomNavLaunch, 24f)
+        GlassBlurHelper.apply(bottomNavSync, 20f)
     }
 
     private fun applyBottomNavStyle(isLaunch: Boolean) {
@@ -265,6 +275,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupLaunchTab() {
         // 仪表盘
+        layoutDashboard = launchBinding.layoutDashboard
         tvDashboardEnabled = launchBinding.tvDashboardEnabled
         tvDashboardNext = launchBinding.tvDashboardNext
 
@@ -346,6 +357,18 @@ class MainActivity : AppCompatActivity() {
         updateWindowLabels()
         updateTriggerUi()
         refreshRules()
+
+        // Glassmorphism：为关键组件绑定毛玻璃模糊（API 31+，低版本自动降级为纯色）
+        GlassBlurHelper.apply(layoutDashboard, 18f)
+        GlassBlurHelper.apply(layoutTime, 18f)
+        GlassBlurHelper.apply(layoutBt, 18f)
+        GlassBlurHelper.apply(layoutRulesEmpty, 18f)
+        GlassBlurHelper.apply(btnTime, 24f)
+        GlassBlurHelper.apply(btnWinStart, 24f)
+        GlassBlurHelper.apply(btnWinEnd, 24f)
+        GlassBlurHelper.applyAll(triggerChips, 24f)
+        GlassBlurHelper.applyAll(repeatChips, 24f)
+        GlassBlurHelper.applyAll(dayViews, 20f)
     }
 
     private fun setupTriggerChips() {
@@ -731,6 +754,8 @@ class MainActivity : AppCompatActivity() {
         btnManageSources = syncBinding.btnManageSources
         tvAntiSleep = syncBinding.tvAntiSleep
         swAntiSleep = syncBinding.swAntiSleep
+        layoutAntiSleep = syncBinding.layoutAntiSleep
+        layoutHolidayCard = syncBinding.layoutHolidayCard
 
         btnSyncHolidays.setOnClickListener { syncHolidays() }
         btnManageHolidays.setOnClickListener {
@@ -740,6 +765,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SourceManageActivity::class.java))
         }
         setupSourceSpinner()
+
+        // Glassmorphism：同步源页面卡片模糊
+        GlassBlurHelper.apply(layoutAntiSleep, 18f)
+        GlassBlurHelper.apply(layoutHolidayCard, 18f)
     }
 
     private fun setupSourceSpinner() {

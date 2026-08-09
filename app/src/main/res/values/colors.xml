@@ -1,80 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- ═══════════════════════════════════════════════════════════════
-         纯白 + 半透灰白磨砂玻璃 Design Token
+         全页面 Glassmorphism 毛玻璃拟态 Design Token
 
-         严格使用 8 位 ARGB 透明度色值，禁止实色。
-           bg_root        #0F0F0F   纯极暗黑页面背景
-           btn_primary    #FFFFFF / #222222   主按钮白底黑字
-           item_active    #24FFFFFF + #38FFFFFF 描边   选中磨砂
-           item_inactive  #14FFFFFF              未选中暗卡片
-           card_dark      #12FFFFFF              统计/输入卡片
-           text_white     #FFFFFF
-           text_secondary #CCCCCC
+         严格使用 8 位 ARGB 透明度色值，禁止实色（主按钮除外）。
+           glass_bg_root        #0C0C0C   纯深暗黑页面背景
+           glass_btn_primary    #FFFFFF / #1A1A1A   主按钮纯白实色
+           glass_active         #1FFFFFFF + #33FFFFFF 描边   选中磨砂
+           glass_inactive       #0FFFFFFF              未选中暗卡片
+           glass_card           #0DFFFFFF              数据卡片
+           glass_checkbox_stroke #38FFFFFF             复选框边框
      ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- 1. 页面主背景 -->
-    <color name="bg_root">#0F0F0F</color>
+    <!-- 1. 全局背景底色 -->
+    <color name="glass_bg_root">#0C0C0C</color>
 
-    <!-- 2. 主按钮 -->
-    <color name="btn_primary_bg">#FFFFFF</color>
-    <color name="btn_primary_text">#222222</color>
+    <!-- 2. 主按钮：纯白实色，最高视觉层级 -->
+    <color name="glass_btn_primary_bg">#FFFFFF</color>
+    <color name="glass_btn_primary_text">#1A1A1A</color>
 
-    <!-- 3. 选中态卡片 / Tab -->
-    <color name="item_active_bg">#24FFFFFF</color>
-    <color name="item_active_stroke">#38FFFFFF</color>
-    <color name="item_active_text">#FFFFFF</color>
+    <!-- 3. 选中组件 / 底部 Tab 选中 / 时间气泡 -->
+    <color name="glass_active_bg">#1FFFFFFF</color>
+    <color name="glass_active_stroke">#33FFFFFF</color>
+    <color name="glass_active_text">#FFFFFF</color>
 
-    <!-- 4. 未选中态卡片 / Tab -->
-    <color name="item_inactive_bg">#14FFFFFF</color>
-    <color name="item_inactive_text">#CCCCCC</color>
+    <!-- 4. 未选中组件 / 充电 / WiFi / 蓝牙 / 底部未选中 Tab -->
+    <color name="glass_inactive_bg">#0FFFFFFF</color>
+    <color name="glass_inactive_text">#C6C6C6</color>
 
-    <!-- 5. 输入框 / 统计卡片 -->
-    <color name="card_dark_bg">#12FFFFFF</color>
-    <color name="text_white">#FFFFFF</color>
-    <color name="text_secondary">#CCCCCC</color>
-    <color name="text_caption">#A1A1AA</color>
+    <!-- 5. 页面数据卡片 / 已启用规则模块 / 输入框容器 -->
+    <color name="glass_card_bg">#0DFFFFFF</color>
+
+    <!-- 6. 复选框边框 -->
+    <color name="glass_checkbox_stroke">#38FFFFFF</color>
+
+    <!-- ═══════════════ 旧 Token 收敛为 Glass Token 别名 ═══════════════ -->
+    <color name="bg_root">@color/glass_bg_root</color>
+
+    <color name="btn_primary_bg">@color/glass_btn_primary_bg</color>
+    <color name="btn_primary_text">@color/glass_btn_primary_text</color>
+
+    <color name="item_active_bg">@color/glass_active_bg</color>
+    <color name="item_active_stroke">@color/glass_active_stroke</color>
+    <color name="item_active_text">@color/glass_active_text</color>
+
+    <color name="item_inactive_bg">@color/glass_inactive_bg</color>
+    <color name="item_inactive_text">@color/glass_inactive_text</color>
+
+    <color name="card_dark_bg">@color/glass_card_bg</color>
+    <color name="text_white">@color/glass_active_text</color>
+    <color name="text_secondary">@color/glass_inactive_text</color>
     <color name="text_tertiary">#888888</color>
+    <color name="text_caption">#A1A1AA</color>
 
-    <!-- ═══════════════ 兼容别名：全部收敛到白磨砂体系 ═══════════════ -->
-    <color name="bg_card">#14FFFFFF</color>
-    <color name="bg_widget">#12FFFFFF</color>
+    <color name="bg_card">@color/glass_inactive_bg</color>
+    <color name="bg_widget">@color/glass_card_bg</color>
     <color name="stroke_hairline">#20FFFFFF</color>
-    <color name="stroke_glass">#20FFFFFF</color>
+    <color name="stroke_glass">@color/glass_active_stroke</color>
     <color name="bg_floating_bar">#00121212</color>
 
-    <!-- 品牌强调色：由绿改为纯白（符合本次「去绿」规范） -->
-    <color name="brand_accent">@color/text_white</color>
+    <!-- 品牌强调色：由绿改为纯白（保持去绿） -->
+    <color name="brand_accent">@color/glass_active_text</color>
     <color name="brand_accent_press">#E0FFFFFF</color>
-    <color name="brand_accent_surface">#24FFFFFF</color>
+    <color name="brand_accent_surface">@color/glass_active_bg</color>
 
     <!-- 文字 -->
-    <color name="text_primary">@color/text_white</color>
+    <color name="text_primary">@color/glass_active_text</color>
 
     <!-- 语义色 -->
     <color name="destructive">#FF453A</color>
 
     <!-- 老资源名兼容 -->
-    <color name="dark_root">@color/bg_root</color>
-    <color name="dark_bg_primary">@color/bg_root</color>
-    <color name="dark_card_primary">@color/card_dark_bg</color>
-    <color name="dark_card_secondary">@color/item_inactive_bg</color>
-    <color name="dark_button_bg">@color/item_inactive_bg</color>
-    <color name="dark_input_bg">@color/card_dark_bg</color>
-    <color name="dark_search_bg">@color/card_dark_bg</color>
+    <color name="dark_root">@color/glass_bg_root</color>
+    <color name="dark_bg_primary">@color/glass_bg_root</color>
+    <color name="dark_card_primary">@color/glass_card_bg</color>
+    <color name="dark_card_secondary">@color/glass_inactive_bg</color>
+    <color name="dark_button_bg">@color/glass_inactive_bg</color>
+    <color name="dark_input_bg">@color/glass_card_bg</color>
+    <color name="dark_search_bg">@color/glass_card_bg</color>
     <color name="dark_divider">@color/stroke_hairline</color>
     <color name="dark_stroke">@color/stroke_hairline</color>
 
-    <color name="dark_text_primary">@color/text_white</color>
-    <color name="dark_text_secondary">@color/text_secondary</color>
+    <color name="dark_text_primary">@color/glass_active_text</color>
+    <color name="dark_text_secondary">@color/glass_inactive_text</color>
     <color name="dark_text_tertiary">@color/text_tertiary</color>
     <color name="dark_text_hint">@color/text_tertiary</color>
 
-    <color name="dark_accent">@color/text_white</color>
-    <color name="dark_accent_green">@color/text_white</color>
+    <color name="dark_accent">@color/glass_active_text</color>
+    <color name="dark_accent_green">@color/glass_active_text</color>
     <color name="dark_accent_press">#E0FFFFFF</color>
 
-    <color name="dark_switch_thumb">@color/text_white</color>
+    <color name="dark_switch_thumb">@color/glass_active_text</color>
     <color name="dark_switch_track">@color/stroke_hairline</color>
     <color name="dark_destructive">@color/destructive</color>
 

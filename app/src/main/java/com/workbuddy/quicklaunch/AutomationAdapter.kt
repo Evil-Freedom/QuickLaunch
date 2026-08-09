@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ItemAutomationBinding
+import com.workbuddy.quicklaunch.util.GlassBlurHelper
 import java.util.Locale
 
 /**
@@ -35,6 +36,8 @@ class AutomationAdapter(
         holder.b.root.setBackgroundResource(
             if (a.enabled) R.drawable.bg_rule_item_active else R.drawable.bg_rule_item_inactive
         )
+        // Glassmorphism：规则卡片模糊（启用/停用统一 18px）
+        GlassBlurHelper.apply(holder.b.root, 18f)
         holder.b.tvName.text = a.name
         holder.b.tvDesc.text = "${triggerLabel(a)} → ${a.targetAppName}"
         // 状态色点：启用绿 / 停用灰，颜色随 values-night 自动切换

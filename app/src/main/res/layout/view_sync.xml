@@ -32,6 +32,7 @@
 
         <!-- 防外屏息屏开关 -->
         <LinearLayout
+            android:id="@+id/layoutAntiSleep"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card_dark"
@@ -60,6 +61,7 @@
 
         <!-- 节假日同步卡片 -->
         <LinearLayout
+            android:id="@+id/layoutHolidayCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
