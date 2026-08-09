@@ -9917,7 +9917,8 @@
         <item name="android:textColor">@color/dark_text_secondary</item>
         <item name="android:textSize">13sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:drawablePadding">4dp</item>
+        <item name="android:drawableTop">@drawable/ic_trigger_time</item>
+        <item name="android:drawablePadding">6dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
@@ -9929,7 +9930,8 @@
         <item name="android:textColor">@color/item_active_text</item>
         <item name="android:textSize">13sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:drawablePadding">4dp</item>
+        <item name="android:drawableTop">@drawable/ic_trigger_time</item>
+        <item name="android:drawablePadding">6dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>

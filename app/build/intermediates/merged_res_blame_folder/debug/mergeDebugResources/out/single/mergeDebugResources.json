@@ -68,6 +68,10 @@
         "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_automation.xml"
     },
     {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_trigger_icon_circle_selected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_trigger_icon_circle_selected.xml"
+    },
+    {
         "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_segment_track.xml.flat",
         "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_segment_track.xml"
     },
@@ -114,6 +118,10 @@
     {
         "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_dock_app.xml.flat",
         "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_dock_app.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_trigger_icon_circle.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_trigger_icon_circle.xml"
     },
     {
         "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_activity_main.xml.flat",
@@ -276,6 +284,10 @@
         "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_source.xml"
     },
     {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_status_glow_on.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/status_glow_on.xml"
+    },
+    {
         "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_bottom_nav_indicator.xml.flat",
         "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_bottom_nav_indicator.xml"
     },
@@ -298,6 +310,10 @@
     {
         "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_capsule_unselected.xml.flat",
         "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dark_capsule_unselected.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_status_glow_off.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/status_glow_off.xml"
     },
     {
         "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_card_primary.xml.flat",

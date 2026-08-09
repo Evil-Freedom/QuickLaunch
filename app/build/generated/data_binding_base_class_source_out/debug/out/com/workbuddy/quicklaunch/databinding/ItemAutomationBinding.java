@@ -4,11 +4,11 @@ package com.workbuddy.quicklaunch.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.workbuddy.quicklaunch.R;
@@ -18,7 +18,7 @@ import java.lang.String;
 
 public final class ItemAutomationBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final ConstraintLayout rootView;
 
   @NonNull
   public final TextView btnDelete;
@@ -35,20 +35,24 @@ public final class ItemAutomationBinding implements ViewBinding {
   @NonNull
   public final View vStatusDot;
 
-  private ItemAutomationBinding(@NonNull LinearLayout rootView, @NonNull TextView btnDelete,
+  @NonNull
+  public final View vStatusGlow;
+
+  private ItemAutomationBinding(@NonNull ConstraintLayout rootView, @NonNull TextView btnDelete,
       @NonNull SwitchCompat switchEnabled, @NonNull TextView tvDesc, @NonNull TextView tvName,
-      @NonNull View vStatusDot) {
+      @NonNull View vStatusDot, @NonNull View vStatusGlow) {
     this.rootView = rootView;
     this.btnDelete = btnDelete;
     this.switchEnabled = switchEnabled;
     this.tvDesc = tvDesc;
     this.tvName = tvName;
     this.vStatusDot = vStatusDot;
+    this.vStatusGlow = vStatusGlow;
   }
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public ConstraintLayout getRoot() {
     return rootView;
   }
 
@@ -103,8 +107,14 @@ public final class ItemAutomationBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemAutomationBinding((LinearLayout) rootView, btnDelete, switchEnabled, tvDesc,
-          tvName, vStatusDot);
+      id = R.id.vStatusGlow;
+      View vStatusGlow = ViewBindings.findChildViewById(rootView, id);
+      if (vStatusGlow == null) {
+        break missingId;
+      }
+
+      return new ItemAutomationBinding((ConstraintLayout) rootView, btnDelete, switchEnabled,
+          tvDesc, tvName, vStatusDot, vStatusGlow);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -122,7 +122,7 @@
         <item name="android:focusable">true</item>
     </style>
 
-    <!-- 触发条件 4 联排网格卡片：高密度瘦身 -->
+    <!-- 触发条件 4 联排网格卡片：高密度瘦身 + 图标圆形背景 -->
     <style name="Widget.QuickLaunch.Dark.GridChip" parent="">
         <item name="android:background">@drawable/bg_trigger_grid_item</item>
         <item name="android:gravity">center</item>
@@ -131,7 +131,8 @@
         <item name="android:textColor">@color/dark_text_secondary</item>
         <item name="android:textSize">13sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:drawablePadding">4dp</item>
+        <item name="android:drawableTop">@drawable/ic_trigger_time</item>
+        <item name="android:drawablePadding">6dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
@@ -144,7 +145,8 @@
         <item name="android:textColor">@color/item_active_text</item>
         <item name="android:textSize">13sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:drawablePadding">4dp</item>
+        <item name="android:drawableTop">@drawable/ic_trigger_time</item>
+        <item name="android:drawablePadding">6dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>

@@ -32,14 +32,11 @@ class AutomationAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val a = items[position]
-        // 规则卡片背景：启用 = 带描边磨砂，停用 = 无描边磨砂
-        holder.b.root.setBackgroundResource(
-            if (a.enabled) R.drawable.bg_rule_item_active else R.drawable.bg_rule_item_inactive
-        )
         // ⚠️ Round 10 修复：移除 RenderEffect blur — 会糊掉 tvName/tvDesc 等子 View 文字
         holder.b.tvName.text = a.name
         holder.b.tvDesc.text = "${triggerLabel(a)} → ${a.targetAppName}"
-        // 状态色点：启用绿 / 停用灰，颜色随 values-night 自动切换
+        // 状态色点 + 光晕：启用 = 薰衣草紫光晕 + 实心点，停用 = 灰色无光晕
+        holder.b.vStatusGlow.setBackgroundResource(statusGlowRes(a.enabled))
         holder.b.vStatusDot.setBackgroundResource(statusDotRes(a.enabled))
         // 必须先摘掉旧监听：复用 ViewHolder 时 isChecked 赋值会触发上一条规则的回调，导致误改数据
         holder.b.switchEnabled.setOnCheckedChangeListener(null)
@@ -50,9 +47,13 @@ class AutomationAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    /** 状态色点资源：启用绿 / 停用灰。 */
+    /** 状态色点资源：启用薰衣草紫 / 停用灰。 */
     private fun statusDotRes(enabled: Boolean): Int =
         if (enabled) R.drawable.status_dot_on else R.drawable.status_dot_off
+
+    /** 状态光晕资源：启用薰衣草紫柔光 / 停用灰。 */
+    private fun statusGlowRes(enabled: Boolean): Int =
+        if (enabled) R.drawable.status_glow_on else R.drawable.status_glow_off
 
     private fun triggerLabel(a: Automation): String = when (a.triggerType) {
         TriggerType.TIME ->

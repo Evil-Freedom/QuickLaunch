@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 启用状态色点：8dp 圆点，颜色随 values-night 自动切换 -->
+<!-- 启用状态色点：8dp 实心圆点（中心点，在光晕圈内） -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <solid android:color="@color/status_enabled" />
+    <solid android:color="@color/accent_lavender" />
     <size
         android:width="8dp"
         android:height="8dp" />

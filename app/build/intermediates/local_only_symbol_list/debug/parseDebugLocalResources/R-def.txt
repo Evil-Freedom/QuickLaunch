@@ -292,6 +292,8 @@ drawable bg_segment_track
 drawable bg_segment_unselected
 drawable bg_trigger_grid_item
 drawable bg_trigger_grid_item_selected
+drawable bg_trigger_icon_circle
+drawable bg_trigger_icon_circle_selected
 drawable cb_glass
 drawable cb_glass_checked
 drawable cb_glass_unchecked
@@ -316,6 +318,8 @@ drawable ic_trigger_time
 drawable ic_trigger_wifi
 drawable status_dot_off
 drawable status_dot_on
+drawable status_glow_off
+drawable status_glow_on
 id action_add_to_dock
 id action_app_info
 id action_uninstall
@@ -443,6 +447,7 @@ id tvTriggerTitle
 id tvUrl
 id tvValue
 id vStatusDot
+id vStatusGlow
 id viewPager
 layout activity_create
 layout activity_holiday_manage
