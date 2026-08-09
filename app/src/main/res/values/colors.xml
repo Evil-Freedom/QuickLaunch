@@ -33,6 +33,7 @@
     <color name="card_dark_bg">#12FFFFFF</color>
     <color name="text_white">#FFFFFF</color>
     <color name="text_secondary">#CCCCCC</color>
+    <color name="text_caption">#A1A1AA</color>
     <color name="text_tertiary">#888888</color>
 
     <!-- ═══════════════ 兼容别名：全部收敛到白磨砂体系 ═══════════════ -->

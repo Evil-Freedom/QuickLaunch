@@ -501,25 +501,33 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-light"
-            android:letterSpacing="0.05"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:fontFamily="sans-serif"
             android:text="规则列表"
-            android:textAllCaps="true"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
+            android:textColor="@color/text_caption"
+            android:textFontWeight="700"
+            android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/tvRulesEmpty"
+        <!-- 空状态：半透磨砂卡片 -->
+        <LinearLayout
+            android:id="@+id/layoutRulesEmpty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_dark"
             android:gravity="center"
-            android:paddingVertical="32dp"
-            android:text="还没有自动化规则"
-            android:textColor="@color/text_tertiary"
-            android:textSize="14sp"
-            android:visibility="gone" />
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvRulesEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="还没有自动化规则"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRules"

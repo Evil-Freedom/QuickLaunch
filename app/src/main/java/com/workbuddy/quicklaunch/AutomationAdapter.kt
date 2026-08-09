@@ -31,6 +31,10 @@ class AutomationAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val a = items[position]
+        // 规则卡片背景：启用 = 带描边磨砂，停用 = 无描边磨砂
+        holder.b.root.setBackgroundResource(
+            if (a.enabled) R.drawable.bg_rule_item_active else R.drawable.bg_rule_item_inactive
+        )
         holder.b.tvName.text = a.name
         holder.b.tvDesc.text = "${triggerLabel(a)} → ${a.targetAppName}"
         // 状态色点：启用绿 / 停用灰，颜色随 values-night 自动切换

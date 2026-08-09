@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
 
     // ---------- 规则列表 ----------
     private lateinit var rvRules: RecyclerView
-    private lateinit var tvRulesEmpty: TextView
+    private lateinit var layoutRulesEmpty: View
     private val ruleAdapter = AutomationAdapter(emptyList(), ::onToggle, ::onDelete)
 
     // ---------- 仪表盘 ----------
@@ -270,7 +270,7 @@ class MainActivity : AppCompatActivity() {
 
         // 规则列表
         rvRules = launchBinding.rvRules
-        tvRulesEmpty = launchBinding.tvRulesEmpty
+        layoutRulesEmpty = launchBinding.layoutRulesEmpty
         rvRules.layoutManager = LinearLayoutManager(this)
         rvRules.adapter = ruleAdapter
         rvRules.overScrollMode = View.OVER_SCROLL_NEVER
@@ -612,7 +612,7 @@ class MainActivity : AppCompatActivity() {
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             postUi {
                 ruleAdapter.submit(automations)
-                tvRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
                 updateDashboard(automations)
             }
         }
@@ -697,7 +697,7 @@ class MainActivity : AppCompatActivity() {
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             postUi {
                 ruleAdapter.submit(automations)
-                tvRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
                 Snackbar.make(binding.rootContainer, "已删除「${automation.name}」", Snackbar.LENGTH_LONG)
                     .setAction("撤销") { undoDelete(automation) }
                     .show()
@@ -715,7 +715,7 @@ class MainActivity : AppCompatActivity() {
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             postUi {
                 ruleAdapter.submit(automations)
-                tvRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
             }
         }
     }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  规则列表项：启用状态
+  半透灰白磨砂背景 + 1dp 细白描边，24dp 圆角。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#14FFFFFF" />
+    <corners android:radius="24dp" />
+    <stroke
+        android:width="1dp"
+        android:color="#38FFFFFF" />
+</shape>

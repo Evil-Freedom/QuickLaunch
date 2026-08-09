@@ -57,8 +57,8 @@
         按钮 / 输入框 / 小选项 / 抽屉   32dp 大胶囊
         应用图标           14dp iOS Squircle
     -->
-    <dimen name="dark_radius_card">22dp</dimen>
-    <dimen name="dark_radius_pill">24dp</dimen>
+    <dimen name="dark_radius_card">24dp</dimen>
+    <dimen name="dark_radius_pill">26dp</dimen>
     <dimen name="dark_radius_icon">14dp</dimen>
 
     <!-- iOS 风格悬浮毛玻璃底栏 -->
@@ -70,10 +70,10 @@
     <!-- 描边 -->
     <dimen name="dark_stroke_width">1px</dimen>
     <!-- 组件高度 -->
-    <dimen name="dark_button_height">48dp</dimen>
+    <dimen name="dark_button_height">52dp</dimen>
     <dimen name="dark_input_height">48dp</dimen>
     <dimen name="dark_chip_height">34dp</dimen>
-    <dimen name="trigger_grid_item_height">60dp</dimen>
+    <dimen name="trigger_grid_item_height">56dp</dimen>
     <dimen name="trigger_grid_icon_size">20dp</dimen>
     <!-- 间距（整体压缩 30% 左右，让界面更紧致） -->
     <dimen name="dark_card_margin_horizontal">16dp</dimen>
