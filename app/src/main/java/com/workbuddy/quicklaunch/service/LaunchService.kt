@@ -98,7 +98,7 @@ object Notifier {
         )
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("正在启动 $appName")
+            .setContentTitle(context.getString(R.string.launch_notification_title, appName))
             .setContentText("正在启动 $appName · 若未自动打开，点此立即启动")
             .setSmallIcon(R.drawable.ic_notification_stat)
             .setContentIntent(pi)

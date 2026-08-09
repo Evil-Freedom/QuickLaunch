@@ -66,20 +66,20 @@ class SourceManageActivity : AppCompatActivity() {
         }
         // 偏好里的 JSON 可能被外部改坏，读取失败时只展示内置源而不是白屏崩溃
         runCatching { HolidayPrefs.getCustomSources(this) }.getOrDefault(emptyList()).forEach {
-            val parserName = if (it.parser == ParserType.TIMOR) "timor.tech 格式" else "holiday-cn 格式"
+            val parserName = if (it.parser == ParserType.TIMOR) getString(R.string.source_format_timor) else getString(R.string.source_format_holiday_cn)
             items.add(Row(it.id, it.label, it.urlTemplate, "自定义 · $parserName", false))
         }
         adapter.notifyDataSetChanged()
     }
 
     private fun addSource() {
-        val labelInput = EditText(this).apply { hint = "名称，如 我的节假日API" }
-        val urlInput = EditText(this).apply { hint = "https://example.com/【年份】.json" }
+        val labelInput = EditText(this).apply { hint = getString(R.string.source_name_hint) }
+        val urlInput = EditText(this).apply { hint = getString(R.string.source_url_hint) }
         val parserSpinner = Spinner(this).apply {
             adapter = ArrayAdapter(
                 this@SourceManageActivity,
                 android.R.layout.simple_spinner_item,
-                listOf("holiday-cn 格式", "timor.tech 格式")
+                listOf(getString(R.string.source_format_holiday_cn), getString(R.string.source_format_timor))
             ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
         }
         val layout = android.widget.LinearLayout(this).apply {
@@ -90,17 +90,17 @@ class SourceManageActivity : AppCompatActivity() {
             addView(parserSpinner)
         }
         AlertDialog.Builder(this)
-            .setTitle("添加自定义数据源")
+            .setTitle(getString(R.string.source_add_custom))
             .setView(layout)
             .setPositiveButton("保存") { _, _ ->
                 val label = labelInput.text.toString().trim()
                 val url = urlInput.text.toString().trim()
                 if (label.isEmpty() || url.isEmpty()) {
-                    android.widget.Toast.makeText(this, "名称和 URL 不能为空", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(this, getString(R.string.source_empty_fields), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 if (!url.contains("【年份】")) {
-                    android.widget.Toast.makeText(this, "网址里必须包含「年份」标记", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(this, getString(R.string.source_url_need_year), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 // 校验协议与可解析性：非法网址曾会在同步时抛异常并中断整条回退链，
@@ -110,7 +110,7 @@ class SourceManageActivity : AppCompatActivity() {
                 val validUrl = runCatching { java.net.URL(probe).protocol.lowercase(Locale.US) }
                     .getOrNull()
                 if (validUrl != "http" && validUrl != "https") {
-                    android.widget.Toast.makeText(this, "URL 必须是 http:// 或 https:// 开头的合法地址", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(this, getString(R.string.source_url_invalid), android.widget.Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
                 val parser = if (parserSpinner.selectedItemPosition == 1) ParserType.TIMOR else ParserType.NATE_SCARLET

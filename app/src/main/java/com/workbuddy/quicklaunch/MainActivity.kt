@@ -49,6 +49,7 @@ import com.workbuddy.quicklaunch.util.DarkWheelTimePicker
 import com.workbuddy.quicklaunch.util.HolidayPrefs
 import com.workbuddy.quicklaunch.util.HolidaySources
 import com.workbuddy.quicklaunch.util.HolidaySync
+import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import com.workbuddy.quicklaunch.util.RootUtils
 import com.workbuddy.quicklaunch.util.Scheduler
 import com.workbuddy.quicklaunch.util.ScreenOnOverlay
@@ -521,7 +522,7 @@ class MainActivity : AppCompatActivity() {
             if (isFinishing || isDestroyed) return@loadAsync
             btnPickApp.isEnabled = true
             if (apps.isEmpty()) {
-                toast("未找到可启动的应用")
+                toast(getString(R.string.main_no_apps))
                 return@loadAsync
             }
             runCatching {
@@ -529,7 +530,7 @@ class MainActivity : AppCompatActivity() {
                     .setOnSelectedListener { app ->
                         selectedPackage = app.packageName
                         selectedAppName = app.appName
-                        btnPickApp.text = "已选择：$selectedAppName"
+                        btnPickApp.text = getString(R.string.main_pick_app_done, selectedAppName)
                     }
                     .show(supportFragmentManager, "app_picker")
             }
@@ -539,10 +540,10 @@ class MainActivity : AppCompatActivity() {
     private fun saveRule() {
         val pkg = selectedPackage
         if (pkg == null) {
-            toast("请先选择要启动的应用")
+            toast(getString(R.string.main_pick_app_first))
             return
         }
-        val name = selectedAppName ?: "自动化"
+        val name = selectedAppName ?: getString(R.string.main_default_name)
         val repeatKey = currentRepeatKey()
         val repeatDaysMask = if (repeatKey == "custom") {
             var mask = 0
@@ -550,7 +551,7 @@ class MainActivity : AppCompatActivity() {
             mask
         } else 0
         if (repeatKey == "custom" && repeatDaysMask == 0) {
-            toast("请至少选择一天")
+            toast(getString(R.string.main_pick_day))
             return
         }
 
@@ -578,7 +579,7 @@ class MainActivity : AppCompatActivity() {
 
         btnSaveRule.isEnabled = false
         val app = applicationContext
-        saveExecutor.execute {
+        QuickLaunchExecutors.save.execute {
             val ok = runCatching {
                 val id = db.automationDao().insert(a)
                 if (a.triggerType == TriggerType.TIME) {
@@ -589,11 +590,11 @@ class MainActivity : AppCompatActivity() {
                 if (isFinishing || isDestroyed) return@postUi
                 btnSaveRule.isEnabled = true
                 if (ok) {
-                    toast("已保存")
+                    toast(getString(R.string.main_saved))
                     resetForm()
                     refreshRules()
                 } else {
-                    toast("保存失败，请重试")
+                    toast(getString(R.string.main_save_failed))
                 }
             }
         }
@@ -602,7 +603,7 @@ class MainActivity : AppCompatActivity() {
     private fun resetForm() {
         selectedPackage = null
         selectedAppName = null
-        btnPickApp.text = "选择要启动的应用"
+        btnPickApp.text = getString(R.string.main_pick_app)
         selectedTriggerIndex = 0
         selectedRepeatIndex = 0
         selectedDays.fill(false)
@@ -684,7 +685,7 @@ class MainActivity : AppCompatActivity() {
                 refreshRules()
                 Snackbar.make(
                     binding.rootContainer,
-                    if (checked) "已开启「${automation.name}」" else "已关闭「${automation.name}」",
+                    if (checked) getString(R.string.main_rule_enabled, automation.name) else getString(R.string.main_rule_disabled, automation.name),
                     Snackbar.LENGTH_SHORT
                 ).show()
             }
@@ -694,10 +695,10 @@ class MainActivity : AppCompatActivity() {
     private fun onDelete(automation: Automation) {
         runCatching {
             AlertDialog.Builder(this)
-                .setTitle("删除自动化？")
-                .setMessage("「${automation.name}」将被删除，其定时任务会一并取消。")
-                .setPositiveButton("删除") { _, _ -> performDelete(automation) }
-                .setNegativeButton("取消", null)
+                .setTitle(R.string.main_delete_rule)
+                .setMessage(getString(R.string.main_delete_rule_msg, automation.name))
+                .setPositiveButton(R.string.main_delete) { _, _ -> performDelete(automation) }
+                .setNegativeButton(R.string.main_cancel, null)
                 .show()
         }
     }
@@ -711,8 +712,8 @@ class MainActivity : AppCompatActivity() {
             postUi {
                 ruleAdapter.submit(automations)
                 layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
-                Snackbar.make(binding.rootContainer, "已删除「${automation.name}」", Snackbar.LENGTH_LONG)
-                    .setAction("撤销") { undoDelete(automation) }
+                Snackbar.make(binding.rootContainer, getString(R.string.main_rule_deleted, automation.name), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.main_undo) { undoDelete(automation) }
                     .show()
             }
         }
@@ -761,14 +762,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupSourceSpinner() {
         val ids = mutableListOf("auto")
-        val labels = mutableListOf("自动（推荐）")
+        val labels = mutableListOf(getString(R.string.main_source_auto))
         HolidaySources.ALL.forEach {
             ids.add(it.id)
             labels.add(it.label)
         }
         runCatching { HolidayPrefs.getCustomSources(this) }.getOrDefault(emptyList()).forEach {
             ids.add(it.id)
-            labels.add("${it.label}（自定义）")
+            labels.add(getString(R.string.main_source_custom, it.label))
         }
 
         val pref = runCatching { HolidayPrefs.getSourcePref(this) }.getOrNull() ?: "auto"
@@ -799,7 +800,7 @@ class MainActivity : AppCompatActivity() {
     private fun syncHolidays() {
         if (btnSyncHolidays.isEnabled) {
             btnSyncHolidays.isEnabled = false
-            btnSyncHolidays.text = "同步中…"
+            btnSyncHolidays.text = getString(R.string.main_syncing)
         }
         val pref = HolidayPrefs.getSourcePref(this)
         val prefId = if (pref == "auto") null else pref
@@ -807,12 +808,12 @@ class MainActivity : AppCompatActivity() {
         HolidaySync.sync(this, prefId) { res ->
             if (isFinishing || isDestroyed) return@sync
             btnSyncHolidays.isEnabled = true
-            btnSyncHolidays.text = "同步法定节假日"
+            btnSyncHolidays.text = getString(R.string.main_sync_holidays)
             val msg = if (res.success) {
                 runIo { Scheduler.rescheduleAll(app) }
-                "已同步（来源：${res.sourceLabel}，${res.count} 天）"
+                getString(R.string.main_synced, res.sourceLabel, res.count)
             } else {
-                "节假日数据同步失败（已保留上次数据），定时规则不受影响，可稍后重试"
+                getString(R.string.main_sync_failed)
             }
             runCatching { Snackbar.make(binding.rootContainer, msg, Snackbar.LENGTH_SHORT).show() }
         }
@@ -829,7 +830,7 @@ class MainActivity : AppCompatActivity() {
             postUi {
                 if (!ScreenOnOverlay.canDraw(this)) return@postUi
                 tvAntiSleep.text =
-                    if (rooted) "防外屏息屏（屏幕常亮，已叠加 root 增强）" else "防外屏息屏（屏幕常亮）"
+                    if (rooted) getString(R.string.main_anti_sleep_on) else getString(R.string.main_anti_sleep_on_no_root)
             }
         }
     }
@@ -838,7 +839,7 @@ class MainActivity : AppCompatActivity() {
         if (!::swAntiSleep.isInitialized) return
         val granted = ScreenOnOverlay.canDraw(this)
         tvAntiSleep.text =
-            if (granted) "防外屏息屏（屏幕常亮）" else "防外屏息屏 —— 需要悬浮窗权限"
+            if (granted) getString(R.string.main_anti_sleep_on_no_root) else "防外屏息屏 —— 需要悬浮窗权限"
         swAntiSleep.setOnCheckedChangeListener(null)
         swAntiSleep.isChecked = AntiSleep.isEnabled(this) && granted
         swAntiSleep.isEnabled = true
@@ -849,8 +850,8 @@ class MainActivity : AppCompatActivity() {
         swAntiSleep.setOnCheckedChangeListener { view, checked ->
             if (checked && !ScreenOnOverlay.canDraw(this)) {
                 resetAntiSleepSwitch(false)
-                Snackbar.make(binding.rootContainer, "需要悬浮窗权限才能防止外屏息屏", Snackbar.LENGTH_LONG)
-                    .setAction("去授权") { requestOverlayPermission() }
+                Snackbar.make(binding.rootContainer, getString(R.string.main_anti_sleep_need_overlay), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.main_anti_sleep_go_auth) { requestOverlayPermission() }
                     .show()
                 return@setOnCheckedChangeListener
             }
@@ -864,11 +865,11 @@ class MainActivity : AppCompatActivity() {
                 postUi {
                     view.isEnabled = true
                     if (ok) {
-                        val tip = if (checked) "已开启：屏幕（含外屏）保持常亮" else "已关闭：恢复系统默认息屏"
+                        val tip = if (checked) getString(R.string.main_anti_sleep_turned_on) else getString(R.string.main_anti_sleep_turned_off)
                         Snackbar.make(binding.rootContainer, tip, Snackbar.LENGTH_SHORT).show()
                     } else {
                         resetAntiSleepSwitch(!checked)
-                        Snackbar.make(binding.rootContainer, "开启失败，请检查悬浮窗权限是否被系统撤回", Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(binding.rootContainer, getString(R.string.main_anti_sleep_failed), Snackbar.LENGTH_LONG).show()
                     }
                 }
             }
@@ -934,33 +935,33 @@ class MainActivity : AppCompatActivity() {
 
         val missing = buildList {
             if (runCatching { !Settings.canDrawOverlays(this@MainActivity) }.getOrDefault(false)) {
-                add("悬浮窗权限 —— 后台自动拉起应用的必备条件，不开则只能靠点通知启动")
+                add(getString(R.string.main_permission_overlay))
             }
             val ignoring = runCatching {
                 (getSystemService(POWER_SERVICE) as? PowerManager)
                     ?.isIgnoringBatteryOptimizations(packageName) ?: true
             }.getOrDefault(true)
-            if (!ignoring) add("忽略电池优化 —— 否则休眠时定时任务会被系统推迟或杀掉")
+            if (!ignoring) add(getString(R.string.main_permission_battery))
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val exact = runCatching {
                     (getSystemService(ALARM_SERVICE) as? AlarmManager)?.canScheduleExactAlarms() ?: true
                 }.getOrDefault(true)
-                if (!exact) add("精确闹钟 —— 否则定时触发会有几分钟误差")
+                if (!exact) add(getString(R.string.main_permission_exact_alarm))
             }
-            add("自启动 / 后台弹出界面 —— Motorola myui 等厂商 ROM 需在「应用管理」中单独放行")
+            add(getString(R.string.main_permission_autostart))
         }
 
         if (isFinishing || isDestroyed) return
         runCatching {
             AlertDialog.Builder(this)
-                .setTitle("需要开启以下权限")
+                .setTitle(R.string.main_permission_required)
                 .setMessage(missing.joinToString("\n\n• ", prefix = "• "))
-                .setPositiveButton("去设置") { _, _ ->
+                .setPositiveButton(R.string.main_permission_go_settings) { _, _ ->
                     sp.edit().putBoolean("guided", true).apply()
                     openSettings()
                 }
-                .setNegativeButton("以后再说") { _, _ ->
+                .setNegativeButton(R.string.main_permission_later) { _, _ ->
                     sp.edit().putBoolean("guided", true).apply()
                 }
                 .show()
@@ -987,10 +988,5 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         const val TAB_LAUNCH = 0
         const val TAB_SYNC = 1
-
-        val saveExecutor: java.util.concurrent.ExecutorService =
-            java.util.concurrent.Executors.newSingleThreadExecutor { r ->
-                Thread(r, "create-save").apply { isDaemon = true }
-            }
     }
 }

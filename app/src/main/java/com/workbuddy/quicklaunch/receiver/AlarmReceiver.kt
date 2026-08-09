@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.workbuddy.quicklaunch.data.AppDatabase
+import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.service.LaunchService
 import com.workbuddy.quicklaunch.util.Scheduler
 
@@ -31,7 +32,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val a = runCatching { dao.getById(id) }.getOrNull() ?: return
         if (!a.enabled) return
 
-        if (a.repeatMode != "once") {
+        if (a.repeatMode != RepeatMode.ONCE) {
             // 先把下一次排上：即使随后的拉起失败，重复链路也不会断
             runCatching { Scheduler.schedule(context, a) }
                 .onFailure { Log.e(TAG, "reschedule failed id=$id", it) }

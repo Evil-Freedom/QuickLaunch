@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
+import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.receiver.AlarmReceiver
 import java.util.Calendar
@@ -153,7 +154,7 @@ object Scheduler {
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
 
-        if (a.repeatMode == "once") {
+        if (a.repeatMode == RepeatMode.ONCE) {
             if (cal.timeInMillis <= now) cal.add(Calendar.DAY_OF_YEAR, 1)
             return cal.timeInMillis
         }
@@ -210,15 +211,15 @@ object Scheduler {
      */
     private fun advanceToValidDay(cal: Calendar, a: Automation) {
         when (a.repeatMode) {
-            "weekdays" -> {
+            RepeatMode.WEEKDAYS -> {
                 var i = 0
                 while (isWeekend(cal) && i++ < 7) cal.add(Calendar.DAY_OF_YEAR, 1)
             }
-            "weekend" -> {
+            RepeatMode.WEEKEND -> {
                 var i = 0
                 while (!isWeekend(cal) && i++ < 7) cal.add(Calendar.DAY_OF_YEAR, 1)
             }
-            "custom" -> {
+            RepeatMode.CUSTOM -> {
                 // 只保留 bit0..bit6（周日~周六）；清洗后为 0 视为数据异常，退化为「任意一天」
                 val mask = a.repeatDays and 0x7F
                 if (mask != 0) {

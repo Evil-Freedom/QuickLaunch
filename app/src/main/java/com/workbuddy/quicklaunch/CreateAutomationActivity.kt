@@ -15,6 +15,7 @@ import com.workbuddy.quicklaunch.databinding.ActivityCreateBinding
 import com.workbuddy.quicklaunch.util.AppListLoader
 import com.workbuddy.quicklaunch.util.AppPickerBottomSheet
 import com.workbuddy.quicklaunch.util.DarkWheelTimePicker
+import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import com.workbuddy.quicklaunch.util.Scheduler
 import java.util.Calendar
 import java.util.Locale
@@ -264,7 +265,7 @@ class CreateAutomationActivity : AppCompatActivity() {
             if (isFinishing || isDestroyed) return@loadAsync
             binding.btnPickApp.isEnabled = true
             if (apps.isEmpty()) {
-                toast("未找到可启动的应用")
+                toast(getString(R.string.create_no_apps))
                 return@loadAsync
             }
             runCatching {
@@ -282,10 +283,10 @@ class CreateAutomationActivity : AppCompatActivity() {
     private fun save() {
         val pkg = selectedPackage
         if (pkg == null) {
-            toast("请先选择要启动的应用")
+            toast(getString(R.string.create_pick_app_first))
             return
         }
-        val name = selectedAppName ?: "自动化"
+        val name = selectedAppName ?: getString(R.string.create_default_name)
         val repeatKey = currentRepeatKey()
         val repeatDaysMask = if (repeatKey == "custom") {
             var mask = 0
@@ -293,7 +294,7 @@ class CreateAutomationActivity : AppCompatActivity() {
             mask
         } else 0
         if (repeatKey == "custom" && repeatDaysMask == 0) {
-            toast("请至少选择一天")
+            toast(getString(R.string.create_pick_day))
             return
         }
 
@@ -322,7 +323,7 @@ class CreateAutomationActivity : AppCompatActivity() {
         // 写库 + 排程都是阻塞操作，放后台；避免重复点击保存出现重复规则
         binding.btnSave.isEnabled = false
         val app = applicationContext
-        saveExecutor.execute {
+        QuickLaunchExecutors.save.execute {
             val ok = runCatching {
                 val id = db.automationDao().insert(a)
                 if (a.triggerType == TriggerType.TIME) {
@@ -332,11 +333,11 @@ class CreateAutomationActivity : AppCompatActivity() {
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 if (ok) {
-                    toast("已保存")
+                    toast(getString(R.string.create_saved))
                     finish()
                 } else {
                     binding.btnSave.isEnabled = true
-                    toast("保存失败，请重试")
+                    toast(getString(R.string.create_save_failed))
                 }
             }
         }
@@ -347,10 +348,6 @@ class CreateAutomationActivity : AppCompatActivity() {
     }
 
     private companion object {
-        /** 保存动作的后台线程，daemon 避免阻止进程退出。 */
-        val saveExecutor: java.util.concurrent.ExecutorService =
-            java.util.concurrent.Executors.newSingleThreadExecutor { r ->
-                Thread(r, "create-save").apply { isDaemon = true }
-            }
+        // saveExecutor 迁移至 QuickLaunchExecutors.save
     }
 }

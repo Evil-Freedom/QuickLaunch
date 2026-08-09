@@ -16,7 +16,7 @@ import java.util.concurrent.Executors
  * 应用选择列表适配器。
  *
  * - 列表项 36dp 真实图标 + 15sp 应用名
- * - 图标在主线程之外（2 线程池）加载，避免几百个应用逐个 getApplicationIcon 卡 UI
+ * - 图标在主线程之外（共享 2 线程池）加载，避免几百个应用逐个 getApplicationIcon 卡 UI
  * - 按 packageName 缓存 Drawable，过滤/复用时直接命中
  * - 回到主线程再设置图标，并用 bindingAdapterPosition 校验防止滚动复用串图
  */
@@ -26,7 +26,7 @@ class AppPickerAdapter(
 ) : RecyclerView.Adapter<AppPickerAdapter.VH>() {
 
     private var items: List<AppInfo> = emptyList()
-    private val executor = Executors.newFixedThreadPool(2)
+    private val executor = QuickLaunchExecutors.io
     private val mainHandler = Handler(Looper.getMainLooper())
     private val iconCache = mutableMapOf<String, Drawable>()
 

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.workbuddy.quicklaunch.data.Automation
+import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ItemAutomationBinding
 import java.util.Locale
@@ -67,10 +68,10 @@ class AutomationAdapter(
     }
 
     private fun repeatLabel(a: Automation): String = when (a.repeatMode) {
-        "daily" -> "每天"
-        "weekdays" -> "工作日"
-        "weekend" -> "周末"
-        "custom" -> customDaysLabel(a.repeatDays)
+        RepeatMode.DAILY -> "每天"
+        RepeatMode.WEEKDAYS -> "工作日"
+        RepeatMode.WEEKEND -> "周末"
+        RepeatMode.CUSTOM -> customDaysLabel(a.repeatDays)
         else -> "一次"
     }
 

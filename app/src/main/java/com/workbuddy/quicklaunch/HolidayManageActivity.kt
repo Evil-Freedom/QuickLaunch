@@ -107,10 +107,10 @@ class HolidayManageActivity : AppCompatActivity() {
     private fun askName(date: String, current: String) {
         val input = EditText(this).apply {
             setText(current)
-            hint = "名称（可选，如 元旦）"
+            hint = getString(R.string.holiday_name_hint)
         }
         AlertDialog.Builder(this)
-            .setTitle("添加 $date")
+            .setTitle(getString(R.string.holiday_add, date))
             .setView(input)
             .setPositiveButton("保存") { _, _ ->
                 val name = input.text.toString().trim()

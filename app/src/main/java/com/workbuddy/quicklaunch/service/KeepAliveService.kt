@@ -196,8 +196,8 @@ class KeepAliveService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, CHANNEL)
-            .setContentTitle("QuickLaunch 后台保活中")
-            .setContentText("保障自动启动规则不被系统回收")
+            .setContentTitle(applicationContext.getString(R.string.keepalive_notification_title))
+            .setContentText(applicationContext.getString(R.string.keepalive_notification_text))
             .setSmallIcon(R.drawable.ic_notification_stat)   // 强制单色透明通知图标，彻底避开旧缓存
             .setContentIntent(pi)
             .setPriority(NotificationCompat.PRIORITY_LOW)
