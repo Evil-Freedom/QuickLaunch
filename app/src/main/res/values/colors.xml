@@ -21,15 +21,17 @@
 
     <!-- 3. 选中组件 / 底部 Tab 选中 / 时间气泡 -->
     <color name="glass_active_bg">#1FFFFFFF</color>
-    <color name="glass_active_stroke">#33FFFFFF</color>
+    <color name="glass_active_stroke">#38FFFFFF</color>
     <color name="glass_active_text">#FFFFFF</color>
 
     <!-- 4. 未选中组件 / 充电 / WiFi / 蓝牙 / 底部未选中 Tab -->
-    <color name="glass_inactive_bg">#0FFFFFFF</color>
+    <color name="glass_inactive_bg">#0DFFFFFF</color>
+    <color name="glass_inactive_stroke">#14FFFFFF</color>
     <color name="glass_inactive_text">#C6C6C6</color>
 
     <!-- 5. 页面数据卡片 / 已启用规则模块 / 输入框容器 -->
-    <color name="glass_card_bg">#0DFFFFFF</color>
+    <color name="glass_card_bg">#0FFFFFFF</color>
+    <color name="glass_card_stroke">#1FFFFFFF</color>
 
     <!-- 6. 复选框边框 -->
     <color name="glass_checkbox_stroke">#38FFFFFF</color>
@@ -103,6 +105,10 @@
     <!-- 底部渐变遮罩（消除硬编码） -->
     <color name="bottom_gradient_solid">#0F0F0F</color>
     <color name="bottom_gradient_transparent">#000F0F0F</color>
+
+    <!-- 数据源状态 Badge 颜色 -->
+    <color name="glass_badge_success_text">#FFFFFF</color>
+    <color name="glass_badge_pending_text">#C6C6C6</color>
 
     <!-- 白色/黑色（仅供系统控件兜底，业务禁用） -->
     <color name="white">#FFFFFFFF</color>

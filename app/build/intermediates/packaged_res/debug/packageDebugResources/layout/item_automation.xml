@@ -1,109 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  规则卡片：优雅毛玻璃风格
-  - 启用态：发光描边 + 状态光点
-  - 停用态：低调磨砂
-  - 圆角 28dp，内边距增大呼吸感
+  规则卡片 — Glassmorphism UI 重构
+  - 左侧 40x40dp 应用图标（12dp 圆角）
+  - 顶部行：状态色点 + 名称 + 开关
+  - 胶囊标签行：触发条件语义化展示（定时/充电/WiFi/蓝牙）
+  - 整体使用 .glass-panel 磨砂背景
 -->
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginBottom="10dp"
-    android:background="@drawable/bg_card_elegant"
-    android:paddingLeft="18dp"
-    android:paddingTop="16dp"
-    android:paddingRight="18dp"
-    android:paddingBottom="16dp">
+    android:clickable="false"
+    android:focusable="false"
+    app:cardBackgroundColor="@color/glass_card_bg"
+    app:cardCornerRadius="@dimen/dark_radius_card"
+    app:cardElevation="0dp"
+    app:cardUseCompatPadding="false"
+    app:strokeColor="@color/glass_active_stroke"
+    app:strokeWidth="1dp">
 
-    <!-- 顶行：状态色点 + 名称 + 开关 -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
 
-        <!-- 状态光点容器（光晕 + 实心点） -->
-        <FrameLayout
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_marginEnd="12dp">
+        <!-- 左侧应用图标：40x40dp, 12dp 圆角 -->
+        <ImageView
+            android:id="@+id/ivAppIcon"
+            android:layout_width="@dimen/glass_icon_app_size"
+            android:layout_height="@dimen/glass_icon_app_size"
+            android:background="@drawable/bg_icon_squircle"
+            android:contentDescription="应用图标"
+            android:padding="2dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_tab_launch"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <View
-                android:id="@+id/vStatusGlow"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:layout_gravity="center"
-                android:background="@drawable/status_glow_on" />
-
-            <View
-                android:id="@+id/vStatusDot"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_gravity="center"
-                android:background="@drawable/status_dot_on" />
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/tvName"
+        <!-- 右侧垂直容器：顶行（状态 + 名称 + 开关）+ 标签行 -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif"
-            android:maxLines="1"
-            android:text="自动化名称"
-            android:textColor="@color/text_white"
-            android:textFontWeight="600"
-            android:textSize="16sp" />
+            android:layout_marginStart="14dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivAppIcon"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchEnabled"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleX="0.9"
-            android:scaleY="0.9"
-            android:thumbTint="@color/dark_switch_thumb"
-            android:trackTint="@color/dark_switch_track" />
-    </LinearLayout>
+            <!-- 顶行：状态色点 + 名称 + 开关 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-    <!-- 描述行 -->
-    <TextView
-        android:id="@+id/tvDesc"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="26dp"
-        android:layout_marginTop="6dp"
-        android:ellipsize="end"
-        android:fontFamily="sans-serif-light"
-        android:maxLines="2"
-        android:text="描述文字"
-        android:textColor="@color/text_tertiary"
-        android:textSize="13sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvName" />
+                <!-- 状态光点容器（光晕 + 实心点） -->
+                <FrameLayout
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="10dp">
 
-    <!-- 删除按钮 -->
-    <TextView
-        android:id="@+id/btnDelete"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_gravity="end"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/bg_card_dark"
-        android:fontFamily="sans-serif"
-        android:gravity="center"
-        android:minWidth="56dp"
-        android:paddingHorizontal="12dp"
-        android:text="删除"
-        android:textColor="@color/destructive"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDesc" />
+                    <View
+                        android:id="@+id/vStatusGlow"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/status_glow_on" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                    <View
+                        android:id="@+id/vStatusDot"
+                        android:layout_width="@dimen/glass_status_dot_size"
+                        android:layout_height="@dimen/glass_status_dot_size"
+                        android:layout_gravity="center"
+                        android:background="@drawable/status_dot_on" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif"
+                    android:maxLines="1"
+                    android:text="自动化名称"
+                    android:textColor="@color/text_white"
+                    android:textFontWeight="600"
+                    android:textSize="15sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:scaleX="0.9"
+                    android:scaleY="0.9"
+                    android:thumbTint="@color/dark_switch_thumb"
+                    android:trackTint="@color/dark_switch_track" />
+            </LinearLayout>
+
+            <!-- 语义化胶囊标签行：触发条件 -->
+            <LinearLayout
+                android:id="@+id/layoutTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tagTrigger"
+                    style="@style/Widget.QuickLaunch.Glass.Tag"
+                    android:text="定时 08:00" />
+            </LinearLayout>
+
+            <!-- 描述行 -->
+            <TextView
+                android:id="@+id/tvDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-light"
+                android:maxLines="1"
+                android:text="描述文字"
+                android:textColor="@color/text_tertiary"
+                android:textSize="12sp" />
+
+            <!-- 删除按钮 -->
+            <TextView
+                android:id="@+id/btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/glass_permission_btn_height"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_card_dark"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:minWidth="48dp"
+                android:paddingHorizontal="14dp"
+                android:text="删除"
+                android:textColor="@color/destructive"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -25,6 +25,7 @@ data class Automation(
     /** 仅对 TIME 触发生效：true 时跳过中国法定节假日（含调休休息日）不触发 */
     val skipHolidays: Boolean = false,
     val bluetoothName: String = "",
+    val wifiName: String = "",
     val enabled: Boolean = true,
     val createdAt: Long = System.currentTimeMillis(),
     /** 随机时间：true 时忽略 timeHour/timeMinute，改在 [windowStartMin, windowEndMin] 当天分钟区间里随机取触发时刻 */

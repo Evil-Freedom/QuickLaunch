@@ -34,7 +34,7 @@ public class AutomationDao_Impl(
     this.__db = __db
     this.__insertAdapterOfAutomation = object : EntityInsertAdapter<Automation>() {
       protected override fun createQuery(): String =
-          "INSERT OR ABORT INTO `automations` (`id`,`name`,`targetPackage`,`targetAppName`,`triggerType`,`timeHour`,`timeMinute`,`repeatMode`,`repeatDays`,`skipHolidays`,`bluetoothName`,`enabled`,`createdAt`,`randomWindow`,`windowStartMin`,`windowEndMin`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+          "INSERT OR ABORT INTO `automations` (`id`,`name`,`targetPackage`,`targetAppName`,`triggerType`,`timeHour`,`timeMinute`,`repeatMode`,`repeatDays`,`skipHolidays`,`bluetoothName`,`wifiName`,`enabled`,`createdAt`,`randomWindow`,`windowStartMin`,`windowEndMin`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
       protected override fun bind(statement: SQLiteStatement, entity: Automation) {
         statement.bindLong(1, entity.id)
@@ -49,13 +49,14 @@ public class AutomationDao_Impl(
         val _tmp: Int = if (entity.skipHolidays) 1 else 0
         statement.bindLong(10, _tmp.toLong())
         statement.bindText(11, entity.bluetoothName)
+        statement.bindText(12, entity.wifiName)
         val _tmp_1: Int = if (entity.enabled) 1 else 0
-        statement.bindLong(12, _tmp_1.toLong())
-        statement.bindLong(13, entity.createdAt)
+        statement.bindLong(13, _tmp_1.toLong())
+        statement.bindLong(14, entity.createdAt)
         val _tmp_2: Int = if (entity.randomWindow) 1 else 0
-        statement.bindLong(14, _tmp_2.toLong())
-        statement.bindLong(15, entity.windowStartMin.toLong())
-        statement.bindLong(16, entity.windowEndMin.toLong())
+        statement.bindLong(15, _tmp_2.toLong())
+        statement.bindLong(16, entity.windowStartMin.toLong())
+        statement.bindLong(17, entity.windowEndMin.toLong())
       }
     }
     this.__deleteAdapterOfAutomation = object : EntityDeleteOrUpdateAdapter<Automation>() {
@@ -67,7 +68,7 @@ public class AutomationDao_Impl(
     }
     this.__updateAdapterOfAutomation = object : EntityDeleteOrUpdateAdapter<Automation>() {
       protected override fun createQuery(): String =
-          "UPDATE OR ABORT `automations` SET `id` = ?,`name` = ?,`targetPackage` = ?,`targetAppName` = ?,`triggerType` = ?,`timeHour` = ?,`timeMinute` = ?,`repeatMode` = ?,`repeatDays` = ?,`skipHolidays` = ?,`bluetoothName` = ?,`enabled` = ?,`createdAt` = ?,`randomWindow` = ?,`windowStartMin` = ?,`windowEndMin` = ? WHERE `id` = ?"
+          "UPDATE OR ABORT `automations` SET `id` = ?,`name` = ?,`targetPackage` = ?,`targetAppName` = ?,`triggerType` = ?,`timeHour` = ?,`timeMinute` = ?,`repeatMode` = ?,`repeatDays` = ?,`skipHolidays` = ?,`bluetoothName` = ?,`wifiName` = ?,`enabled` = ?,`createdAt` = ?,`randomWindow` = ?,`windowStartMin` = ?,`windowEndMin` = ? WHERE `id` = ?"
 
       protected override fun bind(statement: SQLiteStatement, entity: Automation) {
         statement.bindLong(1, entity.id)
@@ -82,14 +83,15 @@ public class AutomationDao_Impl(
         val _tmp: Int = if (entity.skipHolidays) 1 else 0
         statement.bindLong(10, _tmp.toLong())
         statement.bindText(11, entity.bluetoothName)
+        statement.bindText(12, entity.wifiName)
         val _tmp_1: Int = if (entity.enabled) 1 else 0
-        statement.bindLong(12, _tmp_1.toLong())
-        statement.bindLong(13, entity.createdAt)
+        statement.bindLong(13, _tmp_1.toLong())
+        statement.bindLong(14, entity.createdAt)
         val _tmp_2: Int = if (entity.randomWindow) 1 else 0
-        statement.bindLong(14, _tmp_2.toLong())
-        statement.bindLong(15, entity.windowStartMin.toLong())
-        statement.bindLong(16, entity.windowEndMin.toLong())
-        statement.bindLong(17, entity.id)
+        statement.bindLong(15, _tmp_2.toLong())
+        statement.bindLong(16, entity.windowStartMin.toLong())
+        statement.bindLong(17, entity.windowEndMin.toLong())
+        statement.bindLong(18, entity.id)
       }
     }
   }
@@ -126,6 +128,7 @@ public class AutomationDao_Impl(
         val _columnIndexOfRepeatDays: Int = getColumnIndexOrThrow(_stmt, "repeatDays")
         val _columnIndexOfSkipHolidays: Int = getColumnIndexOrThrow(_stmt, "skipHolidays")
         val _columnIndexOfBluetoothName: Int = getColumnIndexOrThrow(_stmt, "bluetoothName")
+        val _columnIndexOfWifiName: Int = getColumnIndexOrThrow(_stmt, "wifiName")
         val _columnIndexOfEnabled: Int = getColumnIndexOrThrow(_stmt, "enabled")
         val _columnIndexOfCreatedAt: Int = getColumnIndexOrThrow(_stmt, "createdAt")
         val _columnIndexOfRandomWindow: Int = getColumnIndexOrThrow(_stmt, "randomWindow")
@@ -158,6 +161,8 @@ public class AutomationDao_Impl(
           _tmpSkipHolidays = _tmp != 0
           val _tmpBluetoothName: String
           _tmpBluetoothName = _stmt.getText(_columnIndexOfBluetoothName)
+          val _tmpWifiName: String
+          _tmpWifiName = _stmt.getText(_columnIndexOfWifiName)
           val _tmpEnabled: Boolean
           val _tmp_1: Int
           _tmp_1 = _stmt.getLong(_columnIndexOfEnabled).toInt()
@@ -173,7 +178,7 @@ public class AutomationDao_Impl(
           val _tmpWindowEndMin: Int
           _tmpWindowEndMin = _stmt.getLong(_columnIndexOfWindowEndMin).toInt()
           _item =
-              Automation(_tmpId,_tmpName,_tmpTargetPackage,_tmpTargetAppName,_tmpTriggerType,_tmpTimeHour,_tmpTimeMinute,_tmpRepeatMode,_tmpRepeatDays,_tmpSkipHolidays,_tmpBluetoothName,_tmpEnabled,_tmpCreatedAt,_tmpRandomWindow,_tmpWindowStartMin,_tmpWindowEndMin)
+              Automation(_tmpId,_tmpName,_tmpTargetPackage,_tmpTargetAppName,_tmpTriggerType,_tmpTimeHour,_tmpTimeMinute,_tmpRepeatMode,_tmpRepeatDays,_tmpSkipHolidays,_tmpBluetoothName,_tmpWifiName,_tmpEnabled,_tmpCreatedAt,_tmpRandomWindow,_tmpWindowStartMin,_tmpWindowEndMin)
           _result.add(_item)
         }
         _result
@@ -201,6 +206,7 @@ public class AutomationDao_Impl(
         val _columnIndexOfRepeatDays: Int = getColumnIndexOrThrow(_stmt, "repeatDays")
         val _columnIndexOfSkipHolidays: Int = getColumnIndexOrThrow(_stmt, "skipHolidays")
         val _columnIndexOfBluetoothName: Int = getColumnIndexOrThrow(_stmt, "bluetoothName")
+        val _columnIndexOfWifiName: Int = getColumnIndexOrThrow(_stmt, "wifiName")
         val _columnIndexOfEnabled: Int = getColumnIndexOrThrow(_stmt, "enabled")
         val _columnIndexOfCreatedAt: Int = getColumnIndexOrThrow(_stmt, "createdAt")
         val _columnIndexOfRandomWindow: Int = getColumnIndexOrThrow(_stmt, "randomWindow")
@@ -232,6 +238,8 @@ public class AutomationDao_Impl(
           _tmpSkipHolidays = _tmp != 0
           val _tmpBluetoothName: String
           _tmpBluetoothName = _stmt.getText(_columnIndexOfBluetoothName)
+          val _tmpWifiName: String
+          _tmpWifiName = _stmt.getText(_columnIndexOfWifiName)
           val _tmpEnabled: Boolean
           val _tmp_1: Int
           _tmp_1 = _stmt.getLong(_columnIndexOfEnabled).toInt()
@@ -247,7 +255,7 @@ public class AutomationDao_Impl(
           val _tmpWindowEndMin: Int
           _tmpWindowEndMin = _stmt.getLong(_columnIndexOfWindowEndMin).toInt()
           _result =
-              Automation(_tmpId,_tmpName,_tmpTargetPackage,_tmpTargetAppName,_tmpTriggerType,_tmpTimeHour,_tmpTimeMinute,_tmpRepeatMode,_tmpRepeatDays,_tmpSkipHolidays,_tmpBluetoothName,_tmpEnabled,_tmpCreatedAt,_tmpRandomWindow,_tmpWindowStartMin,_tmpWindowEndMin)
+              Automation(_tmpId,_tmpName,_tmpTargetPackage,_tmpTargetAppName,_tmpTriggerType,_tmpTimeHour,_tmpTimeMinute,_tmpRepeatMode,_tmpRepeatDays,_tmpSkipHolidays,_tmpBluetoothName,_tmpWifiName,_tmpEnabled,_tmpCreatedAt,_tmpRandomWindow,_tmpWindowStartMin,_tmpWindowEndMin)
         } else {
           _result = null
         }
@@ -276,6 +284,7 @@ public class AutomationDao_Impl(
         val _columnIndexOfRepeatDays: Int = getColumnIndexOrThrow(_stmt, "repeatDays")
         val _columnIndexOfSkipHolidays: Int = getColumnIndexOrThrow(_stmt, "skipHolidays")
         val _columnIndexOfBluetoothName: Int = getColumnIndexOrThrow(_stmt, "bluetoothName")
+        val _columnIndexOfWifiName: Int = getColumnIndexOrThrow(_stmt, "wifiName")
         val _columnIndexOfEnabled: Int = getColumnIndexOrThrow(_stmt, "enabled")
         val _columnIndexOfCreatedAt: Int = getColumnIndexOrThrow(_stmt, "createdAt")
         val _columnIndexOfRandomWindow: Int = getColumnIndexOrThrow(_stmt, "randomWindow")
@@ -308,6 +317,8 @@ public class AutomationDao_Impl(
           _tmpSkipHolidays = _tmp != 0
           val _tmpBluetoothName: String
           _tmpBluetoothName = _stmt.getText(_columnIndexOfBluetoothName)
+          val _tmpWifiName: String
+          _tmpWifiName = _stmt.getText(_columnIndexOfWifiName)
           val _tmpEnabled: Boolean
           val _tmp_1: Int
           _tmp_1 = _stmt.getLong(_columnIndexOfEnabled).toInt()
@@ -323,7 +334,7 @@ public class AutomationDao_Impl(
           val _tmpWindowEndMin: Int
           _tmpWindowEndMin = _stmt.getLong(_columnIndexOfWindowEndMin).toInt()
           _item =
-              Automation(_tmpId,_tmpName,_tmpTargetPackage,_tmpTargetAppName,_tmpTriggerType,_tmpTimeHour,_tmpTimeMinute,_tmpRepeatMode,_tmpRepeatDays,_tmpSkipHolidays,_tmpBluetoothName,_tmpEnabled,_tmpCreatedAt,_tmpRandomWindow,_tmpWindowStartMin,_tmpWindowEndMin)
+              Automation(_tmpId,_tmpName,_tmpTargetPackage,_tmpTargetAppName,_tmpTriggerType,_tmpTimeHour,_tmpTimeMinute,_tmpRepeatMode,_tmpRepeatDays,_tmpSkipHolidays,_tmpBluetoothName,_tmpWifiName,_tmpEnabled,_tmpCreatedAt,_tmpRandomWindow,_tmpWindowStartMin,_tmpWindowEndMin)
           _result.add(_item)
         }
         _result

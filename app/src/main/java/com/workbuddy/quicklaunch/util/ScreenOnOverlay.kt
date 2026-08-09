@@ -32,6 +32,9 @@ object ScreenOnOverlay {
     /** displayId -> 已挂载的占位 View，便于按屏增删。 */
     private val views = mutableMapOf<Int, View>()
 
+    /** displayId -> 缓存的 Display Context，避免每次 sync 重复创建。 */
+    private val displayContexts = mutableMapOf<Int, Context>()
+
     private val main = Handler(Looper.getMainLooper())
 
     fun canDraw(context: Context): Boolean = Settings.canDrawOverlays(context)
@@ -86,6 +89,7 @@ object ScreenOnOverlay {
     /** 全部摘除，关闭开关或服务销毁时调用。 */
     fun clear(context: Context) = onMain {
         views.keys.toList().forEach { remove(it) }
+        displayContexts.clear()
     }
 
     fun isActive(): Boolean = views.isNotEmpty()
@@ -93,7 +97,9 @@ object ScreenOnOverlay {
     private fun attach(context: Context, display: Display) {
         runCatching {
             // 必须用目标 display 的 context 取 WindowManager，否则窗口会落到默认屏上
-            val dctx = context.createDisplayContext(display)
+            val dctx = displayContexts.getOrPut(display.displayId) {
+                context.createDisplayContext(display)
+            }
             val wm = dctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val v = View(dctx)
             wm.addView(v, params())
@@ -106,6 +112,8 @@ object ScreenOnOverlay {
 
     private fun remove(displayId: Int) {
         val v = views.remove(displayId) ?: return
+        // 清理缓存的 Context
+        displayContexts.remove(displayId)
         runCatching {
             val wm = v.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             wm.removeViewImmediate(v)

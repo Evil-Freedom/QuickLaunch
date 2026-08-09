@@ -91,4 +91,15 @@
          ═══════════════════════════════════════════════════════════════ -->
     <string name="launch_channel_name">应用启动</string>
     <string name="launch_notification_title">正在启动 %1$s</string>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Glassmorphism UI 重构 — 新增文案
+         ═══════════════════════════════════════════════════════════════ -->
+    <string name="glass_permission_warning_title">部分权限未全部开启</string>
+    <string name="glass_permission_warning_subtitle">定时规则可能无法正常触发</string>
+    <string name="glass_go_auth">去开启</string>
+    <string name="glass_sync_success">成功</string>
+    <string name="glass_sync_unsynced">未同步</string>
+    <string name="glass_source_status">数据源状态</string>
+    <string name="glass_add_custom_source">添加自定义数据源</string>
 </resources>

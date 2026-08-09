@@ -15,7 +15,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -27,6 +26,12 @@ public final class ActivityCreateBinding implements ViewBinding {
 
   @NonNull
   public final MaterialButton btnPickApp;
+
+  @NonNull
+  public final MaterialButton btnPickBluetooth;
+
+  @NonNull
+  public final MaterialButton btnPickWifi;
 
   @NonNull
   public final MaterialButton btnSave;
@@ -74,12 +79,6 @@ public final class ActivityCreateBinding implements ViewBinding {
   public final TextView chipTrigger3;
 
   @NonNull
-  public final TextInputEditText etBtName;
-
-  @NonNull
-  public final ConstraintLayout layoutBt;
-
-  @NonNull
   public final LinearLayout layoutCustomDays;
 
   @NonNull
@@ -95,10 +94,10 @@ public final class ActivityCreateBinding implements ViewBinding {
   public final ConstraintLayout layoutTrigger;
 
   @NonNull
-  public final HorizontalScrollView scrollRepeat;
+  public final ConstraintLayout layoutTriggerGrid;
 
   @NonNull
-  public final HorizontalScrollView scrollTrigger;
+  public final HorizontalScrollView scrollRepeat;
 
   @NonNull
   public final TextView tbDay0;
@@ -131,22 +130,24 @@ public final class ActivityCreateBinding implements ViewBinding {
   public final TextView tvTriggerTitle;
 
   private ActivityCreateBinding(@NonNull ScrollView rootView, @NonNull MaterialButton btnPickApp,
+      @NonNull MaterialButton btnPickBluetooth, @NonNull MaterialButton btnPickWifi,
       @NonNull MaterialButton btnSave, @NonNull TextView btnTime, @NonNull TextView btnWinEnd,
       @NonNull TextView btnWinStart, @NonNull CheckBox cbRandom, @NonNull CheckBox cbSkipHolidays,
       @NonNull TextView chipRepeat0, @NonNull TextView chipRepeat1, @NonNull TextView chipRepeat2,
       @NonNull TextView chipRepeat3, @NonNull TextView chipRepeat4, @NonNull TextView chipTrigger0,
       @NonNull TextView chipTrigger1, @NonNull TextView chipTrigger2,
-      @NonNull TextView chipTrigger3, @NonNull TextInputEditText etBtName,
-      @NonNull ConstraintLayout layoutBt, @NonNull LinearLayout layoutCustomDays,
+      @NonNull TextView chipTrigger3, @NonNull LinearLayout layoutCustomDays,
       @NonNull ConstraintLayout layoutOptions, @NonNull LinearLayout layoutRandom,
       @NonNull ConstraintLayout layoutTime, @NonNull ConstraintLayout layoutTrigger,
-      @NonNull HorizontalScrollView scrollRepeat, @NonNull HorizontalScrollView scrollTrigger,
+      @NonNull ConstraintLayout layoutTriggerGrid, @NonNull HorizontalScrollView scrollRepeat,
       @NonNull TextView tbDay0, @NonNull TextView tbDay1, @NonNull TextView tbDay2,
       @NonNull TextView tbDay3, @NonNull TextView tbDay4, @NonNull TextView tbDay5,
       @NonNull TextView tbDay6, @NonNull TextView tvRepeatTitle, @NonNull TextView tvTimeTitle,
       @NonNull TextView tvTriggerTitle) {
     this.rootView = rootView;
     this.btnPickApp = btnPickApp;
+    this.btnPickBluetooth = btnPickBluetooth;
+    this.btnPickWifi = btnPickWifi;
     this.btnSave = btnSave;
     this.btnTime = btnTime;
     this.btnWinEnd = btnWinEnd;
@@ -162,15 +163,13 @@ public final class ActivityCreateBinding implements ViewBinding {
     this.chipTrigger1 = chipTrigger1;
     this.chipTrigger2 = chipTrigger2;
     this.chipTrigger3 = chipTrigger3;
-    this.etBtName = etBtName;
-    this.layoutBt = layoutBt;
     this.layoutCustomDays = layoutCustomDays;
     this.layoutOptions = layoutOptions;
     this.layoutRandom = layoutRandom;
     this.layoutTime = layoutTime;
     this.layoutTrigger = layoutTrigger;
+    this.layoutTriggerGrid = layoutTriggerGrid;
     this.scrollRepeat = scrollRepeat;
-    this.scrollTrigger = scrollTrigger;
     this.tbDay0 = tbDay0;
     this.tbDay1 = tbDay1;
     this.tbDay2 = tbDay2;
@@ -213,6 +212,18 @@ public final class ActivityCreateBinding implements ViewBinding {
       id = R.id.btnPickApp;
       MaterialButton btnPickApp = ViewBindings.findChildViewById(rootView, id);
       if (btnPickApp == null) {
+        break missingId;
+      }
+
+      id = R.id.btnPickBluetooth;
+      MaterialButton btnPickBluetooth = ViewBindings.findChildViewById(rootView, id);
+      if (btnPickBluetooth == null) {
+        break missingId;
+      }
+
+      id = R.id.btnPickWifi;
+      MaterialButton btnPickWifi = ViewBindings.findChildViewById(rootView, id);
+      if (btnPickWifi == null) {
         break missingId;
       }
 
@@ -306,18 +317,6 @@ public final class ActivityCreateBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.etBtName;
-      TextInputEditText etBtName = ViewBindings.findChildViewById(rootView, id);
-      if (etBtName == null) {
-        break missingId;
-      }
-
-      id = R.id.layoutBt;
-      ConstraintLayout layoutBt = ViewBindings.findChildViewById(rootView, id);
-      if (layoutBt == null) {
-        break missingId;
-      }
-
       id = R.id.layoutCustomDays;
       LinearLayout layoutCustomDays = ViewBindings.findChildViewById(rootView, id);
       if (layoutCustomDays == null) {
@@ -348,15 +347,15 @@ public final class ActivityCreateBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.scrollRepeat;
-      HorizontalScrollView scrollRepeat = ViewBindings.findChildViewById(rootView, id);
-      if (scrollRepeat == null) {
+      id = R.id.layoutTriggerGrid;
+      ConstraintLayout layoutTriggerGrid = ViewBindings.findChildViewById(rootView, id);
+      if (layoutTriggerGrid == null) {
         break missingId;
       }
 
-      id = R.id.scrollTrigger;
-      HorizontalScrollView scrollTrigger = ViewBindings.findChildViewById(rootView, id);
-      if (scrollTrigger == null) {
+      id = R.id.scrollRepeat;
+      HorizontalScrollView scrollRepeat = ViewBindings.findChildViewById(rootView, id);
+      if (scrollRepeat == null) {
         break missingId;
       }
 
@@ -420,12 +419,12 @@ public final class ActivityCreateBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityCreateBinding((ScrollView) rootView, btnPickApp, btnSave, btnTime,
-          btnWinEnd, btnWinStart, cbRandom, cbSkipHolidays, chipRepeat0, chipRepeat1, chipRepeat2,
-          chipRepeat3, chipRepeat4, chipTrigger0, chipTrigger1, chipTrigger2, chipTrigger3,
-          etBtName, layoutBt, layoutCustomDays, layoutOptions, layoutRandom, layoutTime,
-          layoutTrigger, scrollRepeat, scrollTrigger, tbDay0, tbDay1, tbDay2, tbDay3, tbDay4,
-          tbDay5, tbDay6, tvRepeatTitle, tvTimeTitle, tvTriggerTitle);
+      return new ActivityCreateBinding((ScrollView) rootView, btnPickApp, btnPickBluetooth,
+          btnPickWifi, btnSave, btnTime, btnWinEnd, btnWinStart, cbRandom, cbSkipHolidays,
+          chipRepeat0, chipRepeat1, chipRepeat2, chipRepeat3, chipRepeat4, chipTrigger0,
+          chipTrigger1, chipTrigger2, chipTrigger3, layoutCustomDays, layoutOptions, layoutRandom,
+          layoutTime, layoutTrigger, layoutTriggerGrid, scrollRepeat, tbDay0, tbDay1, tbDay2,
+          tbDay3, tbDay4, tbDay5, tbDay6, tvRepeatTitle, tvTimeTitle, tvTriggerTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

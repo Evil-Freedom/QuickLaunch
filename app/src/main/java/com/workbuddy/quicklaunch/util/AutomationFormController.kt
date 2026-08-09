@@ -72,9 +72,9 @@ class AutomationFormController(
         val cbSkipHolidays: CheckBox,
         val layoutRandom: View,
         val layoutTime: View,
-        val layoutBt: View,
+        val btnPickBluetooth: MaterialButton,
+        val btnPickWifi: MaterialButton,
         val layoutCustomDays: View,
-        val etBtName: TextView,
         val btnSave: MaterialButton,
         val triggerChips: List<TextView>,
         val repeatChips: List<TextView>,
@@ -98,6 +98,8 @@ class AutomationFormController(
     var winStartMinute = 30
     var winEndHour = 8
     var winEndMinute = 50
+    var bluetoothName: String = ""
+    var wifiName: String = ""
 
     // ── 状态查询 ─────────────────────────────────────────────────
     fun currentTriggerType(): String = when (selectedTriggerIndex) {
@@ -285,7 +287,8 @@ class AutomationFormController(
             randomWindow = randomWindow,
             windowStartMin = wsMin,
             windowEndMin = weMin,
-            bluetoothName = views.etBtName.text.toString().trim()
+            bluetoothName = bluetoothName,
+            wifiName = wifiName,
         )
 
         views.btnSave.isEnabled = false
@@ -319,7 +322,8 @@ class AutomationFormController(
         selectedDays.fill(false)
         randomWindow = false
         skipHolidays = false
-        views.etBtName.text = ""
+        bluetoothName = ""
+        wifiName = ""
         val now = Calendar.getInstance()
         hour = now.get(Calendar.HOUR_OF_DAY)
         minute = now.get(Calendar.MINUTE)

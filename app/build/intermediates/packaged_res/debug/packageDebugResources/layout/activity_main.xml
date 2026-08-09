@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  控制中心主框架（Edge-to-Edge 沉浸式 + 纯平漂浮药丸底栏）
-
+  控制中心主框架 — Glassmorphism UI 重构
   - 顶部无 Tab：标题与内容顶到状态栏下方
   - 主体：ViewPager2 左右滑动，复用 view_launch / view_sync
-  - 底部：纯平无遮罩，两个独立漂浮胶囊药丸
+  - 底部：纯平无遮罩，两个独立漂浮玻璃药丸
       [ ic_home  快捷启动 ]  [ ic_source  节假日与数据源 ]
-      选中 = 白磨砂 + 细白边框；未选中 = 普通暗卡片
+      选中 = .glass-active（白磨砂 + 细白边框）；未选中 = .glass-inactive（暗磨砂）
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/glass_bg_root">
 
-    <!-- ═══ 主体：ViewPager2（页面由 MainActivity 注入，复用原 view_launch / view_sync） ═══ -->
+    <!-- ═══ 主体：ViewPager2 ═══ -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="0dp"
@@ -24,30 +24,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- ═══ 底部暗黑渐变遮罩：淡化滚动到底部的内容，避免文字穿透悬浮胶囊 ═══ -->
+    <!-- ═══ 底部：带渐变遮罩的漂浮药丸容器 ═══ -->
     <View
-        android:id="@+id/bottomGradientShadow"
+        android:id="@+id/bottomScrim"
         android:layout_width="0dp"
         android:layout_height="120dp"
-        android:background="@drawable/bg_bottom_gradient"
+        android:background="@drawable/bg_bottom_scrim"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- ═══ 底部：纯平无遮罩漂浮药丸 ═══ -->
     <LinearLayout
         android:id="@+id/floatingBottomBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:background="@android:color/transparent"
+        android:gravity="center"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <!-- 快捷启动 -->
+        <!-- 快捷启动 Tab -->
         <LinearLayout
             android:id="@+id/bottomNavLaunch"
             android:layout_width="wrap_content"
@@ -65,8 +65,8 @@
                 android:layout_height="@dimen/dark_floating_bar_item_icon"
                 android:background="@drawable/bg_nav_icon_circle"
                 android:contentDescription="快捷启动"
-                android:scaleType="centerInside"
                 android:padding="5dp"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_tab_launch"
                 app:tint="@color/item_active_text" />
 
@@ -80,10 +80,9 @@
                 android:textColor="@color/item_active_text"
                 android:textFontWeight="500"
                 android:textSize="14sp" />
-
         </LinearLayout>
 
-        <!-- 节假日与数据源 -->
+        <!-- 节假日与数据源 Tab -->
         <LinearLayout
             android:id="@+id/bottomNavSync"
             android:layout_width="wrap_content"
@@ -100,8 +99,8 @@
                 android:layout_height="@dimen/dark_floating_bar_item_icon"
                 android:background="@drawable/bg_nav_icon_circle"
                 android:contentDescription="节假日与数据源"
-                android:scaleType="centerInside"
                 android:padding="5dp"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_tab_sync"
                 app:tint="@color/item_inactive_text" />
 
@@ -114,7 +113,6 @@
                 android:text="节假日与数据源"
                 android:textColor="@color/item_inactive_text"
                 android:textSize="14sp" />
-
         </LinearLayout>
     </LinearLayout>
 

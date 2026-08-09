@@ -51,14 +51,16 @@
     <color name="dark_text_tertiary">@color/text_tertiary</color>
     <color name="destructive">#FF453A</color>
     <color name="glass_active_bg">#1FFFFFFF</color>
-    <color name="glass_active_stroke">#33FFFFFF</color>
+    <color name="glass_active_stroke">#38FFFFFF</color>
     <color name="glass_active_text">#FFFFFF</color>
     <color name="glass_bg_root">#0C0C0C</color>
     <color name="glass_btn_primary_bg">#FFFFFF</color>
     <color name="glass_btn_primary_text">#1A1A1A</color>
-    <color name="glass_card_bg">#0DFFFFFF</color>
+    <color name="glass_card_bg">#0FFFFFFF</color>
+    <color name="glass_card_stroke">#1FFFFFFF</color>
     <color name="glass_checkbox_stroke">#38FFFFFF</color>
-    <color name="glass_inactive_bg">#0FFFFFFF</color>
+    <color name="glass_inactive_bg">#0DFFFFFF</color>
+    <color name="glass_inactive_stroke">#14FFFFFF</color>
     <color name="glass_inactive_text">#C6C6C6</color>
     <color name="item_active_bg">@color/glass_active_bg</color>
     <color name="item_active_stroke">@color/glass_active_stroke</color>
@@ -91,6 +93,15 @@
     <dimen name="dark_stroke_width">1px</dimen>
     <dimen name="glass_button_height">46dp</dimen>
     <dimen name="glass_button_radius">23dp</dimen>
+    <dimen name="glass_icon_app_radius">12dp</dimen>
+    <dimen name="glass_icon_app_size">40dp</dimen>
+    <dimen name="glass_permission_btn_height">32dp</dimen>
+    <dimen name="glass_permission_card_icon">20dp</dimen>
+    <dimen name="glass_status_badge_height">24dp</dimen>
+    <dimen name="glass_status_badge_radius">12dp</dimen>
+    <dimen name="glass_status_dot_size">8dp</dimen>
+    <dimen name="glass_tag_height">28dp</dimen>
+    <dimen name="glass_tag_radius">14dp</dimen>
     <dimen name="glass_time_bubble_height">40dp</dimen>
     <dimen name="glass_time_bubble_radius">20dp</dimen>
     <dimen name="ios_border_hairline">1px</dimen>
@@ -137,6 +148,13 @@
     <string name="create_pick_day">请至少选择一天</string>
     <string name="create_save_failed">保存失败，请重试</string>
     <string name="create_saved">已保存</string>
+    <string name="glass_add_custom_source">添加自定义数据源</string>
+    <string name="glass_go_auth">去开启</string>
+    <string name="glass_permission_warning_subtitle">定时规则可能无法正常触发</string>
+    <string name="glass_permission_warning_title">部分权限未全部开启</string>
+    <string name="glass_source_status">数据源状态</string>
+    <string name="glass_sync_success">成功</string>
+    <string name="glass_sync_unsynced">未同步</string>
     <string name="holiday_add">添加 %1$s</string>
     <string name="holiday_name_hint">名称（可选，如 元旦）</string>
     <string name="keepalive_channel_name">保活服务</string>
@@ -736,6 +754,10 @@
         <item name="android:padding">0dp</item>
         <item name="android:layout_marginHorizontal">4dp</item>
     </style>
+    <style name="Widget.QuickLaunch.Glass.AppIcon" parent="ShapeAppearance.Material3.Corner.Small">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/glass_icon_app_radius</item>
+    </style>
     <style name="Widget.QuickLaunch.Glass.Card" parent="Widget.Material3.CardView.Filled">
         <item name="cardCornerRadius">@dimen/dark_radius_card</item>
         <item name="cardElevation">0dp</item>
@@ -745,6 +767,54 @@
         <item name="cardCornerRadius">@dimen/dark_radius_card</item>
         <item name="cardElevation">0dp</item>
         <item name="cardBackgroundColor">@color/dark_card_primary</item>
+    </style>
+    <style name="Widget.QuickLaunch.Glass.PermissionButton" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/glass_button_radius</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:backgroundTint">@color/glass_btn_primary_bg</item>
+        <item name="android:textColor">@color/glass_btn_primary_text</item>
+        <item name="android:minHeight">@dimen/glass_permission_btn_height</item>
+        <item name="android:minWidth">72dp</item>
+        <item name="android:paddingHorizontal">16dp</item>
+    </style>
+    <style name="Widget.QuickLaunch.Glass.PermissionCard" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/glass_card_bg</item>
+        <item name="android:layout_marginHorizontal">16dp</item>
+        <item name="android:layout_marginTop">12dp</item>
+    </style>
+    <style name="Widget.QuickLaunch.Glass.StatusBadge" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/glass_status_badge_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="Widget.QuickLaunch.Glass.StatusBadge.Pending" parent="Widget.QuickLaunch.Glass.StatusBadge">
+        <item name="android:background">@drawable/bg_badge_pending</item>
+        <item name="android:textColor">@color/glass_inactive_text</item>
+    </style>
+    <style name="Widget.QuickLaunch.Glass.StatusBadge.Success" parent="Widget.QuickLaunch.Glass.StatusBadge">
+        <item name="android:background">@drawable/bg_badge_success</item>
+        <item name="android:textColor">@color/glass_active_text</item>
+    </style>
+    <style name="Widget.QuickLaunch.Glass.Tag" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/glass_tag_height</item>
+        <item name="android:layout_marginEnd">6dp</item>
+        <item name="android:background">@drawable/bg_dark_capsule_unselected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:textColor">@color/glass_inactive_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="Widget.QuickLaunch.Group.Card" parent="Widget.Material3.CardView.Filled">
         <item name="cardCornerRadius">@dimen/dark_radius_card</item>

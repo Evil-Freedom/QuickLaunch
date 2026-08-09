@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 成功状态 Badge 背景：绿色微光 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#1AFF453A" />
+    <corners android:radius="@dimen/glass_status_badge_radius" />
+    <stroke
+        android:width="0.5dp"
+        android:color="#33FF453A" />
+</shape>

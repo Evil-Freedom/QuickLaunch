@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -16,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -27,7 +27,16 @@ public final class ViewLaunchBinding implements ViewBinding {
   private final NestedScrollView rootView;
 
   @NonNull
+  public final TextView btnGoAuth;
+
+  @NonNull
   public final MaterialButton btnPickApp;
+
+  @NonNull
+  public final MaterialButton btnPickBluetooth;
+
+  @NonNull
+  public final MaterialButton btnPickWifi;
 
   @NonNull
   public final MaterialButton btnSaveRule;
@@ -40,6 +49,9 @@ public final class ViewLaunchBinding implements ViewBinding {
 
   @NonNull
   public final TextView btnWinStart;
+
+  @NonNull
+  public final ConstraintLayout cardPermission;
 
   @NonNull
   public final CheckBox cbRandom;
@@ -75,22 +87,16 @@ public final class ViewLaunchBinding implements ViewBinding {
   public final TextView chipTrigger3;
 
   @NonNull
-  public final View dashboardDivider;
-
-  @NonNull
-  public final TextInputEditText etBtName;
+  public final ImageView ivWarnIcon;
 
   @NonNull
   public final NestedScrollView launchScroll;
 
   @NonNull
-  public final ConstraintLayout layoutBt;
-
-  @NonNull
   public final LinearLayout layoutCustomDays;
 
   @NonNull
-  public final ConstraintLayout layoutDashboard;
+  public final LinearLayout layoutDashboard;
 
   @NonNull
   public final LinearLayout layoutRandom;
@@ -144,6 +150,9 @@ public final class ViewLaunchBinding implements ViewBinding {
   public final TextView tvDashboardNext;
 
   @NonNull
+  public final TextView tvPermissionMsg;
+
+  @NonNull
   public final TextView tvRepeatTitle;
 
   @NonNull
@@ -161,16 +170,17 @@ public final class ViewLaunchBinding implements ViewBinding {
   @NonNull
   public final TextView tvTriggerTitle;
 
-  private ViewLaunchBinding(@NonNull NestedScrollView rootView, @NonNull MaterialButton btnPickApp,
-      @NonNull MaterialButton btnSaveRule, @NonNull TextView btnTime, @NonNull TextView btnWinEnd,
-      @NonNull TextView btnWinStart, @NonNull CheckBox cbRandom, @NonNull CheckBox cbSkipHolidays,
-      @NonNull TextView chipRepeat0, @NonNull TextView chipRepeat1, @NonNull TextView chipRepeat2,
-      @NonNull TextView chipRepeat3, @NonNull TextView chipRepeat4, @NonNull TextView chipTrigger0,
-      @NonNull TextView chipTrigger1, @NonNull TextView chipTrigger2,
-      @NonNull TextView chipTrigger3, @NonNull View dashboardDivider,
-      @NonNull TextInputEditText etBtName, @NonNull NestedScrollView launchScroll,
-      @NonNull ConstraintLayout layoutBt, @NonNull LinearLayout layoutCustomDays,
-      @NonNull ConstraintLayout layoutDashboard, @NonNull LinearLayout layoutRandom,
+  private ViewLaunchBinding(@NonNull NestedScrollView rootView, @NonNull TextView btnGoAuth,
+      @NonNull MaterialButton btnPickApp, @NonNull MaterialButton btnPickBluetooth,
+      @NonNull MaterialButton btnPickWifi, @NonNull MaterialButton btnSaveRule,
+      @NonNull TextView btnTime, @NonNull TextView btnWinEnd, @NonNull TextView btnWinStart,
+      @NonNull ConstraintLayout cardPermission, @NonNull CheckBox cbRandom,
+      @NonNull CheckBox cbSkipHolidays, @NonNull TextView chipRepeat0,
+      @NonNull TextView chipRepeat1, @NonNull TextView chipRepeat2, @NonNull TextView chipRepeat3,
+      @NonNull TextView chipRepeat4, @NonNull TextView chipTrigger0, @NonNull TextView chipTrigger1,
+      @NonNull TextView chipTrigger2, @NonNull TextView chipTrigger3, @NonNull ImageView ivWarnIcon,
+      @NonNull NestedScrollView launchScroll, @NonNull LinearLayout layoutCustomDays,
+      @NonNull LinearLayout layoutDashboard, @NonNull LinearLayout layoutRandom,
       @NonNull ConstraintLayout layoutRulesEmpty, @NonNull ConstraintLayout layoutTime,
       @NonNull ConstraintLayout layoutTriggerGrid, @NonNull RecyclerView rvRules,
       @NonNull HorizontalScrollView scrollRepeat, @NonNull TextView tbDay0,
@@ -178,15 +188,19 @@ public final class ViewLaunchBinding implements ViewBinding {
       @NonNull TextView tbDay4, @NonNull TextView tbDay5, @NonNull TextView tbDay6,
       @NonNull TextView tvDashboardEnabled, @NonNull TextView tvDashboardLabelEnabled,
       @NonNull TextView tvDashboardLabelNext, @NonNull TextView tvDashboardNext,
-      @NonNull TextView tvRepeatTitle, @NonNull TextView tvRuleListTitle,
-      @NonNull TextView tvRulesEmpty, @NonNull TextView tvTimeTitle, @NonNull TextView tvTitle,
-      @NonNull TextView tvTriggerTitle) {
+      @NonNull TextView tvPermissionMsg, @NonNull TextView tvRepeatTitle,
+      @NonNull TextView tvRuleListTitle, @NonNull TextView tvRulesEmpty,
+      @NonNull TextView tvTimeTitle, @NonNull TextView tvTitle, @NonNull TextView tvTriggerTitle) {
     this.rootView = rootView;
+    this.btnGoAuth = btnGoAuth;
     this.btnPickApp = btnPickApp;
+    this.btnPickBluetooth = btnPickBluetooth;
+    this.btnPickWifi = btnPickWifi;
     this.btnSaveRule = btnSaveRule;
     this.btnTime = btnTime;
     this.btnWinEnd = btnWinEnd;
     this.btnWinStart = btnWinStart;
+    this.cardPermission = cardPermission;
     this.cbRandom = cbRandom;
     this.cbSkipHolidays = cbSkipHolidays;
     this.chipRepeat0 = chipRepeat0;
@@ -198,10 +212,8 @@ public final class ViewLaunchBinding implements ViewBinding {
     this.chipTrigger1 = chipTrigger1;
     this.chipTrigger2 = chipTrigger2;
     this.chipTrigger3 = chipTrigger3;
-    this.dashboardDivider = dashboardDivider;
-    this.etBtName = etBtName;
+    this.ivWarnIcon = ivWarnIcon;
     this.launchScroll = launchScroll;
-    this.layoutBt = layoutBt;
     this.layoutCustomDays = layoutCustomDays;
     this.layoutDashboard = layoutDashboard;
     this.layoutRandom = layoutRandom;
@@ -221,6 +233,7 @@ public final class ViewLaunchBinding implements ViewBinding {
     this.tvDashboardLabelEnabled = tvDashboardLabelEnabled;
     this.tvDashboardLabelNext = tvDashboardLabelNext;
     this.tvDashboardNext = tvDashboardNext;
+    this.tvPermissionMsg = tvPermissionMsg;
     this.tvRepeatTitle = tvRepeatTitle;
     this.tvRuleListTitle = tvRuleListTitle;
     this.tvRulesEmpty = tvRulesEmpty;
@@ -256,9 +269,27 @@ public final class ViewLaunchBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btnGoAuth;
+      TextView btnGoAuth = ViewBindings.findChildViewById(rootView, id);
+      if (btnGoAuth == null) {
+        break missingId;
+      }
+
       id = R.id.btnPickApp;
       MaterialButton btnPickApp = ViewBindings.findChildViewById(rootView, id);
       if (btnPickApp == null) {
+        break missingId;
+      }
+
+      id = R.id.btnPickBluetooth;
+      MaterialButton btnPickBluetooth = ViewBindings.findChildViewById(rootView, id);
+      if (btnPickBluetooth == null) {
+        break missingId;
+      }
+
+      id = R.id.btnPickWifi;
+      MaterialButton btnPickWifi = ViewBindings.findChildViewById(rootView, id);
+      if (btnPickWifi == null) {
         break missingId;
       }
 
@@ -283,6 +314,12 @@ public final class ViewLaunchBinding implements ViewBinding {
       id = R.id.btnWinStart;
       TextView btnWinStart = ViewBindings.findChildViewById(rootView, id);
       if (btnWinStart == null) {
+        break missingId;
+      }
+
+      id = R.id.cardPermission;
+      ConstraintLayout cardPermission = ViewBindings.findChildViewById(rootView, id);
+      if (cardPermission == null) {
         break missingId;
       }
 
@@ -352,25 +389,13 @@ public final class ViewLaunchBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.dashboardDivider;
-      View dashboardDivider = ViewBindings.findChildViewById(rootView, id);
-      if (dashboardDivider == null) {
-        break missingId;
-      }
-
-      id = R.id.etBtName;
-      TextInputEditText etBtName = ViewBindings.findChildViewById(rootView, id);
-      if (etBtName == null) {
+      id = R.id.ivWarnIcon;
+      ImageView ivWarnIcon = ViewBindings.findChildViewById(rootView, id);
+      if (ivWarnIcon == null) {
         break missingId;
       }
 
       NestedScrollView launchScroll = (NestedScrollView) rootView;
-
-      id = R.id.layoutBt;
-      ConstraintLayout layoutBt = ViewBindings.findChildViewById(rootView, id);
-      if (layoutBt == null) {
-        break missingId;
-      }
 
       id = R.id.layoutCustomDays;
       LinearLayout layoutCustomDays = ViewBindings.findChildViewById(rootView, id);
@@ -379,7 +404,7 @@ public final class ViewLaunchBinding implements ViewBinding {
       }
 
       id = R.id.layoutDashboard;
-      ConstraintLayout layoutDashboard = ViewBindings.findChildViewById(rootView, id);
+      LinearLayout layoutDashboard = ViewBindings.findChildViewById(rootView, id);
       if (layoutDashboard == null) {
         break missingId;
       }
@@ -486,6 +511,12 @@ public final class ViewLaunchBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tvPermissionMsg;
+      TextView tvPermissionMsg = ViewBindings.findChildViewById(rootView, id);
+      if (tvPermissionMsg == null) {
+        break missingId;
+      }
+
       id = R.id.tvRepeatTitle;
       TextView tvRepeatTitle = ViewBindings.findChildViewById(rootView, id);
       if (tvRepeatTitle == null) {
@@ -522,14 +553,15 @@ public final class ViewLaunchBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ViewLaunchBinding((NestedScrollView) rootView, btnPickApp, btnSaveRule, btnTime,
-          btnWinEnd, btnWinStart, cbRandom, cbSkipHolidays, chipRepeat0, chipRepeat1, chipRepeat2,
+      return new ViewLaunchBinding((NestedScrollView) rootView, btnGoAuth, btnPickApp,
+          btnPickBluetooth, btnPickWifi, btnSaveRule, btnTime, btnWinEnd, btnWinStart,
+          cardPermission, cbRandom, cbSkipHolidays, chipRepeat0, chipRepeat1, chipRepeat2,
           chipRepeat3, chipRepeat4, chipTrigger0, chipTrigger1, chipTrigger2, chipTrigger3,
-          dashboardDivider, etBtName, launchScroll, layoutBt, layoutCustomDays, layoutDashboard,
-          layoutRandom, layoutRulesEmpty, layoutTime, layoutTriggerGrid, rvRules, scrollRepeat,
-          tbDay0, tbDay1, tbDay2, tbDay3, tbDay4, tbDay5, tbDay6, tvDashboardEnabled,
-          tvDashboardLabelEnabled, tvDashboardLabelNext, tvDashboardNext, tvRepeatTitle,
-          tvRuleListTitle, tvRulesEmpty, tvTimeTitle, tvTitle, tvTriggerTitle);
+          ivWarnIcon, launchScroll, layoutCustomDays, layoutDashboard, layoutRandom,
+          layoutRulesEmpty, layoutTime, layoutTriggerGrid, rvRules, scrollRepeat, tbDay0, tbDay1,
+          tbDay2, tbDay3, tbDay4, tbDay5, tbDay6, tvDashboardEnabled, tvDashboardLabelEnabled,
+          tvDashboardLabelNext, tvDashboardNext, tvPermissionMsg, tvRepeatTitle, tvRuleListTitle,
+          tvRulesEmpty, tvTimeTitle, tvTitle, tvTriggerTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

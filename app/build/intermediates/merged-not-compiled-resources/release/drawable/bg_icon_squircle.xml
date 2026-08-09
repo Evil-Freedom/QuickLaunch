@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- 应用图标统一 14dp iOS Squircle，底色走 widget 灰而非亮白 -->
+    <corners android:radius="@dimen/dark_radius_icon" />
+    <solid android:color="@color/bg_widget" />
+</shape>

@@ -1,16 +1,32 @@
 package com.workbuddy.quicklaunch
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.workbuddy.quicklaunch.adapter.BluetoothDeviceAdapter
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.databinding.ActivityCreateBinding
+import com.workbuddy.quicklaunch.databinding.DialogBluetoothDevicesBinding
+import com.workbuddy.quicklaunch.util.AppListLoader
 import com.workbuddy.quicklaunch.util.AutomationFormController
+import com.workbuddy.quicklaunch.util.BluetoothDevices
+import com.workbuddy.quicklaunch.util.DevicePickerBottomSheet
+import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
+import com.workbuddy.quicklaunch.util.WifiNetworks
+import androidx.recyclerview.widget.LinearLayoutManager
 
 class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.FormCallbacks {
 
@@ -22,6 +38,51 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
     private val triggerChips = mutableListOf<TextView>()
     private val repeatChips = mutableListOf<TextView>()
     private val dayViews = mutableListOf<TextView>()
+
+    // ── 蓝牙/WiFi 设备选择 ──
+    private var selectedBluetoothName: String? = null
+    private var selectedWifiName: String? = null
+    private lateinit var btnPickBluetooth: MaterialButton
+    private lateinit var btnPickWifi: MaterialButton
+
+    // ── WiFi 运行时权限请求 ──
+    private var pendingWifiPermissionCallback: ((Boolean) -> Unit)? = null
+
+    private val wifiPermissionLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            pendingWifiPermissionCallback?.invoke(granted)
+            pendingWifiPermissionCallback = null
+        }
+
+    /** 检查是否需要请求 WiFi 相关运行时权限 */
+    private fun requestWifiPermissionIfNeeded(onResult: (Boolean) -> Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ 需要 NEARBY_WIFI_DEVICES
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.NEARBY_WIFI_DEVICES
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                onResult(true)
+                return
+            }
+            pendingWifiPermissionCallback = onResult
+            wifiPermissionLauncher.launch(Manifest.permission.NEARBY_WIFI_DEVICES)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10-12 需要 ACCESS_FINE_LOCATION
+            if (ContextCompat.checkSelfPermission(
+                    this, Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                onResult(true)
+                return
+            }
+            pendingWifiPermissionCallback = onResult
+            wifiPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            // Android 9 及以下不需要运行时权限
+            onResult(true)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -38,6 +99,11 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
         }
 
         db = AppDatabase.get(this)
+
+        // 预加载应用列表：首次点击「启动应用」时直接命中缓存，零等待
+        QuickLaunchExecutors.io.execute {
+            AppListLoader.load(applicationContext)
+        }
 
         triggerChips.clear()
         triggerChips.addAll(
@@ -66,6 +132,15 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
             )
         )
 
+        btnPickBluetooth = binding.btnPickBluetooth
+        btnPickWifi = binding.btnPickWifi
+        btnPickBluetooth.setOnClickListener {
+            showBluetoothDevicePicker()
+        }
+        btnPickWifi.setOnClickListener {
+            showWifiNetworkPicker()
+        }
+
         formController = AutomationFormController(
             context = this,
             db = db,
@@ -78,9 +153,9 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
                 cbSkipHolidays = binding.cbSkipHolidays,
                 layoutRandom = binding.layoutRandom,
                 layoutTime = binding.layoutTime,
-                layoutBt = binding.layoutBt,
+                btnPickBluetooth = btnPickBluetooth,
+                btnPickWifi = btnPickWifi,
                 layoutCustomDays = binding.layoutCustomDays,
-                etBtName = binding.etBtName,
                 btnSave = binding.btnSave,
                 triggerChips = triggerChips,
                 repeatChips = repeatChips,
@@ -90,6 +165,55 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
             callbacks = this
         )
         formController.setup()
+    }
+
+    private fun showBluetoothDevicePicker() {
+        val deviceNames = BluetoothDevices.getPairedDeviceNames(this)
+        DevicePickerBottomSheet.newInstance(
+            mode = DevicePickerBottomSheet.MODE_BLUETOOTH,
+            devices = deviceNames,
+            selectedName = selectedBluetoothName
+        ).setOnSelectedListener { name ->
+            selectedBluetoothName = name
+            formController.bluetoothName = name.orEmpty()
+            updateBluetoothButtonText()
+        }.show(supportFragmentManager, "bluetooth_picker")
+    }
+
+    private fun updateBluetoothButtonText() {
+        btnPickBluetooth.text = if (selectedBluetoothName.isNullOrEmpty()) {
+            "选择蓝牙设备（可选）"
+        } else {
+            "已选择：$selectedBluetoothName"
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // WiFi 网络选择
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun showWifiNetworkPicker() {
+        requestWifiPermissionIfNeeded { granted ->
+            if (!granted) return@requestWifiPermissionIfNeeded
+            val networkNames = WifiNetworks.getSavedNetworkNames(this)
+            DevicePickerBottomSheet.newInstance(
+                mode = DevicePickerBottomSheet.MODE_WIFI,
+                devices = networkNames,
+                selectedName = selectedWifiName
+            ).setOnSelectedListener { name ->
+                selectedWifiName = name
+                formController.wifiName = name.orEmpty()
+                updateWifiButtonText()
+            }.show(supportFragmentManager, "wifi_picker")
+        }
+    }
+
+    private fun updateWifiButtonText() {
+        btnPickWifi.text = if (selectedWifiName.isNullOrEmpty()) {
+            "选择 WiFi 网络（可选）"
+        } else {
+            "已选择：$selectedWifiName"
+        }
     }
 
     private fun toast(msg: String) {
@@ -124,7 +248,8 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
         dayViews.forEachIndexed { idx, view ->
             refreshChip(view, formController.selectedDays[idx])
         }
-        binding.layoutBt.visibility = if (formController.selectedTriggerIndex == 3) View.VISIBLE else View.GONE
+        btnPickBluetooth.visibility = if (formController.selectedTriggerIndex == 3) View.VISIBLE else View.GONE
+        btnPickWifi.visibility = if (formController.selectedTriggerIndex == 2) View.VISIBLE else View.GONE
     }
 
     override fun onAppPicked(appName: String) {

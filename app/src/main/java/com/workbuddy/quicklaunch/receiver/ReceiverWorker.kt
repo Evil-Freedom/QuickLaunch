@@ -2,7 +2,7 @@ package com.workbuddy.quicklaunch.receiver
 
 import android.content.BroadcastReceiver
 import android.util.Log
-import java.util.concurrent.Executors
+import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 
 /**
  * 广播接收器的统一后台执行器。
@@ -14,12 +14,9 @@ import java.util.concurrent.Executors
  *    这里统一 try/catch，任何异常只记日志，不影响其它触发规则。
  *
  * 单线程池：天然把并发到来的多个广播串行化，避免同时排程/写库互相打架。
+ * 使用 QuickLaunchExecutors.save 共享串行执行器，减少孤儿线程池数量。
  */
 internal object ReceiverWorker {
-
-    private val io = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "receiver-worker").apply { isDaemon = true }
-    }
 
     /** 必须在 onReceive 内（主线程）调用。 */
     fun run(receiver: BroadcastReceiver, tag: String, block: () -> Unit) {
@@ -35,6 +32,6 @@ internal object ReceiverWorker {
         }
         // 拿不到 PendingResult 时只能同步执行，至少保证事件不丢
         if (pending == null) task.run()
-        else runCatching { io.execute(task) }.onFailure { task.run() }
+        else runCatching { QuickLaunchExecutors.save.execute(task) }.onFailure { task.run() }
     }
 }

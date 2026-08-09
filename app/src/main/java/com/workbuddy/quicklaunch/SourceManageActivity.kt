@@ -42,9 +42,20 @@ class SourceManageActivity : AppCompatActivity() {
             val row = items[position]
             holder.label.text = row.label
             holder.url.text = row.url
-            holder.tag.text = row.tag
             holder.delete.visibility = if (row.builtIn) View.GONE else View.VISIBLE
             holder.delete.setOnClickListener { removeCustom(row.id) }
+            // Glassmorphism 重构：数据源状态指示灯 + Badge
+            if (row.builtIn) {
+                holder.statusDot.setBackgroundResource(R.drawable.status_dot_synced)
+                holder.statusBadge.setBackgroundResource(R.drawable.bg_badge_success)
+                holder.statusBadge.text = "已同步"
+                holder.statusBadge.setTextColor(resources.getColor(R.color.glass_active_text, null))
+            } else {
+                holder.statusDot.setBackgroundResource(R.drawable.status_dot_unsynced)
+                holder.statusBadge.setBackgroundResource(R.drawable.bg_badge_pending)
+                holder.statusBadge.text = "未同步"
+                holder.statusBadge.setTextColor(resources.getColor(R.color.glass_inactive_text, null))
+            }
         }
     }
 
@@ -137,7 +148,8 @@ class SourceManageActivity : AppCompatActivity() {
         androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {
         val label = v.findViewById<android.widget.TextView>(R.id.tvLabel)
         val url = v.findViewById<android.widget.TextView>(R.id.tvUrl)
-        val tag = v.findViewById<android.widget.TextView>(R.id.tvTag)
         val delete = v.findViewById<android.widget.Button>(R.id.btnDelete)
+        val statusDot = v.findViewById<android.view.View>(R.id.vStatusDot)
+        val statusBadge = v.findViewById<android.widget.TextView>(R.id.tvStatusBadge)
     }
 }

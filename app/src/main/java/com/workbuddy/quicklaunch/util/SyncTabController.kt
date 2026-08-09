@@ -36,6 +36,9 @@ class SyncTabController(
         /** 同步源页面进入时调用（刷新 spinner、防息屏 UI）。 */
         fun onSyncPageSelected()
 
+        /** 同步完成后调用（刷新数据源状态 UI）。 */
+        fun onSyncCompleted(success: Boolean)
+
         /** Snackbar 根容器。 */
         val snackbarRoot: View
 
@@ -54,7 +57,12 @@ class SyncTabController(
         val tvAntiSleep: TextView,
         val swAntiSleep: SwitchCompat,
         val layoutAntiSleep: View,
-        val layoutHolidayCard: View
+        val layoutHolidayCard: View,
+        // 数据源状态可视化
+        val dotTimor: View? = null,
+        val badgeTimor: TextView? = null,
+        val dotHolidayCn: View? = null,
+        val badgeHolidayCn: TextView? = null
     )
 
     private var sourceIds: List<String> = emptyList()
@@ -69,6 +77,9 @@ class SyncTabController(
             context.startActivity(Intent(context, SourceManageActivity::class.java))
         }
         setupSourceSpinner(callbacks)
+
+        // 数据源状态可视化（初始）
+        updateSourceStatus()
 
         // 防息屏
         syncAntiSleepUi(callbacks)
@@ -122,6 +133,43 @@ class SyncTabController(
         }
     }
 
+    // ── 数据源状态可视化 ──────────────────────────────────────────
+    fun updateSourceStatus() {
+        val dotTimor = views.dotTimor ?: return
+        val badgeTimor = views.badgeTimor ?: return
+        val dotHolidayCn = views.dotHolidayCn ?: return
+        val badgeHolidayCn = views.badgeHolidayCn ?: return
+
+        val lastGood = runCatching { HolidayPrefs.getLastGood(context) }.getOrNull()
+        val synced = !lastGood.isNullOrBlank() && lastGood != "auto"
+
+        // timor.tech — 自动模式下首选 timor，同步过即视为成功
+        if (synced) {
+            dotTimor.setBackgroundResource(R.drawable.status_dot_synced)
+            badgeTimor.text = context.getString(R.string.glass_sync_success)
+            badgeTimor.setBackgroundResource(R.drawable.bg_badge_success)
+            badgeTimor.setTextColor(context.getColor(R.color.glass_badge_success_text))
+        } else {
+            dotTimor.setBackgroundResource(R.drawable.status_dot_unsynced)
+            badgeTimor.text = context.getString(R.string.glass_sync_unsynced)
+            badgeTimor.setBackgroundResource(R.drawable.bg_badge_pending)
+            badgeTimor.setTextColor(context.getColor(R.color.glass_badge_pending_text))
+        }
+
+        // holiday-cn
+        if (synced && (lastGood == "natescarlet_raw" || lastGood == "natescarlet_cdn")) {
+            dotHolidayCn.setBackgroundResource(R.drawable.status_dot_synced)
+            badgeHolidayCn.text = context.getString(R.string.glass_sync_success)
+            badgeHolidayCn.setBackgroundResource(R.drawable.bg_badge_success)
+            badgeHolidayCn.setTextColor(context.getColor(R.color.glass_badge_success_text))
+        } else {
+            dotHolidayCn.setBackgroundResource(R.drawable.status_dot_unsynced)
+            badgeHolidayCn.text = context.getString(R.string.glass_sync_unsynced)
+            badgeHolidayCn.setBackgroundResource(R.drawable.bg_badge_pending)
+            badgeHolidayCn.setTextColor(context.getColor(R.color.glass_badge_pending_text))
+        }
+    }
+
     // ── 同步 ─────────────────────────────────────────────────────
     fun syncHolidays(callbacks: SyncCallbacks) {
         if (views.btnSyncHolidays.isEnabled) {
@@ -142,6 +190,9 @@ class SyncTabController(
             } else {
                 context.getString(R.string.main_sync_failed)
             }
+            // 刷新数据源状态可视化
+            updateSourceStatus()
+            callbacks.onSyncCompleted(res.success)
             callbacks.showSnackbar(msg, Snackbar.LENGTH_SHORT)
         }
     }

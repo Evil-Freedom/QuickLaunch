@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  设备选择列表项 — 与 item_app_select 统一风格
+  - 36dp 设备图标（蓝牙 / WiFi）
+  - 15sp 设备名称
+  - 选中对勾
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="14dp">
+
+    <!-- 设备图标：36dp 圆形背景 + 居中图标 -->
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="@drawable/bg_trigger_icon_circle">
+
+        <ImageView
+            android:id="@+id/ivIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_trigger_bluetooth"
+            app:tint="@color/item_active_text" />
+    </FrameLayout>
+
+    <!-- 设备名称 -->
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:maxLines="1"
+        android:text="Device Name"
+        android:textColor="@color/dark_text_primary"
+        android:textSize="15sp" />
+
+    <!-- 选中对勾 -->
+    <ImageView
+        android:id="@+id/ivCheck"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_check"
+        android:visibility="gone"
+        app:tint="@color/item_active_text" />
+
+</LinearLayout>

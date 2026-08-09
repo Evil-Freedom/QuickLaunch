@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Tab 2：同步源（纯白 + 半透灰白磨砂玻璃风格）
-  - 扁平化重构：最大嵌套深度 ≤4 层（原 6 层）
+  Tab 2：同步源 — Glassmorphism UI 重构
+  - 状态指示灯圆点（已同步绿色 / 未同步灰色）
+  - 状态 Badge（成功 / 未同步）
+  - 扁平化重构：最大嵌套深度 ≤4 层
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -30,13 +32,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 防外屏息屏卡片（深度 3） -->
+        <!-- 防外屏息屏卡片 -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutAntiSleep"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:background="@drawable/bg_card_elegant"
+            android:background="@drawable/bg_liquid_glass_rim"
             android:padding="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,17 +68,111 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- 节假日同步卡片（深度 4 max） -->
+        <!-- ═══ 数据源状态可视化卡片（新增）═══ -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutSourceStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_liquid_glass_rim"
+            android:padding="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutAntiSleep">
+
+            <TextView
+                android:id="@+id/tvSourceStatusTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.05"
+                android:text="数据源状态"
+                android:textAllCaps="true"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- timor.tech 状态行 -->
+            <LinearLayout
+                android:id="@+id/rowTimor"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvSourceStatusTitle">
+
+                <View
+                    android:id="@+id/dotTimor"
+                    android:layout_width="@dimen/glass_status_dot_size"
+                    android:layout_height="@dimen/glass_status_dot_size"
+                    android:background="@drawable/status_dot_synced" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="timor.tech"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/badgeTimor"
+                    style="@style/Widget.QuickLaunch.Glass.StatusBadge.Success"
+                    android:text="成功" />
+            </LinearLayout>
+
+            <!-- holiday-cn 状态行 -->
+            <LinearLayout
+                android:id="@+id/rowHolidayCn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rowTimor">
+
+                <View
+                    android:id="@+id/dotHolidayCn"
+                    android:layout_width="@dimen/glass_status_dot_size"
+                    android:layout_height="@dimen/glass_status_dot_size"
+                    android:background="@drawable/status_dot_unsynced" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:text="holiday-cn"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/badgeHolidayCn"
+                    style="@style/Widget.QuickLaunch.Glass.StatusBadge.Pending"
+                    android:text="未同步" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 节假日同步卡片 -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutHolidayCard"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_card_elegant"
+            android:background="@drawable/bg_liquid_glass_rim"
             android:padding="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutAntiSleep">
+            app:layout_constraintTop_toBottomOf="@id/layoutSourceStatus">
 
             <TextView
                 android:id="@+id/tvHolidayTitle"
@@ -91,7 +187,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- 数据源选择行（深度 4） -->
+            <!-- 数据源选择行 -->
             <TextView
                 android:id="@+id/tvSourceLabel"
                 android:layout_width="wrap_content"
@@ -115,24 +211,24 @@
                 app:layout_constraintStart_toEndOf="@id/tvSourceLabel"
                 app:layout_constraintTop_toBottomOf="@id/tvHolidayTitle" />
 
-            <!-- 同步按钮 -->
+            <!-- 同步按钮：46dp 纯白大胶囊 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSyncHolidays"
                 style="@style/Widget.QuickLaunch.Dark.Button.Primary"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/dark_button_height"
+                android:layout_height="@dimen/glass_button_height"
                 android:layout_marginTop="10dp"
                 android:text="同步法定节假日"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/spinnerSource" />
 
-            <!-- 管理按钮组（扁平化到深度 4） -->
+            <!-- 管理按钮组 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManageHolidays"
                 style="@style/Widget.QuickLaunch.Dark.Button.Action"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/dark_button_height"
+                android:layout_height="@dimen/glass_button_height"
                 android:layout_marginTop="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -147,7 +243,7 @@
                 android:id="@+id/btnManageSources"
                 style="@style/Widget.QuickLaunch.Dark.Button.Action"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/dark_button_height"
+                android:layout_height="@dimen/glass_button_height"
                 android:layout_marginTop="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"

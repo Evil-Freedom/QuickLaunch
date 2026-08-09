@@ -58,50 +58,61 @@ object AntiSleep {
         Settings.System.getInt(ctx.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT, FALLBACK_TIMEOUT)
 
     /**
-     * 开启（手动）：悬浮窗常亮 + （若有 root）顶高系统超时。
-     * 挂窗口要切主线程，是异步的，这里用「权限是否具备」作为成功判据。
+     * 开启（手动）：若有 root 走 root 策略（改 screen_off_timeout），
+     * 否则走悬浮窗策略。两者都兜底增强。
      */
     fun enable(ctx: Context): Boolean {
         if (!ScreenOnOverlay.canDraw(ctx)) return false
         setDisabled(ctx, false)
-        applyRootTimeout(ctx)
-        ScreenOnOverlay.sync(ctx)
+        val rooted = RootUtils.hasRoot()
+        applyRootTimeout(ctx, rooted)
+        if (!rooted) {
+            // 没 root 才需要悬浮窗兜底
+            ScreenOnOverlay.sync(ctx)
+        }
         return true
     }
 
-    /** 关闭（手动）：摘掉悬浮窗，并把系统超时还原成开启前备份的值。 */
+    /** 关闭（手动）：摘掉悬浮窗，有 root 才还原系统超时。 */
     fun disable(ctx: Context): Boolean {
         setDisabled(ctx, true)
         ScreenOnOverlay.clear(ctx)
-        val back = sp(ctx).getInt(KEY_BACKUP, FALLBACK_TIMEOUT)
-        if (currentTimeout(ctx) >= MAX_TIMEOUT) {
-            // 走异步入口：即便调用方误在主线程调用，也不会因 su 授权弹窗 ANR
-            RootUtils.runAsRootAsync("settings put system screen_off_timeout $back")
+        val rooted = RootUtils.hasRoot()
+        if (rooted) {
+            val back = sp(ctx).getInt(KEY_BACKUP, FALLBACK_TIMEOUT)
+            if (currentTimeout(ctx) >= MAX_TIMEOUT) {
+                RootUtils.runAsRootAsync("settings put system screen_off_timeout $back")
+            }
         }
         return true
     }
 
     /**
      * 开机 / 屏幕状态变化后重新套用。
-     * 新模型下：用户没手动关就重新挂载悬浮窗（「后台即防息屏」的核心），关了就摘掉。
+     * 有 root：root 改超时 + 悬浮窗兜底；没 root：仅悬浮窗。
      */
     fun reapply(ctx: Context) {
         if (isDisabled(ctx)) {
             ScreenOnOverlay.clear(ctx)
             return
         }
-        applyRootTimeout(ctx)
-        ScreenOnOverlay.sync(ctx)
+        val rooted = RootUtils.hasRoot()
+        applyRootTimeout(ctx, rooted)
+        if (!rooted) {
+            ScreenOnOverlay.sync(ctx)
+        }
     }
 
     /** 只重置系统超时，不碰悬浮窗（窗口由常驻服务统一管理）。 */
     fun reapplyTimeoutOnly(ctx: Context) {
         if (isDisabled(ctx)) return
-        applyRootTimeout(ctx)
+        val rooted = RootUtils.hasRoot()
+        applyRootTimeout(ctx, rooted)
     }
 
-    /** 只有真有 root 才动 settings；没 root 静默跳过，不影响悬浮窗那条主路径。 */
-    private fun applyRootTimeout(ctx: Context) {
+    /** 有 root 才改 settings；没 root 静默跳过。 */
+    private fun applyRootTimeout(ctx: Context, rooted: Boolean) {
+        if (!rooted) return
         // 读 Settings 可能因 ContentProvider 未就绪抛异常（开机早期尤其常见），不能让它带崩调用链
         val now = runCatching { currentTimeout(ctx) }.getOrNull() ?: return
         if (now >= MAX_TIMEOUT) return

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 精致卡片背景：Ardot 设计灵感 · 毛玻璃 + 微妙发光边框 -->
+<!-- 精致卡片背景：Glassmorphism .glass-panel · 毛玻璃 + 柔和边框 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 底层：外发光 -->
+    <!-- 底层：外柔和边框 -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/stroke_glass" />
+            <solid android:color="@color/glass_card_stroke" />
             <corners android:radius="@dimen/dark_radius_card" />
         </shape>
     </item>
     <!-- 顶层：毛玻璃主体 -->
-    <item android:left="0.5dp" android:top="0.5dp" android:right="0.5dp" android:bottom="0.5dp">
+    <item android:left="1dp" android:top="1dp" android:right="1dp" android:bottom="1dp">
         <shape android:shape="rectangle">
             <solid android:color="@color/glass_card_bg" />
             <corners android:radius="@dimen/dark_radius_card" />
             <stroke
-                android:width="0.5dp"
-                android:color="@color/stroke_glass" />
+                android:width="1dp"
+                android:color="@color/glass_card_stroke" />
         </shape>
     </item>
 </layer-list>

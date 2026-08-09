@@ -80,6 +80,16 @@
     <dimen name="glass_button_radius">23dp</dimen>
     <dimen name="glass_time_bubble_height">40dp</dimen>
     <dimen name="glass_time_bubble_radius">20dp</dimen>
+    <!-- Glassmorphism 重构新增 Token -->
+    <dimen name="glass_icon_app_size">40dp</dimen>
+    <dimen name="glass_icon_app_radius">12dp</dimen>
+    <dimen name="glass_status_dot_size">8dp</dimen>
+    <dimen name="glass_tag_height">28dp</dimen>
+    <dimen name="glass_tag_radius">14dp</dimen>
+    <dimen name="glass_permission_card_icon">20dp</dimen>
+    <dimen name="glass_permission_btn_height">32dp</dimen>
+    <dimen name="glass_status_badge_height">24dp</dimen>
+    <dimen name="glass_status_badge_radius">12dp</dimen>
     <!-- 间距（整体压缩 30% 左右，让界面更紧致） -->
     <dimen name="dark_card_margin_horizontal">16dp</dimen>
     <dimen name="dark_card_margin_vertical">6dp</dimen>

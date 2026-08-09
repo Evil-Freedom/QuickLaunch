@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  iOS 26 风格壁纸背景 — 柔和渐变 + 彩色光斑
+  浅色模式：低饱和蓝紫渐变 + 柔和光斑
+  深色模式：深紫蓝渐变（通过 values-night 覆盖）
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 第1层：底层渐变 -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:endColor="#2A2A4A"
+                android:startColor="#1A1A2E"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- 第2层：左上角光斑（紫色） -->
+    <item
+        android:bottom="0dp"
+        android:end="0dp"
+        android:start="0dp"
+        android:top="0dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:centerX="0.3"
+                android:centerY="0.3"
+                android:endColor="#00000000"
+                android:gradientRadius="50%p"
+                android:startColor="#30664488"
+                android:type="radial" />
+        </shape>
+    </item>
+
+    <!-- 第3层：右下角光斑（蓝色） -->
+    <item
+        android:bottom="0dp"
+        android:end="0dp"
+        android:start="0dp"
+        android:top="0dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:centerX="0.7"
+                android:centerY="0.7"
+                android:endColor="#00000000"
+                android:gradientRadius="50%p"
+                android:startColor="#304466AA"
+                android:type="radial" />
+        </shape>
+    </item>
+
+    <!-- 第4层：底部微光 -->
+    <item
+        android:bottom="0dp"
+        android:end="0dp"
+        android:start="0dp"
+        android:top="0dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="90"
+                android:endColor="#00000000"
+                android:startColor="#15FFFFFF"
+                android:type="linear" />
+        </shape>
+    </item>
+</layer-list>

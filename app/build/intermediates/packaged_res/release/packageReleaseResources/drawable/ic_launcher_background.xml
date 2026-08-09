@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  自适应图标背景（暗黑极简风格）
+  - 纯深灰黑底 #18181B，无渐变、无高光
+  - 兼容各类安卓桌面（Squircle / 圆形 / 圆角矩形）裁剪
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#18181B"
+        android:pathData="M0,0h108v108h-108z" />
+</vector>

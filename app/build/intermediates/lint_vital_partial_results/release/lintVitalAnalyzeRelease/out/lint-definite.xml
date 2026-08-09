@@ -1,0 +1,3224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.9.1" type="incidents">
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="169"
+                endOffset="209"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="9"
+            column="12"
+            startOffset="176"
+            endLine="9"
+            endColumn="29"
+            endOffset="193"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="214"
+                endOffset="257"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="10"
+            column="12"
+            startOffset="221"
+            endLine="10"
+            endColumn="32"
+            endOffset="241"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="262"
+                endOffset="312"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="11"
+            column="12"
+            startOffset="269"
+            endLine="11"
+            endColumn="39"
+            endOffset="296"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="317"
+                endOffset="370"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="12"
+            column="12"
+            startOffset="324"
+            endLine="12"
+            endColumn="42"
+            endOffset="354"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="399"
+                endOffset="441"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="15"
+            column="12"
+            startOffset="406"
+            endLine="15"
+            endColumn="31"
+            endOffset="425"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="446"
+                endOffset="491"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="16"
+            column="12"
+            startOffset="453"
+            endLine="16"
+            endColumn="34"
+            endOffset="475"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="496"
+                endOffset="548"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="17"
+            column="12"
+            startOffset="503"
+            endLine="17"
+            endColumn="41"
+            endOffset="532"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="553"
+                endOffset="608"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="18"
+            column="12"
+            startOffset="560"
+            endLine="18"
+            endColumn="44"
+            endOffset="592"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="636"
+                endOffset="677"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="21"
+            column="12"
+            startOffset="643"
+            endLine="21"
+            endColumn="30"
+            endOffset="661"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="682"
+                endOffset="726"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="22"
+            column="12"
+            startOffset="689"
+            endLine="22"
+            endColumn="33"
+            endOffset="710"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="731"
+                endOffset="782"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="23"
+            column="12"
+            startOffset="738"
+            endLine="23"
+            endColumn="40"
+            endOffset="766"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="787"
+                endOffset="841"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="24"
+            column="12"
+            startOffset="794"
+            endLine="24"
+            endColumn="43"
+            endOffset="825"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="866"
+                endOffset="904"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="27"
+            column="12"
+            startOffset="873"
+            endLine="27"
+            endColumn="27"
+            endOffset="888"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="909"
+                endOffset="950"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="28"
+            column="12"
+            startOffset="916"
+            endLine="28"
+            endColumn="30"
+            endOffset="934"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="955"
+                endOffset="1003"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="29"
+            column="12"
+            startOffset="962"
+            endLine="29"
+            endColumn="37"
+            endOffset="987"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1008"
+                endOffset="1059"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="30"
+            column="12"
+            startOffset="1015"
+            endLine="30"
+            endColumn="40"
+            endOffset="1043"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1099"
+                endOffset="1142"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="33"
+            column="12"
+            startOffset="1106"
+            endLine="33"
+            endColumn="32"
+            endOffset="1126"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1147"
+                endOffset="1193"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="34"
+            column="12"
+            startOffset="1154"
+            endLine="34"
+            endColumn="35"
+            endOffset="1177"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1198"
+                endOffset="1238"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="35"
+            column="12"
+            startOffset="1205"
+            endLine="35"
+            endColumn="29"
+            endOffset="1222"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1243"
+                endOffset="1286"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="36"
+            column="12"
+            startOffset="1250"
+            endLine="36"
+            endColumn="32"
+            endOffset="1270"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1291"
+                endOffset="1339"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="37"
+            column="12"
+            startOffset="1298"
+            endLine="37"
+            endColumn="37"
+            endOffset="1323"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_on_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1344"
+                endOffset="1395"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="38"
+            column="12"
+            startOffset="1351"
+            endLine="38"
+            endColumn="40"
+            endOffset="1379"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_outline&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1422"
+                endOffset="1462"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="41"
+            column="12"
+            startOffset="1429"
+            endLine="41"
+            endColumn="29"
+            endOffset="1446"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_outline_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1467"
+                endOffset="1515"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="42"
+            column="12"
+            startOffset="1474"
+            endLine="42"
+            endColumn="37"
+            endOffset="1499"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_surface_container_lowest&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1555"
+                endOffset="1612"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="45"
+            column="12"
+            startOffset="1562"
+            endLine="45"
+            endColumn="46"
+            endOffset="1596"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_surface_container_low&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1617"
+                endOffset="1671"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="46"
+            column="12"
+            startOffset="1624"
+            endLine="46"
+            endColumn="43"
+            endOffset="1655"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_surface_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1676"
+                endOffset="1726"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="47"
+            column="12"
+            startOffset="1683"
+            endLine="47"
+            endColumn="39"
+            endOffset="1710"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_surface_container_high&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1731"
+                endOffset="1786"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="48"
+            column="12"
+            startOffset="1738"
+            endLine="48"
+            endColumn="44"
+            endOffset="1770"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_surface_container_highest&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1791"
+                endOffset="1849"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="49"
+            column="12"
+            startOffset="1798"
+            endLine="49"
+            endColumn="47"
+            endOffset="1833"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_inverse_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1876"
+                endOffset="1924"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="52"
+            column="12"
+            startOffset="1883"
+            endLine="52"
+            endColumn="37"
+            endOffset="1908"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_inverse_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1929"
+                endOffset="1980"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="53"
+            column="12"
+            startOffset="1936"
+            endLine="53"
+            endColumn="40"
+            endOffset="1964"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;m3_inverse_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="1985"
+                endOffset="2033"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="54"
+            column="12"
+            startOffset="1992"
+            endLine="54"
+            endColumn="37"
+            endOffset="2017"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;status_enabled&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2071"
+                endOffset="2115"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="57"
+            column="12"
+            startOffset="2078"
+            endLine="57"
+            endColumn="33"
+            endOffset="2099"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;status_disabled&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2137"
+                endOffset="2182"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="59"
+            column="12"
+            startOffset="2144"
+            endLine="59"
+            endColumn="34"
+            endOffset="2166"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ic_launcher_bg_top&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2220"
+                endOffset="2268"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="62"
+            column="12"
+            startOffset="2227"
+            endLine="62"
+            endColumn="37"
+            endOffset="2252"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ic_launcher_bg_bottom&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2273"
+                endOffset="2324"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="63"
+            column="12"
+            startOffset="2280"
+            endLine="63"
+            endColumn="40"
+            endOffset="2308"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ic_launcher_lightning_highlight&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2360"
+                endOffset="2421"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="65"
+            column="12"
+            startOffset="2367"
+            endLine="65"
+            endColumn="50"
+            endOffset="2405"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2634"
+                endOffset="2683"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="72"
+            column="12"
+            startOffset="2641"
+            endLine="72"
+            endColumn="38"
+            endOffset="2667"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2688"
+                endOffset="2740"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="73"
+            column="12"
+            startOffset="2695"
+            endLine="73"
+            endColumn="41"
+            endOffset="2724"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2745"
+                endOffset="2804"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="74"
+            column="12"
+            startOffset="2752"
+            endLine="74"
+            endColumn="48"
+            endOffset="2788"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2809"
+                endOffset="2871"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="75"
+            column="12"
+            startOffset="2816"
+            endLine="75"
+            endColumn="51"
+            endOffset="2855"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2876"
+                endOffset="2927"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="76"
+            column="12"
+            startOffset="2883"
+            endLine="76"
+            endColumn="40"
+            endOffset="2911"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2932"
+                endOffset="2986"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="77"
+            column="12"
+            startOffset="2939"
+            endLine="77"
+            endColumn="43"
+            endOffset="2970"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="2991"
+                endOffset="3052"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="78"
+            column="12"
+            startOffset="2998"
+            endLine="78"
+            endColumn="50"
+            endOffset="3036"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3057"
+                endOffset="3121"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="79"
+            column="12"
+            startOffset="3064"
+            endLine="79"
+            endColumn="53"
+            endOffset="3105"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3126"
+                endOffset="3176"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="80"
+            column="12"
+            startOffset="3133"
+            endLine="80"
+            endColumn="39"
+            endOffset="3160"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3181"
+                endOffset="3234"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="81"
+            column="12"
+            startOffset="3188"
+            endLine="81"
+            endColumn="42"
+            endOffset="3218"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3239"
+                endOffset="3299"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="82"
+            column="12"
+            startOffset="3246"
+            endLine="82"
+            endColumn="49"
+            endOffset="3283"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3304"
+                endOffset="3367"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="83"
+            column="12"
+            startOffset="3311"
+            endLine="83"
+            endColumn="52"
+            endOffset="3351"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3372"
+                endOffset="3419"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="84"
+            column="12"
+            startOffset="3379"
+            endLine="84"
+            endColumn="36"
+            endOffset="3403"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3424"
+                endOffset="3474"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="85"
+            column="12"
+            startOffset="3431"
+            endLine="85"
+            endColumn="39"
+            endOffset="3458"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3479"
+                endOffset="3536"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="86"
+            column="12"
+            startOffset="3486"
+            endLine="86"
+            endColumn="46"
+            endOffset="3520"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3541"
+                endOffset="3601"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="87"
+            column="12"
+            startOffset="3548"
+            endLine="87"
+            endColumn="49"
+            endOffset="3585"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3606"
+                endOffset="3658"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="88"
+            column="12"
+            startOffset="3613"
+            endLine="88"
+            endColumn="41"
+            endOffset="3642"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3663"
+                endOffset="3718"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="89"
+            column="12"
+            startOffset="3670"
+            endLine="89"
+            endColumn="44"
+            endOffset="3702"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3723"
+                endOffset="3772"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="90"
+            column="12"
+            startOffset="3730"
+            endLine="90"
+            endColumn="38"
+            endOffset="3756"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3777"
+                endOffset="3829"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="91"
+            column="12"
+            startOffset="3784"
+            endLine="91"
+            endColumn="41"
+            endOffset="3813"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3834"
+                endOffset="3891"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="92"
+            column="12"
+            startOffset="3841"
+            endLine="92"
+            endColumn="46"
+            endOffset="3875"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_on_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3896"
+                endOffset="3956"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="93"
+            column="12"
+            startOffset="3903"
+            endLine="93"
+            endColumn="49"
+            endOffset="3940"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_outline&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="3961"
+                endOffset="4010"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="94"
+            column="12"
+            startOffset="3968"
+            endLine="94"
+            endColumn="38"
+            endOffset="3994"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_outline_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4015"
+                endOffset="4072"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="95"
+            column="12"
+            startOffset="4022"
+            endLine="95"
+            endColumn="46"
+            endOffset="4056"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_inverse_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4077"
+                endOffset="4134"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="96"
+            column="12"
+            startOffset="4084"
+            endLine="96"
+            endColumn="46"
+            endOffset="4118"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_inverse_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4139"
+                endOffset="4199"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="97"
+            column="12"
+            startOffset="4146"
+            endLine="97"
+            endColumn="49"
+            endOffset="4183"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_mint_inverse_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4204"
+                endOffset="4261"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="98"
+            column="12"
+            startOffset="4211"
+            endLine="98"
+            endColumn="46"
+            endOffset="4245"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4302"
+                endOffset="4355"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="101"
+            column="12"
+            startOffset="4309"
+            endLine="101"
+            endColumn="42"
+            endOffset="4339"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4360"
+                endOffset="4416"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="102"
+            column="12"
+            startOffset="4367"
+            endLine="102"
+            endColumn="45"
+            endOffset="4400"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4421"
+                endOffset="4484"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="103"
+            column="12"
+            startOffset="4428"
+            endLine="103"
+            endColumn="52"
+            endOffset="4468"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4489"
+                endOffset="4555"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="104"
+            column="12"
+            startOffset="4496"
+            endLine="104"
+            endColumn="55"
+            endOffset="4539"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4560"
+                endOffset="4615"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="105"
+            column="12"
+            startOffset="4567"
+            endLine="105"
+            endColumn="44"
+            endOffset="4599"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4620"
+                endOffset="4678"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="106"
+            column="12"
+            startOffset="4627"
+            endLine="106"
+            endColumn="47"
+            endOffset="4662"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4683"
+                endOffset="4748"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="107"
+            column="12"
+            startOffset="4690"
+            endLine="107"
+            endColumn="54"
+            endOffset="4732"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4753"
+                endOffset="4821"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="108"
+            column="12"
+            startOffset="4760"
+            endLine="108"
+            endColumn="57"
+            endOffset="4805"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4826"
+                endOffset="4880"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="109"
+            column="12"
+            startOffset="4833"
+            endLine="109"
+            endColumn="43"
+            endOffset="4864"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4885"
+                endOffset="4942"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="110"
+            column="12"
+            startOffset="4892"
+            endLine="110"
+            endColumn="46"
+            endOffset="4926"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="4947"
+                endOffset="5011"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="111"
+            column="12"
+            startOffset="4954"
+            endLine="111"
+            endColumn="53"
+            endOffset="4995"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5016"
+                endOffset="5083"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="112"
+            column="12"
+            startOffset="5023"
+            endLine="112"
+            endColumn="56"
+            endOffset="5067"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5088"
+                endOffset="5139"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="113"
+            column="12"
+            startOffset="5095"
+            endLine="113"
+            endColumn="40"
+            endOffset="5123"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5144"
+                endOffset="5198"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="114"
+            column="12"
+            startOffset="5151"
+            endLine="114"
+            endColumn="43"
+            endOffset="5182"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5203"
+                endOffset="5264"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="115"
+            column="12"
+            startOffset="5210"
+            endLine="115"
+            endColumn="50"
+            endOffset="5248"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5269"
+                endOffset="5333"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="116"
+            column="12"
+            startOffset="5276"
+            endLine="116"
+            endColumn="53"
+            endOffset="5317"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5338"
+                endOffset="5394"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="117"
+            column="12"
+            startOffset="5345"
+            endLine="117"
+            endColumn="45"
+            endOffset="5378"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5399"
+                endOffset="5458"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="118"
+            column="12"
+            startOffset="5406"
+            endLine="118"
+            endColumn="48"
+            endOffset="5442"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5463"
+                endOffset="5516"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="119"
+            column="12"
+            startOffset="5470"
+            endLine="119"
+            endColumn="42"
+            endOffset="5500"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5521"
+                endOffset="5577"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="120"
+            column="12"
+            startOffset="5528"
+            endLine="120"
+            endColumn="45"
+            endOffset="5561"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5582"
+                endOffset="5643"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="121"
+            column="12"
+            startOffset="5589"
+            endLine="121"
+            endColumn="50"
+            endOffset="5627"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_on_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5648"
+                endOffset="5712"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="122"
+            column="12"
+            startOffset="5655"
+            endLine="122"
+            endColumn="53"
+            endOffset="5696"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_outline&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5717"
+                endOffset="5770"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="123"
+            column="12"
+            startOffset="5724"
+            endLine="123"
+            endColumn="42"
+            endOffset="5754"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_outline_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5775"
+                endOffset="5836"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="124"
+            column="12"
+            startOffset="5782"
+            endLine="124"
+            endColumn="50"
+            endOffset="5820"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_inverse_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5841"
+                endOffset="5902"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="125"
+            column="12"
+            startOffset="5848"
+            endLine="125"
+            endColumn="50"
+            endOffset="5886"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_inverse_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5907"
+                endOffset="5971"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="126"
+            column="12"
+            startOffset="5914"
+            endLine="126"
+            endColumn="53"
+            endOffset="5955"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_lavender_inverse_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="5976"
+                endOffset="6037"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="127"
+            column="12"
+            startOffset="5983"
+            endLine="127"
+            endColumn="50"
+            endOffset="6021"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6077"
+                endOffset="6129"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="130"
+            column="12"
+            startOffset="6084"
+            endLine="130"
+            endColumn="41"
+            endOffset="6113"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6134"
+                endOffset="6189"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="131"
+            column="12"
+            startOffset="6141"
+            endLine="131"
+            endColumn="44"
+            endOffset="6173"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6194"
+                endOffset="6256"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="132"
+            column="12"
+            startOffset="6201"
+            endLine="132"
+            endColumn="51"
+            endOffset="6240"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_primary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6261"
+                endOffset="6326"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="133"
+            column="12"
+            startOffset="6268"
+            endLine="133"
+            endColumn="54"
+            endOffset="6310"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6331"
+                endOffset="6385"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="134"
+            column="12"
+            startOffset="6338"
+            endLine="134"
+            endColumn="43"
+            endOffset="6369"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6390"
+                endOffset="6447"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="135"
+            column="12"
+            startOffset="6397"
+            endLine="135"
+            endColumn="46"
+            endOffset="6431"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6452"
+                endOffset="6516"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="136"
+            column="12"
+            startOffset="6459"
+            endLine="136"
+            endColumn="53"
+            endOffset="6500"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_secondary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6521"
+                endOffset="6588"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="137"
+            column="12"
+            startOffset="6528"
+            endLine="137"
+            endColumn="56"
+            endOffset="6572"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6593"
+                endOffset="6646"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="138"
+            column="12"
+            startOffset="6600"
+            endLine="138"
+            endColumn="42"
+            endOffset="6630"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6651"
+                endOffset="6707"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="139"
+            column="12"
+            startOffset="6658"
+            endLine="139"
+            endColumn="45"
+            endOffset="6691"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6712"
+                endOffset="6775"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="140"
+            column="12"
+            startOffset="6719"
+            endLine="140"
+            endColumn="52"
+            endOffset="6759"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_tertiary_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6780"
+                endOffset="6846"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="141"
+            column="12"
+            startOffset="6787"
+            endLine="141"
+            endColumn="55"
+            endOffset="6830"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6851"
+                endOffset="6901"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="142"
+            column="12"
+            startOffset="6858"
+            endLine="142"
+            endColumn="39"
+            endOffset="6885"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_error&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6906"
+                endOffset="6959"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="143"
+            column="12"
+            startOffset="6913"
+            endLine="143"
+            endColumn="42"
+            endOffset="6943"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="6964"
+                endOffset="7024"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="144"
+            column="12"
+            startOffset="6971"
+            endLine="144"
+            endColumn="49"
+            endOffset="7008"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_error_container&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7029"
+                endOffset="7092"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="145"
+            column="12"
+            startOffset="7036"
+            endLine="145"
+            endColumn="52"
+            endOffset="7076"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7097"
+                endOffset="7152"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="146"
+            column="12"
+            startOffset="7104"
+            endLine="146"
+            endColumn="44"
+            endOffset="7136"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_background&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7157"
+                endOffset="7215"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="147"
+            column="12"
+            startOffset="7164"
+            endLine="147"
+            endColumn="47"
+            endOffset="7199"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7220"
+                endOffset="7272"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="148"
+            column="12"
+            startOffset="7227"
+            endLine="148"
+            endColumn="41"
+            endOffset="7256"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7277"
+                endOffset="7332"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="149"
+            column="12"
+            startOffset="7284"
+            endLine="149"
+            endColumn="44"
+            endOffset="7316"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7337"
+                endOffset="7397"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="150"
+            column="12"
+            startOffset="7344"
+            endLine="150"
+            endColumn="49"
+            endOffset="7381"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_on_surface_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7402"
+                endOffset="7465"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="151"
+            column="12"
+            startOffset="7409"
+            endLine="151"
+            endColumn="52"
+            endOffset="7449"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_outline&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7470"
+                endOffset="7522"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="152"
+            column="12"
+            startOffset="7477"
+            endLine="152"
+            endColumn="41"
+            endOffset="7506"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_outline_variant&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7527"
+                endOffset="7587"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="153"
+            column="12"
+            startOffset="7534"
+            endLine="153"
+            endColumn="49"
+            endOffset="7571"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_inverse_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7592"
+                endOffset="7652"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="154"
+            column="12"
+            startOffset="7599"
+            endLine="154"
+            endColumn="49"
+            endOffset="7636"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_inverse_on_surface&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7657"
+                endOffset="7720"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="155"
+            column="12"
+            startOffset="7664"
+            endLine="155"
+            endColumn="52"
+            endOffset="7704"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;preset_classic_inverse_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="7725"
+                endOffset="7785"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="156"
+            column="12"
+            startOffset="7732"
+            endLine="156"
+            endColumn="49"
+            endOffset="7769"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_glass_surface_light&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8000"
+                endOffset="8055"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="163"
+            column="12"
+            startOffset="8007"
+            endLine="163"
+            endColumn="42"
+            endOffset="8037"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_glass_search_light&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8060"
+                endOffset="8114"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="164"
+            column="12"
+            startOffset="8067"
+            endLine="164"
+            endColumn="41"
+            endOffset="8096"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_glass_dock_light&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8119"
+                endOffset="8171"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="165"
+            column="12"
+            startOffset="8126"
+            endLine="165"
+            endColumn="39"
+            endOffset="8153"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_glass_group_light&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8176"
+                endOffset="8229"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="166"
+            column="12"
+            startOffset="8183"
+            endLine="166"
+            endColumn="40"
+            endOffset="8211"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_glass_border&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8234"
+                endOffset="8282"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="167"
+            column="12"
+            startOffset="8241"
+            endLine="167"
+            endColumn="35"
+            endOffset="8264"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_morand_blush&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8309"
+                endOffset="8355"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="170"
+            column="12"
+            startOffset="8316"
+            endLine="170"
+            endColumn="35"
+            endOffset="8339"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_morand_lavender&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8360"
+                endOffset="8409"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="171"
+            column="12"
+            startOffset="8367"
+            endLine="171"
+            endColumn="38"
+            endOffset="8393"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_morand_mint&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8414"
+                endOffset="8459"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="172"
+            column="12"
+            startOffset="8421"
+            endLine="172"
+            endColumn="34"
+            endOffset="8443"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_morand_sky&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8464"
+                endOffset="8508"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="173"
+            column="12"
+            startOffset="8471"
+            endLine="173"
+            endColumn="33"
+            endOffset="8492"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_morand_sand&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8513"
+                endOffset="8558"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="174"
+            column="12"
+            startOffset="8520"
+            endLine="174"
+            endColumn="34"
+            endOffset="8542"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_morand_peach&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8563"
+                endOffset="8609"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="175"
+            column="12"
+            startOffset="8570"
+            endLine="175"
+            endColumn="35"
+            endOffset="8593"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_morand_rose&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8614"
+                endOffset="8659"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="176"
+            column="12"
+            startOffset="8621"
+            endLine="176"
+            endColumn="34"
+            endOffset="8643"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_text_primary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8687"
+                endOffset="8733"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="179"
+            column="12"
+            startOffset="8694"
+            endLine="179"
+            endColumn="35"
+            endOffset="8717"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_text_secondary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8738"
+                endOffset="8786"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="180"
+            column="12"
+            startOffset="8745"
+            endLine="180"
+            endColumn="37"
+            endOffset="8770"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_text_tertiary&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8791"
+                endOffset="8838"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="181"
+            column="12"
+            startOffset="8798"
+            endLine="181"
+            endColumn="36"
+            endOffset="8822"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_blue&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8875"
+                endOffset="8913"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="184"
+            column="12"
+            startOffset="8882"
+            endLine="184"
+            endColumn="27"
+            endOffset="8897"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_green&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8918"
+                endOffset="8957"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="185"
+            column="12"
+            startOffset="8925"
+            endLine="185"
+            endColumn="28"
+            endOffset="8941"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_orange&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="8962"
+                endOffset="9002"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="186"
+            column="12"
+            startOffset="8969"
+            endLine="186"
+            endColumn="29"
+            endOffset="8986"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_red&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="9007"
+                endOffset="9044"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="187"
+            column="12"
+            startOffset="9014"
+            endLine="187"
+            endColumn="26"
+            endOffset="9028"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_purple&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="9049"
+                endOffset="9089"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="188"
+            column="12"
+            startOffset="9056"
+            endLine="188"
+            endColumn="29"
+            endOffset="9073"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_pink&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="9094"
+                endOffset="9132"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="189"
+            column="12"
+            startOffset="9101"
+            endLine="189"
+            endColumn="27"
+            endOffset="9116"/>
+    </incident>
+
+    <incident
+        id="MissingDefaultResource"
+        severity="fatal"
+        message="The color &quot;ios_teal&quot; in values-night has no declaration in the base `values` folder; this can lead to crashes when the resource is queried in a configuration that does not match this qualifier">
+        <fix-replace
+            description="Remove resource override"
+            replacement=""
+            priority="0">
+            <range
+                file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+                startOffset="9137"
+                endOffset="9175"/>
+        </fix-replace>
+        <location
+            file="${:app*release*MAIN*sourceProvider*0*resDir*0}/values-night/colors.xml"
+            line="190"
+            column="12"
+            startOffset="9144"
+            endLine="190"
+            endColumn="27"
+            endOffset="9159"/>
+    </incident>
+
+</incidents>

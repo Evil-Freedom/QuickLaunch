@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  蓝牙设备选择弹窗 — Glassmorphism 风格
+  已配对设备列表，点击选择
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_liquid_glass_rim"
+    android:padding="20dp">
+
+    <!-- 标题栏 -->
+    <ImageView
+        android:id="@+id/ivBtIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="蓝牙"
+        android:src="@drawable/ic_trigger_bluetooth"
+        app:tint="@color/item_active_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvBtTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:fontFamily="sans-serif"
+        android:text="选择蓝牙设备"
+        android:textColor="@color/text_white"
+        android:textFontWeight="600"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@id/ivBtIcon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivBtIcon"
+        app:layout_constraintTop_toTopOf="@id/ivBtIcon" />
+
+    <!-- 副标题 -->
+    <TextView
+        android:id="@+id/tvBtSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="留空表示匹配任意蓝牙设备"
+        android:textColor="@color/text_tertiary"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@id/ivBtIcon" />
+
+    <!-- 任意设备选项 -->
+    <TextView
+        android:id="@+id/tvBtAnyDevice"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_dark_capsule_unselected"
+        android:fontFamily="sans-serif"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:text="任意设备（不限制）"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/tvBtSubtitle" />
+
+    <!-- 分隔线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/stroke_hairline"
+        app:layout_constraintTop_toBottomOf="@id/tvBtAnyDevice" />
+
+    <!-- 设备列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBluetoothDevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:maxHeight="300dp"
+        android:overScrollMode="never"
+        app:layout_constraintTop_toBottomOf="@id/tvBtAnyDevice" />
+
+    <!-- 空状态 -->
+    <TextView
+        android:id="@+id/tvBtEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="没有已配对的蓝牙设备"
+        android:textColor="@color/text_tertiary"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/rvBluetoothDevices" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  蓝牙设备列表项 — Glassmorphism 风格
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:layout_marginTop="8dp"
+    android:background="@drawable/bg_dark_capsule_unselected"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp">
+
+    <ImageView
+        android:id="@+id/ivDeviceIcon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:contentDescription="设备"
+        android:src="@drawable/ic_trigger_bluetooth"
+        app:tint="@color/item_inactive_text" />
+
+    <TextView
+        android:id="@+id/tvDeviceName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:maxLines="1"
+        android:text="AirPods Pro"
+        android:textColor="@color/text_white"
+        android:textSize="14sp" />
+
+    <ImageView
+        android:id="@+id/ivCheck"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:contentDescription="选中"
+        android:src="@drawable/ic_check"
+        android:visibility="gone"
+        app:tint="@color/item_active_text" />
+
+</LinearLayout>

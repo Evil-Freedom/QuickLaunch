@@ -37,12 +37,12 @@ public class AppDatabase_Impl : AppDatabase() {
 
   protected override fun createOpenDelegate(): RoomOpenDelegate {
     val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(4,
-        "b9e8211da3ee5e84bc1a2cf6f014e5a2", "e39427a661ab8b8add2ae77dcae0bea0") {
+        "3a7f864e2a7d9b91b972654c10390903", "d0aa3d4cadd6ee41dc9ef5a60f29d2f2") {
       public override fun createAllTables(connection: SQLiteConnection) {
-        connection.execSQL("CREATE TABLE IF NOT EXISTS `automations` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `targetPackage` TEXT NOT NULL, `targetAppName` TEXT NOT NULL, `triggerType` TEXT NOT NULL, `timeHour` INTEGER NOT NULL, `timeMinute` INTEGER NOT NULL, `repeatMode` TEXT NOT NULL, `repeatDays` INTEGER NOT NULL, `skipHolidays` INTEGER NOT NULL, `bluetoothName` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `randomWindow` INTEGER NOT NULL, `windowStartMin` INTEGER NOT NULL, `windowEndMin` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `automations` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `targetPackage` TEXT NOT NULL, `targetAppName` TEXT NOT NULL, `triggerType` TEXT NOT NULL, `timeHour` INTEGER NOT NULL, `timeMinute` INTEGER NOT NULL, `repeatMode` TEXT NOT NULL, `repeatDays` INTEGER NOT NULL, `skipHolidays` INTEGER NOT NULL, `bluetoothName` TEXT NOT NULL, `wifiName` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `randomWindow` INTEGER NOT NULL, `windowStartMin` INTEGER NOT NULL, `windowEndMin` INTEGER NOT NULL)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS `holidays` (`date` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`date`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b9e8211da3ee5e84bc1a2cf6f014e5a2')")
+        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3a7f864e2a7d9b91b972654c10390903')")
       }
 
       public override fun dropAllTables(connection: SQLiteConnection) {
@@ -89,6 +89,8 @@ public class AppDatabase_Impl : AppDatabase() {
             null, TableInfo.CREATED_FROM_ENTITY))
         _columnsAutomations.put("bluetoothName", TableInfo.Column("bluetoothName", "TEXT", true, 0,
             null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsAutomations.put("wifiName", TableInfo.Column("wifiName", "TEXT", true, 0, null,
+            TableInfo.CREATED_FROM_ENTITY))
         _columnsAutomations.put("enabled", TableInfo.Column("enabled", "INTEGER", true, 0, null,
             TableInfo.CREATED_FROM_ENTITY))
         _columnsAutomations.put("createdAt", TableInfo.Column("createdAt", "INTEGER", true, 0, null,

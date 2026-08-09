@@ -10,7 +10,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import java.text.Collator
 import java.util.Locale
-import java.util.concurrent.Executors
 
 /** 已安装、可启动（有桌面入口）的应用。手动实现 Parcelable，便于传给 BottomSheet 并耐受旋转重建。 */
 data class AppInfo(val packageName: String, val appName: String) : Parcelable {
@@ -34,9 +33,6 @@ data class AppInfo(val packageName: String, val appName: String) : Parcelable {
 
 object AppListLoader {
 
-    private val executor = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "app-list-loader").apply { isDaemon = true }
-    }
     private val mainHandler = Handler(Looper.getMainLooper())
 
     /** 缓存：应用列表变化不频繁，短时间内重复打开选择弹窗直接复用，避免重复几百毫秒的 loadLabel。 */
@@ -100,7 +96,7 @@ object AppListLoader {
             onDone(it)
             return
         }
-        executor.execute {
+        QuickLaunchExecutors.io.execute {
             val list = runCatching { load(app) }.getOrDefault(emptyList())
             mainHandler.post { runCatching { onDone(list) } }
         }

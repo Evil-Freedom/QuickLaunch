@@ -8,7 +8,7 @@ import com.workbuddy.quicklaunch.data.Holiday
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Calendar
-import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 同步中国法定节假日（含调休休息日）到本地 holidays 表。
@@ -18,14 +18,10 @@ import java.util.concurrent.Executors
  */
 object HolidaySync {
 
-    private val executor = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "holiday-sync").apply { isDaemon = true }
-    }
-
     private val mainHandler = Handler(Looper.getMainLooper())
 
     /** 同步进行中标记：连点同步按钮时合并请求，避免堆积一串重复的网络任务。 */
-    private val running = java.util.concurrent.atomic.AtomicBoolean(false)
+    private val running = AtomicBoolean(false)
 
     data class Result(val success: Boolean, val sourceLabel: String?, val count: Int)
 
@@ -44,7 +40,7 @@ object HolidaySync {
             return
         }
         val submitted = runCatching {
-            executor.execute {
+            QuickLaunchExecutors.io.execute {
                 // doSync 可能因网络异常返回失败结果，这里统一兜底成「失败」
                 val result = runCatching { doSync(app, pref) }.getOrDefault(Result(false, null, 0))
                 running.set(false)

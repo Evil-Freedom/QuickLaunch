@@ -1,40 +1,73 @@
 package com.workbuddy.quicklaunch
 
-import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
+import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ItemAutomationBinding
+import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import java.util.Locale
 
 /**
  * 主界面列表适配器：展示每条自动化，支持启用开关与删除。
+ *
+ * 性能优化：使用 ListAdapter + DiffUtil 做增量刷新，
+ * 避免规则数增长后 notifyDataSetChanged 导致全量重绘。
  */
 class AutomationAdapter(
-    private var items: List<Automation>,
     private val onToggle: (Automation, Boolean) -> Unit,
     private val onDelete: (Automation) -> Unit
-) : RecyclerView.Adapter<AutomationAdapter.VH>() {
+) : ListAdapter<Automation, AutomationAdapter.VH>(DIFF_CALLBACK) {
 
     inner class VH(val b: ItemAutomationBinding) : RecyclerView.ViewHolder(b.root)
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun submit(list: List<Automation>) {
-        items = list
-        notifyDataSetChanged() // ponytail: 规则数量个位数，上 DiffUtil 不划算
-    }
+    // 共享图标缓存（与 AppPickerAdapter 统一）
+    private val iconCache = object : LruCache<String, Drawable>(50) {}
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
         VH(ItemAutomationBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        val a = items[position]
-        // ⚠️ Round 10 修复：移除 RenderEffect blur — 会糊掉 tvName/tvDesc 等子 View 文字
+        val a = getItem(position)
+        val ctx = holder.b.root.context
         holder.b.tvName.text = a.name
         holder.b.tvDesc.text = "${triggerLabel(a)} → ${a.targetAppName}"
+
+        // Glassmorphism 重构：异步加载应用图标
+        holder.b.ivAppIcon.setImageDrawable(null)
+        val pm = ctx.packageManager
+        val cached = iconCache.get(a.targetPackage)
+        if (cached != null) {
+            holder.b.ivAppIcon.setImageDrawable(cached)
+        } else {
+            // 后台取真实图标，回主线程安全设置
+            QuickLaunchExecutors.io.execute {
+                val icon = runCatching { pm.getApplicationIcon(a.targetPackage) }.getOrNull()
+                    ?: return@execute
+                iconCache.put(a.targetPackage, icon)
+                mainHandler.post {
+                    if (holder.bindingAdapterPosition == position) {
+                        holder.b.ivAppIcon.setImageDrawable(icon)
+                    }
+                }
+            }
+        }
+
+        // Glassmorphism 重构：语义化胶囊标签
+        holder.b.tagTrigger.text = triggerLabel(a)
+
         // 状态色点 + 光晕：启用 = 薰衣草紫光晕 + 实心点，停用 = 灰色无光晕
         holder.b.vStatusGlow.setBackgroundResource(statusGlowRes(a.enabled))
         holder.b.vStatusDot.setBackgroundResource(statusDotRes(a.enabled))
@@ -44,8 +77,6 @@ class AutomationAdapter(
         holder.b.switchEnabled.setOnCheckedChangeListener { _, checked -> onToggle(a, checked) }
         holder.b.btnDelete.setOnClickListener { onDelete(a) }
     }
-
-    override fun getItemCount(): Int = items.size
 
     /** 状态色点资源：启用薰衣草紫 / 停用灰。 */
     private fun statusDotRes(enabled: Boolean): Int =
@@ -64,7 +95,7 @@ class AutomationAdapter(
                 if (a.skipHolidays) "·跳假" else ""
             )
         TriggerType.CHARGING -> "充电时"
-        TriggerType.WIFI -> "连接 WiFi"
+        TriggerType.WIFI -> if (a.wifiName.isNotEmpty()) "连接 WiFi:${a.wifiName}" else "连接 WiFi"
         else -> if (a.bluetoothName.isNotEmpty()) "连接蓝牙:${a.bluetoothName}" else "连接蓝牙"
     }
 
@@ -83,5 +114,15 @@ class AutomationAdapter(
         if (mask == 0) return "自定义"
         val picks = (0..6).filter { (mask shr it) and 1 == 1 }.joinToString("") { DAY_LABELS[it] }
         return if (picks.isEmpty()) "自定义" else "自定义($picks)"
+    }
+
+    companion object {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Automation>() {
+            override fun areItemsTheSame(oldItem: Automation, newItem: Automation): Boolean =
+                oldItem.id == newItem.id
+
+            override fun areContentsTheSame(oldItem: Automation, newItem: Automation): Boolean =
+                oldItem == newItem
+        }
     }
 }

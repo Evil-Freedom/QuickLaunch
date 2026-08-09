@@ -17,6 +17,9 @@
     <!-- WiFi 条件监听（registerNetworkCallback 需要） -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- WiFi 列表读取：Android 10-12 需要 ACCESS_FINE_LOCATION，Android 13+ 需要 NEARBY_WIFI_DEVICES -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
     <!-- 蓝牙条件监听 -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
