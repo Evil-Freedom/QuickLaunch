@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  节假日项 —— 统一冷暗卡片（bg_liquid_glass 已收敛为石墨卡片）
-  - 日期单行不换行（15sp 粗体），杜绝日期过长被挤压成两行
-  - 紧凑内边距与间距，整行更紧致
+  节假日项 —— 半透灰白磨砂卡片
+  - 日期单行不换行（15sp 粗体）
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="12dp"
     android:layout_marginVertical="4dp"
-    android:background="@drawable/bg_liquid_glass"
+    android:background="@drawable/bg_card_dark"
     android:gravity="center_vertical"
     android:minHeight="48dp"
     android:orientation="horizontal"
@@ -24,6 +23,7 @@
         android:maxLines="1"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.QuickLaunch.Subhead"
+        android:textColor="@color/text_white"
         android:textSize="15sp"
         android:textStyle="bold" />
 
@@ -34,7 +34,8 @@
         android:layout_weight="1"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.QuickLaunch.Body" />
+        android:textAppearance="@style/TextAppearance.QuickLaunch.Body"
+        android:textColor="@color/text_secondary" />
 
     <Button
         android:id="@+id/btnDelete"
@@ -43,6 +44,7 @@
         android:layout_height="36dp"
         android:minHeight="36dp"
         android:text="删除"
+        android:textColor="@color/text_white"
         android:textSize="13sp" />
 
 </LinearLayout>

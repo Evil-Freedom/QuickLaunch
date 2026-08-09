@@ -1,66 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- ═══════════════════════════════════════════════════════════════
-         统一冷暗色 Design Token（Car Control Center Dark）
+         纯白 + 半透灰白磨砂玻璃 Design Token
 
-         唯一色源。所有 layout / drawable / style 只允许引用本文件的
-         语义色名，禁止硬编码色值。历史上「暖灰 #1C1E26 与冷灰 #252833
-         混用、蓝绿双强调色」的割裂在此彻底收口。
+         严格使用 8 位 ARGB 透明度色值，禁止实色。
+           bg_root        #0F0F0F   纯极暗黑页面背景
+           btn_primary    #FFFFFF / #222222   主按钮白底黑字
+           item_active    #24FFFFFF + #38FFFFFF 描边   选中磨砂
+           item_inactive  #14FFFFFF              未选中暗卡片
+           card_dark      #12FFFFFF              统计/输入卡片
+           text_white     #FFFFFF
+           text_secondary #CCCCCC
+     ═══════════════════════════════════════════════════════════════ -->
 
-           bg_root    #121212   纯暗底（全局背景，唯一根色）
-           bg_card    #212124   深石墨（一级卡片 / 容器）
-           bg_widget  #2A2A2E   中灰（输入框 / 悬浮 / 小选项）
-           stroke     #333338   1px 半透明感描边
-           accent     #34C759   苹果荧光绿（唯一强调色，禁止第二种绿）
-           text       #FFFFFF / #A1A1AA / #71717A
-         ═══════════════════════════════════════════════════════════════ -->
+    <!-- 1. 页面主背景 -->
+    <color name="bg_root">#0F0F0F</color>
 
-    <!-- ─────────── 背景层（三阶，仅此三阶） ─────────── -->
-    <color name="bg_root">#121212</color>
-    <color name="bg_card">#212124</color>
-    <color name="bg_widget">#2A2A2E</color>
-    <color name="stroke_hairline">#333338</color>
-    <color name="stroke_glass">#10FFFFFF</color>
-    <color name="bg_floating_bar">#C0121212</color>
+    <!-- 2. 主按钮 -->
+    <color name="btn_primary_bg">#FFFFFF</color>
+    <color name="btn_primary_text">#222222</color>
 
-    <!-- ─────────── 品牌强调（唯一绿） ─────────── -->
-    <color name="brand_accent">#34C759</color>
-    <color name="brand_accent_press">#2DB14E</color>
-    <!-- 强调色 12% 填充：选中态卡片底，避免整块实心绿刺眼 -->
-    <color name="brand_accent_surface">#1F34C759</color>
+    <!-- 3. 选中态卡片 / Tab -->
+    <color name="item_active_bg">#24FFFFFF</color>
+    <color name="item_active_stroke">#38FFFFFF</color>
+    <color name="item_active_text">#FFFFFF</color>
 
-    <!-- ─────────── 文字（三级，仅此三级） ─────────── -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#A1A1AA</color>
-    <color name="text_tertiary">#71717A</color>
+    <!-- 4. 未选中态卡片 / Tab -->
+    <color name="item_inactive_bg">#14FFFFFF</color>
+    <color name="item_inactive_text">#CCCCCC</color>
 
-    <!-- ─────────── 语义色 ─────────── -->
+    <!-- 5. 输入框 / 统计卡片 -->
+    <color name="card_dark_bg">#12FFFFFF</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_secondary">#CCCCCC</color>
+    <color name="text_tertiary">#888888</color>
+
+    <!-- ═══════════════ 兼容别名：全部收敛到白磨砂体系 ═══════════════ -->
+    <color name="bg_card">#14FFFFFF</color>
+    <color name="bg_widget">#12FFFFFF</color>
+    <color name="stroke_hairline">#20FFFFFF</color>
+    <color name="stroke_glass">#20FFFFFF</color>
+    <color name="bg_floating_bar">#00121212</color>
+
+    <!-- 品牌强调色：由绿改为纯白（符合本次「去绿」规范） -->
+    <color name="brand_accent">@color/text_white</color>
+    <color name="brand_accent_press">#E0FFFFFF</color>
+    <color name="brand_accent_surface">#24FFFFFF</color>
+
+    <!-- 文字 -->
+    <color name="text_primary">@color/text_white</color>
+
+    <!-- 语义色 -->
     <color name="destructive">#FF453A</color>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         兼容别名：老资源名全部收敛指向上方 Token，
-         保证既有布局零改动也能拿到统一后的新色。
-         ═══════════════════════════════════════════════════════════════ -->
+    <!-- 老资源名兼容 -->
     <color name="dark_root">@color/bg_root</color>
     <color name="dark_bg_primary">@color/bg_root</color>
-    <color name="dark_card_primary">@color/bg_card</color>
-    <color name="dark_card_secondary">@color/bg_widget</color>
-    <color name="dark_button_bg">@color/bg_widget</color>
-    <color name="dark_input_bg">@color/bg_widget</color>
-    <color name="dark_search_bg">@color/bg_widget</color>
+    <color name="dark_card_primary">@color/card_dark_bg</color>
+    <color name="dark_card_secondary">@color/item_inactive_bg</color>
+    <color name="dark_button_bg">@color/item_inactive_bg</color>
+    <color name="dark_input_bg">@color/card_dark_bg</color>
+    <color name="dark_search_bg">@color/card_dark_bg</color>
     <color name="dark_divider">@color/stroke_hairline</color>
     <color name="dark_stroke">@color/stroke_hairline</color>
 
-    <color name="dark_text_primary">@color/text_primary</color>
+    <color name="dark_text_primary">@color/text_white</color>
     <color name="dark_text_secondary">@color/text_secondary</color>
     <color name="dark_text_tertiary">@color/text_tertiary</color>
     <color name="dark_text_hint">@color/text_tertiary</color>
 
-    <color name="dark_accent">@color/brand_accent</color>
-    <color name="dark_accent_green">@color/brand_accent</color>
-    <color name="dark_accent_press">@color/brand_accent_press</color>
+    <color name="dark_accent">@color/text_white</color>
+    <color name="dark_accent_green">@color/text_white</color>
+    <color name="dark_accent_press">#E0FFFFFF</color>
 
-    <color name="dark_switch_thumb">@color/brand_accent</color>
+    <color name="dark_switch_thumb">@color/text_white</color>
     <color name="dark_switch_track">@color/stroke_hairline</color>
     <color name="dark_destructive">@color/destructive</color>
 

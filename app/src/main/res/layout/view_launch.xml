@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Tab 1：快捷启动面板（Oreo 大胶囊紧凑版）
-  - 顶部仪表盘双栏卡片（padding 压缩 30%）
-  - 触发条件 4 联排大胶囊网格（高度压缩、圆角 28dp）
-  - 深色卡片 + 1px 半透明白色描边
-  - 跳过节假日 / 随机时间 合并进执行时间卡片，消灭重复与保存按钮之间空白占位块
+  Tab 1：快捷启动面板（纯白 + 半透灰白磨砂玻璃风格）
+  - 顶部仪表盘双栏卡片
+  - 触发条件 4 联排大胶囊网格
+  - 已移除「名称（可选）」输入框
   - 不改动原有启动/保存/快捷逻辑
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -30,14 +29,14 @@
             android:layout_marginBottom="12dp"
             android:fontFamily="sans-serif-light"
             android:text="我的自动化"
-            android:textColor="@color/dark_text_primary"
+            android:textColor="@color/text_white"
             android:textSize="28sp" />
 
         <!-- 仪表盘：双栏大卡片 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_dark_card_primary"
+            android:background="@drawable/bg_card_dark"
             android:orientation="horizontal"
             android:padding="14dp">
 
@@ -52,7 +51,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
                     android:text="已启用规则"
-                    android:textColor="@color/dark_text_secondary"
+                    android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
                 <TextView
@@ -62,7 +61,7 @@
                     android:layout_marginTop="6dp"
                     android:fontFamily="sans-serif"
                     android:text="0"
-                    android:textColor="@color/dark_text_primary"
+                    android:textColor="@color/text_white"
                     android:textFontWeight="600"
                     android:textSize="34sp" />
             </LinearLayout>
@@ -71,7 +70,7 @@
                 android:layout_width="1px"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
-                android:background="@color/dark_stroke" />
+                android:background="@color/stroke_hairline" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -84,7 +83,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
                     android:text="下次触发"
-                    android:textColor="@color/dark_text_secondary"
+                    android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
                 <TextView
@@ -94,7 +93,7 @@
                     android:layout_marginTop="6dp"
                     android:fontFamily="sans-serif"
                     android:text="--:--"
-                    android:textColor="@color/dark_accent_green"
+                    android:textColor="@color/text_white"
                     android:textFontWeight="600"
                     android:textSize="28sp" />
             </LinearLayout>
@@ -115,7 +114,7 @@
                 android:letterSpacing="0.05"
                 android:text="触发条件"
                 android:textAllCaps="true"
-                android:textColor="@color/dark_text_secondary"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
             <LinearLayout
@@ -170,37 +169,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 名称输入卡片 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_dark_card_primary"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="名称（可选）"
-                android:textColorHint="@color/dark_text_tertiary"
-                app:boxBackgroundMode="none"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
-                app:hintTextColor="@color/dark_text_tertiary">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:fontFamily="sans-serif-light"
-                    android:inputType="text"
-                    android:textColor="@color/dark_text_primary"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
         <!-- 应用选择按钮 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPickApp"
@@ -210,13 +178,13 @@
             android:layout_marginTop="10dp"
             android:text="选择要启动的应用" />
 
-        <!-- 时间设置分组卡片（已合并原「选项」卡片内容） -->
+        <!-- 时间设置分组卡片 -->
         <LinearLayout
             android:id="@+id/layoutTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_dark_card_primary"
+            android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
             android:padding="12dp">
 
@@ -227,7 +195,7 @@
                 android:letterSpacing="0.05"
                 android:text="执行时间"
                 android:textAllCaps="true"
-                android:textColor="@color/dark_text_secondary"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
             <LinearLayout
@@ -247,7 +215,7 @@
                     android:paddingStart="24dp"
                     android:paddingEnd="24dp"
                     android:text="08:00"
-                    android:textColor="@color/dark_accent_green"
+                    android:textColor="@color/text_white"
                     android:textFontWeight="500"
                     android:textSize="18sp" />
             </LinearLayout>
@@ -260,7 +228,7 @@
                 android:letterSpacing="0.05"
                 android:text="重复"
                 android:textAllCaps="true"
-                android:textColor="@color/dark_text_secondary"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
             <HorizontalScrollView
@@ -315,7 +283,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
                     android:text="选择星期（可多选）"
-                    android:textColor="@color/dark_text_tertiary"
+                    android:textColor="@color/text_tertiary"
                     android:textSize="12sp" />
 
                 <LinearLayout
@@ -333,7 +301,7 @@
                         android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="日"
-                        android:textColor="@color/dark_text_secondary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
                     <TextView
@@ -346,7 +314,7 @@
                         android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="一"
-                        android:textColor="@color/dark_text_secondary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
                     <TextView
@@ -359,7 +327,7 @@
                         android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="二"
-                        android:textColor="@color/dark_text_secondary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
                     <TextView
@@ -372,7 +340,7 @@
                         android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="三"
-                        android:textColor="@color/dark_text_secondary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
                     <TextView
@@ -385,7 +353,7 @@
                         android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="四"
-                        android:textColor="@color/dark_text_secondary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
                     <TextView
@@ -398,7 +366,7 @@
                         android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="五"
-                        android:textColor="@color/dark_text_secondary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
                     <TextView
@@ -411,7 +379,7 @@
                         android:fontFamily="sans-serif"
                         android:gravity="center"
                         android:text="六"
-                        android:textColor="@color/dark_text_secondary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -422,10 +390,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:buttonTint="@color/dark_accent_green"
+                android:buttonTint="@color/text_white"
                 android:fontFamily="sans-serif-light"
                 android:text="跳过中国法定节假日（含调休休息日）不触发"
-                android:textColor="@color/dark_text_primary"
+                android:textColor="@color/text_white"
                 android:textSize="14sp" />
 
             <!-- 随机时间开关 -->
@@ -434,10 +402,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:buttonTint="@color/dark_accent_green"
+                android:buttonTint="@color/text_white"
                 android:fontFamily="sans-serif-light"
                 android:text="随机时间（在窗口内，避免每天固定打卡）"
-                android:textColor="@color/dark_text_primary"
+                android:textColor="@color/text_white"
                 android:textSize="14sp" />
 
             <!-- 随机窗口时间 -->
@@ -458,7 +426,7 @@
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="08:30"
-                    android:textColor="@color/dark_accent_green"
+                    android:textColor="@color/text_white"
                     android:textSize="16sp" />
 
                 <TextView
@@ -469,7 +437,7 @@
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
                     android:text="至"
-                    android:textColor="@color/dark_text_secondary"
+                    android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
 
                 <TextView
@@ -481,7 +449,7 @@
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="08:50"
-                    android:textColor="@color/dark_accent_green"
+                    android:textColor="@color/text_white"
                     android:textSize="16sp" />
             </LinearLayout>
         </LinearLayout>
@@ -492,7 +460,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_dark_card_primary"
+            android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
             android:padding="12dp"
             android:visibility="gone">
@@ -501,11 +469,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="蓝牙设备名（可选，留空表示任意设备）"
-                android:textColorHint="@color/dark_text_tertiary"
+                android:textColorHint="@color/text_tertiary"
                 app:boxBackgroundMode="none"
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
-                app:hintTextColor="@color/dark_text_tertiary">
+                app:hintTextColor="@color/text_tertiary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etBtName"
@@ -514,7 +482,7 @@
                     android:background="@android:color/transparent"
                     android:fontFamily="sans-serif-light"
                     android:inputType="text"
-                    android:textColor="@color/dark_text_primary"
+                    android:textColor="@color/text_white"
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -538,7 +506,7 @@
             android:letterSpacing="0.05"
             android:text="规则列表"
             android:textAllCaps="true"
-            android:textColor="@color/dark_text_secondary"
+            android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
         <TextView
@@ -548,7 +516,7 @@
             android:gravity="center"
             android:paddingVertical="32dp"
             android:text="还没有自动化规则"
-            android:textColor="@color/dark_text_tertiary"
+            android:textColor="@color/text_tertiary"
             android:textSize="14sp"
             android:visibility="gone" />
 

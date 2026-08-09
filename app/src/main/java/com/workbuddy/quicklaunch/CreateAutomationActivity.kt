@@ -285,7 +285,7 @@ class CreateAutomationActivity : AppCompatActivity() {
             toast("请先选择要启动的应用")
             return
         }
-        val name = binding.etName.text.toString().ifBlank { selectedAppName ?: "自动化" }
+        val name = selectedAppName ?: "自动化"
         val repeatKey = currentRepeatKey()
         val repeatDaysMask = if (repeatKey == "custom") {
             var mask = 0

@@ -53,10 +53,10 @@
     <color name="m3_inverse_on_surface">#2E322B</color>
     <color name="m3_inverse_primary">#5EA88B</color>
 
-    <!-- 业务色：状态色点（薄荷绿主题暗色版 - 高对比度） -->
-    <color name="status_enabled">#8BD5C0</color>
-    <!-- 停用灰：vs 卡片底 #191C17 对比度 4.53:1 -->
-    <color name="status_disabled">#7E857A</color>
+    <!-- 业务色：状态色点（白磨砂风格，去绿） -->
+    <color name="status_enabled">#FFFFFF</color>
+    <!-- 停用灰 -->
+    <color name="status_disabled">#888888</color>
 
     <!-- 自适应图标渐变背景（暗色版，更深沉） -->
     <color name="ic_launcher_bg_top">#5EA88B</color>

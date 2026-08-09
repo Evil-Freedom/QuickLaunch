@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  【已收编】原 iOS 26 Liquid Glass 亮白毛玻璃。
-  在纯暗色控制中心语境下，白色玻璃是本次「冷暖割裂」的主要来源之一
-  （节假日项、数据源项一整块发白）。这里统一降级为标准石墨卡片，
-  保留资源名以兼容历史引用。
--->
+<!-- 列表项通用背景：低透明度白底大胶囊 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/bg_card" />
+    <solid android:color="@color/card_dark_bg" />
     <corners android:radius="@dimen/dark_radius_card" />
     <stroke
-        android:width="@dimen/dark_stroke_width"
-        android:color="@color/stroke_hairline" />
+        android:width="1px"
+        android:color="@color/stroke_glass" />
 </shape>

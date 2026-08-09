@@ -99,9 +99,9 @@
         android:layout_margin="20dp"
         android:contentDescription="添加节假日"
         android:src="@drawable/ic_add_ios"
-        app:backgroundTint="@color/dark_accent_green"
+        app:backgroundTint="@color/text_white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@color/dark_bg_primary" />
+        app:tint="@color/bg_root" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

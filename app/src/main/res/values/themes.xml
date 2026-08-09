@@ -165,23 +165,23 @@
          暗黑极简胶囊主题（Dark）—— OLED 纯黑 + 深灰胶囊 + 苹果绿
          ════════════════════════════════════════════════════════════════ -->
     <style name="Theme.QuickLaunch.Dark" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- 主色：苹果绿 -->
-        <item name="colorPrimary">@color/dark_accent_green</item>
-        <item name="colorOnPrimary">@color/dark_bg_primary</item>
-        <item name="colorPrimaryContainer">@color/dark_accent_green</item>
-        <item name="colorOnPrimaryContainer">@color/dark_bg_primary</item>
+        <!-- 主色：纯白（去绿） -->
+        <item name="colorPrimary">@color/text_white</item>
+        <item name="colorOnPrimary">@color/bg_root</item>
+        <item name="colorPrimaryContainer">@color/item_active_bg</item>
+        <item name="colorOnPrimaryContainer">@color/text_white</item>
 
-        <!-- 次要色：深灰 -->
-        <item name="colorSecondary">@color/dark_card_primary</item>
-        <item name="colorOnSecondary">@color/dark_text_primary</item>
-        <item name="colorSecondaryContainer">@color/dark_card_secondary</item>
-        <item name="colorOnSecondaryContainer">@color/dark_text_primary</item>
+        <!-- 次要色：半透暗卡片 -->
+        <item name="colorSecondary">@color/card_dark_bg</item>
+        <item name="colorOnSecondary">@color/text_white</item>
+        <item name="colorSecondaryContainer">@color/item_inactive_bg</item>
+        <item name="colorOnSecondaryContainer">@color/text_white</item>
 
         <!-- 第三色：浅灰 -->
-        <item name="colorTertiary">@color/dark_text_secondary</item>
-        <item name="colorOnTertiary">@color/dark_bg_primary</item>
-        <item name="colorTertiaryContainer">@color/dark_divider</item>
-        <item name="colorOnTertiaryContainer">@color/dark_text_primary</item>
+        <item name="colorTertiary">@color/text_secondary</item>
+        <item name="colorOnTertiary">@color/bg_root</item>
+        <item name="colorTertiaryContainer">@color/stroke_hairline</item>
+        <item name="colorOnTertiaryContainer">@color/text_white</item>
 
         <!-- 错误色 -->
         <item name="colorError">#FF453A</item>
@@ -189,23 +189,23 @@
         <item name="colorErrorContainer">#3A2A2A</item>
         <item name="colorOnErrorContainer">#FF453A</item>
 
-        <!-- 背景：OLED 纯黑 -->
-        <item name="android:colorBackground">@color/dark_bg_primary</item>
-        <item name="colorOnBackground">@color/dark_text_primary</item>
-        <item name="colorSurface">@color/dark_bg_primary</item>
-        <item name="colorOnSurface">@color/dark_text_primary</item>
-        <item name="colorSurfaceVariant">@color/dark_card_primary</item>
-        <item name="colorOnSurfaceVariant">@color/dark_text_primary</item>
-        <item name="colorOutline">@color/dark_divider</item>
-        <item name="colorOutlineVariant">@color/dark_divider</item>
-        <item name="colorSurfaceContainerLow">@color/dark_bg_primary</item>
-        <item name="colorSurfaceContainer">@color/dark_card_primary</item>
-        <item name="colorSurfaceContainerHigh">@color/dark_card_secondary</item>
-        <item name="colorSurfaceInverse">@color/dark_text_primary</item>
-        <item name="colorOnSurfaceInverse">@color/dark_bg_primary</item>
-        <item name="colorPrimaryInverse">@color/dark_accent_green</item>
+        <!-- 背景：纯极暗黑 -->
+        <item name="android:colorBackground">@color/bg_root</item>
+        <item name="colorOnBackground">@color/text_white</item>
+        <item name="colorSurface">@color/bg_root</item>
+        <item name="colorOnSurface">@color/text_white</item>
+        <item name="colorSurfaceVariant">@color/card_dark_bg</item>
+        <item name="colorOnSurfaceVariant">@color/text_white</item>
+        <item name="colorOutline">@color/stroke_hairline</item>
+        <item name="colorOutlineVariant">@color/stroke_hairline</item>
+        <item name="colorSurfaceContainerLow">@color/bg_root</item>
+        <item name="colorSurfaceContainer">@color/card_dark_bg</item>
+        <item name="colorSurfaceContainerHigh">@color/item_inactive_bg</item>
+        <item name="colorSurfaceInverse">@color/text_white</item>
+        <item name="colorOnSurfaceInverse">@color/bg_root</item>
+        <item name="colorPrimaryInverse">@color/text_white</item>
 
-        <!-- 窗口背景：统一 bg_root #121212，冷启动瞬间就是最终底色，无跳色 -->
+        <!-- 窗口背景：统一 bg_root #0F0F0F，冷启动瞬间就是最终底色，无跳色 -->
         <item name="android:windowBackground">@color/bg_root</item>
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
 

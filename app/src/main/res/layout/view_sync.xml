@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Tab 2：同步源（Oreo 大胶囊紧凑版）
+  Tab 2：同步源（纯白 + 半透灰白磨砂玻璃风格）
   - 法定节假日同步、数据源选择、手动管理、自定义源管理
-  - 所有卡片统一 28dp 大胶囊圆角 + 1px 半透明白描边 + 压缩 padding
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -26,14 +25,14 @@
             android:layout_marginBottom="12dp"
             android:fontFamily="sans-serif-light"
             android:text="同步源"
-            android:textColor="@color/dark_text_primary"
+            android:textColor="@color/text_white"
             android:textSize="28sp" />
 
         <!-- 防外屏息屏开关 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_dark_card_primary"
+            android:background="@drawable/bg_card_dark"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="12dp">
@@ -45,7 +44,7 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:text="防外屏息屏"
-                android:textColor="@color/dark_text_primary"
+                android:textColor="@color/text_white"
                 android:textSize="16sp" />
 
             <androidx.appcompat.widget.SwitchCompat
@@ -62,7 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_dark_card_primary"
+            android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
             android:padding="12dp">
 
@@ -73,7 +72,7 @@
                 android:letterSpacing="0.05"
                 android:text="法定节假日数据"
                 android:textAllCaps="true"
-                android:textColor="@color/dark_text_secondary"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
             <!-- 数据源选择行 -->
@@ -89,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
                     android:text="数据源"
-                    android:textColor="@color/dark_text_primary"
+                    android:textColor="@color/text_white"
                     android:textSize="16sp" />
 
                 <Spinner
@@ -98,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/dark_accent_green" />
+                    android:backgroundTint="@color/text_white" />
             </LinearLayout>
 
             <!-- 同步按钮 -->
@@ -142,7 +141,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 底部留白：避让悬浮底栏 + 系统手势条 -->
+        <!-- 底部留白：避让漂浮药丸底栏 + 系统手势条 -->
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/dark_scroll_bottom_gap" />

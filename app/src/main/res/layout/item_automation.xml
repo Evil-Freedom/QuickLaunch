@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  车机质感规则卡片：深色立体卡片 + 微光描边 + 状态指示灯
-  - 左侧状态色点
-  - 中部名称/触发描述
-  - 右侧开关 + 删除
+  规则卡片：半透灰白磨砂玻璃风格
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,7 +8,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="4dp"
-    android:background="@drawable/bg_dark_card_primary"
+    android:background="@drawable/bg_card_dark"
     android:orientation="vertical"
     android:padding="12dp">
 
@@ -38,7 +35,7 @@
             android:fontFamily="sans-serif"
             android:maxLines="1"
             android:text="自动化名称"
-            android:textColor="@color/dark_text_primary"
+            android:textColor="@color/text_white"
             android:textFontWeight="500"
             android:textSize="16sp" />
 
@@ -61,7 +58,7 @@
         android:fontFamily="sans-serif-light"
         android:maxLines="2"
         android:text="描述文字"
-        android:textColor="@color/dark_text_tertiary"
+        android:textColor="@color/text_tertiary"
         android:textSize="13sp" />
 
     <!-- 删除按钮 -->
@@ -77,7 +74,7 @@
         android:minWidth="56dp"
         android:paddingHorizontal="12dp"
         android:text="删除"
-        android:textColor="@color/dark_destructive"
+        android:textColor="@color/destructive"
         android:textSize="13sp" />
 
 </LinearLayout>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 主按钮：纯白大胶囊 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/bg_root" />
+    <solid android:color="@color/btn_primary_bg" />
+    <corners android:radius="28dp" />
 </shape>

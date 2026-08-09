@@ -45,7 +45,7 @@
             android:fontFamily="sans-serif-medium"
             android:padding="8dp"
             android:text="完成"
-            android:textColor="@color/dark_accent_green"
+            android:textColor="@color/text_white"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>

@@ -76,8 +76,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ivNavSync: ImageView
     private lateinit var tvNavLaunch: TextView
     private lateinit var tvNavSync: TextView
-    private lateinit var indicatorLaunch: View
-    private lateinit var indicatorSync: View
 
     // ---------- 规则列表 ----------
     private lateinit var rvRules: RecyclerView
@@ -89,7 +87,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvDashboardNext: TextView
 
     // ---------- 创建表单 ----------
-    private lateinit var etName: TextView
     private lateinit var btnPickApp: MaterialButton
     private lateinit var btnTime: TextView
     private lateinit var btnWinStart: TextView
@@ -219,8 +216,6 @@ class MainActivity : AppCompatActivity() {
         ivNavSync = binding.ivNavSync
         tvNavLaunch = binding.tvNavLaunch
         tvNavSync = binding.tvNavSync
-        indicatorLaunch = binding.indicatorLaunch
-        indicatorSync = binding.indicatorSync
 
         bottomNavLaunch.setOnClickListener { binding.viewPager.currentItem = TAB_LAUNCH }
         bottomNavSync.setOnClickListener { binding.viewPager.currentItem = TAB_SYNC }
@@ -239,16 +234,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applyBottomNavStyle(isLaunch: Boolean) {
-        val accent = resources.getColor(R.color.brand_accent, null)
-        val secondary = resources.getColor(R.color.text_secondary, null)
+        val activeText = resources.getColor(R.color.item_active_text, null)
+        val inactiveText = resources.getColor(R.color.item_inactive_text, null)
 
-        ivNavLaunch.setColorFilter(if (isLaunch) accent else secondary)
-        tvNavLaunch.setTextColor(if (isLaunch) accent else secondary)
-        indicatorLaunch.visibility = if (isLaunch) View.VISIBLE else View.INVISIBLE
+        bottomNavLaunch.setBackgroundResource(
+            if (isLaunch) R.drawable.bg_item_active else R.drawable.bg_item_inactive
+        )
+        ivNavLaunch.setColorFilter(if (isLaunch) activeText else inactiveText)
+        tvNavLaunch.setTextColor(if (isLaunch) activeText else inactiveText)
+        tvNavLaunch.setTypeface(null, if (isLaunch) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
 
-        ivNavSync.setColorFilter(if (isLaunch) secondary else accent)
-        tvNavSync.setTextColor(if (isLaunch) secondary else accent)
-        indicatorSync.visibility = if (isLaunch) View.INVISIBLE else View.VISIBLE
+        bottomNavSync.setBackgroundResource(
+            if (isLaunch) R.drawable.bg_item_inactive else R.drawable.bg_item_active
+        )
+        ivNavSync.setColorFilter(if (isLaunch) inactiveText else activeText)
+        tvNavSync.setTextColor(if (isLaunch) inactiveText else activeText)
+        tvNavSync.setTypeface(null, if (isLaunch) android.graphics.Typeface.NORMAL else android.graphics.Typeface.BOLD)
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -268,7 +269,6 @@ class MainActivity : AppCompatActivity() {
         rvRules.overScrollMode = View.OVER_SCROLL_NEVER
 
         // 创建表单 View
-        etName = launchBinding.etName
         btnPickApp = launchBinding.btnPickApp
         btnTime = launchBinding.btnTime
         btnWinStart = launchBinding.btnWinStart
@@ -375,19 +375,19 @@ class MainActivity : AppCompatActivity() {
             if (selected) R.drawable.bg_dark_capsule_selected else R.drawable.bg_dark_capsule_unselected
         )
         view.setTextColor(
-            if (selected) resources.getColor(R.color.dark_bg_primary, null)
-            else resources.getColor(R.color.dark_text_secondary, null)
+            if (selected) resources.getColor(R.color.item_active_text, null)
+            else resources.getColor(R.color.item_inactive_text, null)
         )
     }
 
     private fun refreshTriggerChip(textView: TextView, selected: Boolean) {
         if (selected) {
             textView.setBackgroundResource(R.drawable.bg_trigger_grid_item_selected)
-            textView.setTextColor(resources.getColor(R.color.dark_accent_green, null))
+            textView.setTextColor(resources.getColor(R.color.item_active_text, null))
             textView.setTypeface(null, android.graphics.Typeface.BOLD)
         } else {
             textView.setBackgroundResource(R.drawable.bg_trigger_grid_item)
-            textView.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
+            textView.setTextColor(resources.getColor(R.color.item_inactive_text, null))
             textView.setTypeface(null, android.graphics.Typeface.NORMAL)
         }
     }
@@ -395,11 +395,11 @@ class MainActivity : AppCompatActivity() {
     private fun refreshRepeatChip(textView: TextView, selected: Boolean) {
         if (selected) {
             textView.setBackgroundResource(R.drawable.bg_dark_capsule_selected)
-            textView.setTextColor(resources.getColor(R.color.dark_bg_primary, null))
+            textView.setTextColor(resources.getColor(R.color.item_active_text, null))
             textView.setTypeface(null, android.graphics.Typeface.BOLD)
         } else {
             textView.setBackgroundResource(R.drawable.bg_dark_capsule_unselected)
-            textView.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
+            textView.setTextColor(resources.getColor(R.color.item_inactive_text, null))
             textView.setTypeface(null, android.graphics.Typeface.NORMAL)
         }
     }
@@ -510,7 +510,7 @@ class MainActivity : AppCompatActivity() {
             toast("请先选择要启动的应用")
             return
         }
-        val name = etName.text.toString().ifBlank { selectedAppName ?: "自动化" }
+        val name = selectedAppName ?: "自动化"
         val repeatKey = currentRepeatKey()
         val repeatDaysMask = if (repeatKey == "custom") {
             var mask = 0
@@ -568,7 +568,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetForm() {
-        etName.text = ""
         selectedPackage = null
         selectedAppName = null
         btnPickApp.text = "选择要启动的应用"

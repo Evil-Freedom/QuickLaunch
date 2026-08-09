@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  控制中心主框架（Edge-to-Edge 沉浸式 + iOS 悬浮毛玻璃底栏）
+  控制中心主框架（Edge-to-Edge 沉浸式 + 纯平漂浮药丸底栏）
 
   - 顶部无 Tab：标题与内容顶到状态栏下方
   - 主体：ViewPager2 左右滑动，复用 view_launch / view_sync
-  - 底部：iOS 风格半透明毛玻璃悬浮底栏
+  - 底部：纯平无遮罩，两个独立漂浮胶囊药丸
       [ ic_home  快捷启动 ]  [ ic_source  节假日与数据源 ]
-      选中态 = 强调绿图标/文字 + 高亮指示器
+      选中 = 白磨砂 + 细白边框；未选中 = 普通暗卡片
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -20,23 +20,20 @@
         android:id="@+id/viewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/floatingBottomBar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- ═══ 底部：iOS 风格悬浮毛玻璃底栏 ═══ -->
+    <!-- ═══ 底部：纯平无遮罩漂浮药丸 ═══ -->
     <LinearLayout
         android:id="@+id/floatingBottomBar"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/dark_floating_bar_height"
-        android:layout_marginHorizontal="@dimen/dark_floating_bar_margin"
-        android:layout_marginBottom="@dimen/dark_floating_bar_margin"
-        android:background="@drawable/bg_floating_bottom_bar"
-        android:baselineAligned="false"
-        android:elevation="6dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:background="@android:color/transparent"
         android:orientation="horizontal"
-        android:paddingHorizontal="8dp"
+        android:paddingHorizontal="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -44,56 +41,65 @@
         <!-- 快捷启动 -->
         <LinearLayout
             android:id="@+id/bottomNavLaunch"
-            style="@style/Widget.QuickLaunch.Dark.BottomNav.Item">
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_item_active"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp">
 
             <ImageView
                 android:id="@+id/ivNavLaunch"
-                android:layout_width="@dimen/dark_floating_bar_item_icon"
-                android:layout_height="@dimen/dark_floating_bar_item_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:contentDescription="快捷启动"
                 android:src="@drawable/ic_tab_launch"
-                app:tint="@color/brand_accent" />
+                app:tint="@color/item_active_text" />
 
             <TextView
                 android:id="@+id/tvNavLaunch"
-                style="@style/Widget.QuickLaunch.Dark.BottomNav.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif"
                 android:text="快捷启动"
-                android:textColor="@color/brand_accent" />
+                android:textColor="@color/item_active_text"
+                android:textFontWeight="500"
+                android:textSize="14sp" />
 
-            <View
-                android:id="@+id/indicatorLaunch"
-                android:layout_width="20dp"
-                android:layout_height="4dp"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/bg_bottom_nav_indicator" />
         </LinearLayout>
 
         <!-- 节假日与数据源 -->
         <LinearLayout
             android:id="@+id/bottomNavSync"
-            style="@style/Widget.QuickLaunch.Dark.BottomNav.Item">
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_item_inactive"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp">
 
             <ImageView
                 android:id="@+id/ivNavSync"
-                android:layout_width="@dimen/dark_floating_bar_item_icon"
-                android:layout_height="@dimen/dark_floating_bar_item_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:contentDescription="节假日与数据源"
                 android:src="@drawable/ic_tab_sync"
-                app:tint="@color/text_secondary" />
+                app:tint="@color/item_inactive_text" />
 
             <TextView
                 android:id="@+id/tvNavSync"
-                style="@style/Widget.QuickLaunch.Dark.BottomNav.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif"
                 android:text="节假日与数据源"
-                android:textColor="@color/text_secondary" />
+                android:textColor="@color/item_inactive_text"
+                android:textSize="14sp" />
 
-            <View
-                android:id="@+id/indicatorSync"
-                android:layout_width="20dp"
-                android:layout_height="4dp"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/bg_bottom_nav_indicator"
-                android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>
 
