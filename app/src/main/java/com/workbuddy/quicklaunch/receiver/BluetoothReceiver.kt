@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.service.LaunchService
@@ -33,7 +34,7 @@ class BluetoothReceiver : BroadcastReceiver() {
         // 避免把「连上任意耳机」误判成「连上指定耳机」。
         val name = readDeviceName(context, device)
         if (name.isEmpty()) {
-            Log.w(TAG, "取不到蓝牙设备名（缺 BLUETOOTH_CONNECT 权限或系统未提供），仅匹配任意设备规则")
+            if (BuildConfig.DEBUG) Log.w(TAG, "取不到蓝牙设备名（缺 BLUETOOTH_CONNECT 权限或系统未提供），仅匹配任意设备规则")
         }
 
         val app = context.applicationContext

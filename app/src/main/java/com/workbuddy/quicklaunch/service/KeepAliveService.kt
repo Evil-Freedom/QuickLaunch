@@ -20,6 +20,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.MainActivity
 import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.util.AntiSleep
@@ -78,14 +79,14 @@ class KeepAliveService : Service() {
                 ContextCompat.RECEIVER_NOT_EXPORTED
             )
             receiverRegistered = true
-        }.onFailure { Log.e("QL-AntiSleep", "屏幕广播注册失败", it) }
+        }.onFailure { if (BuildConfig.DEBUG) Log.e("QL-AntiSleep", "屏幕广播注册失败", it) }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // buildNotify 里的 PendingIntent / 通知构造在极端 ROM 上也可能抛，
         // 这里崩了等于保活服务本身把进程带崩，必须兜住。
         runCatching { startForegroundCompat(buildNotify()) }
-            .onFailure { Log.e("QL-AntiSleep", "前台通知启动失败", it) }
+            .onFailure { if (BuildConfig.DEBUG) Log.e("QL-AntiSleep", "前台通知启动失败", it) }
         scheduleSync()
         return START_STICKY
     }
@@ -125,7 +126,7 @@ class KeepAliveService : Service() {
         runCatching {
             val disabled = AntiSleep.isDisabled(this)
             val can = ScreenOnOverlay.canDraw(this)
-            Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can")
+            if (BuildConfig.DEBUG) Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can")
             if (can && !disabled) {
                 ScreenOnOverlay.sync(this)
                 acquireWakeLock()
@@ -133,7 +134,7 @@ class KeepAliveService : Service() {
                 ScreenOnOverlay.clear(this)
                 releaseWakeLock()
             }
-        }.onFailure { Log.e("QL-AntiSleep", "同步失败", it) }
+        }.onFailure { if (BuildConfig.DEBUG) Log.e("QL-AntiSleep", "同步失败", it) }
     }
 
     /**
@@ -174,8 +175,8 @@ class KeepAliveService : Service() {
             }
             handler.removeCallbacks(renewWakeLockTask)
             handler.postDelayed(renewWakeLockTask, WAKELOCK_RENEW_MS)
-            Log.i("QL-AntiSleep", "WakeLock 已持有(屏幕常亮兜底, 自动续期)")
-        }.onFailure { Log.e("QL-AntiSleep", "WakeLock 获取失败", it) }
+            if (BuildConfig.DEBUG) Log.i("QL-AntiSleep", "WakeLock 已持有(屏幕常亮兜底, 自动续期)")
+        }.onFailure { if (BuildConfig.DEBUG) Log.e("QL-AntiSleep", "WakeLock 获取失败", it) }
     }
 
     private fun releaseWakeLock() {
@@ -183,7 +184,7 @@ class KeepAliveService : Service() {
         runCatching {
             wakeLock?.takeIf { it.isHeld }?.let {
                 it.release()
-                Log.i("QL-AntiSleep", "WakeLock 已释放")
+                if (BuildConfig.DEBUG) Log.i("QL-AntiSleep", "WakeLock 已释放")
             }
         }
         wakeLock = null

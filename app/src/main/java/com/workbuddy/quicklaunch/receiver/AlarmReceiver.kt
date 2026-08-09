@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.service.LaunchService
@@ -35,14 +36,14 @@ class AlarmReceiver : BroadcastReceiver() {
         if (a.repeatMode != RepeatMode.ONCE) {
             // 先把下一次排上：即使随后的拉起失败，重复链路也不会断
             runCatching { Scheduler.schedule(context, a) }
-                .onFailure { Log.e(TAG, "reschedule failed id=$id", it) }
+                .onFailure { if (BuildConfig.DEBUG) Log.e(TAG, "reschedule failed id=$id", it) }
         } else {
             runCatching { dao.update(a.copy(enabled = false)) }   // 一次性任务执行后自动关闭
-                .onFailure { Log.e(TAG, "disable once-task failed id=$id", it) }
+                .onFailure { if (BuildConfig.DEBUG) Log.e(TAG, "disable once-task failed id=$id", it) }
         }
 
         runCatching { LaunchService.start(context, a.targetPackage, a.targetAppName) }
-            .onFailure { Log.e(TAG, "launch failed pkg=${a.targetPackage}", it) }
+            .onFailure { if (BuildConfig.DEBUG) Log.e(TAG, "launch failed pkg=${a.targetPackage}", it) }
     }
 
     private companion object {

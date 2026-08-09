@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.Display
 import android.view.View
 import android.view.WindowManager
+import com.workbuddy.quicklaunch.BuildConfig
 
 /**
  * 防息屏核心实现：在目标屏幕上挂一个 1x1 的透明悬浮窗，带 FLAG_KEEP_SCREEN_ON。
@@ -63,7 +64,7 @@ object ScreenOnOverlay {
                 ?.filter { p -> none { d -> d.displayId == p.displayId } }
                 ?.let { addAll(it) }
         }
-        Log.i(TAG, "sync: canDraw=$can displays=" +
+        if (BuildConfig.DEBUG) Log.i(TAG, "sync: canDraw=$can displays=" +
             (displays.joinToString { "#${it.displayId}(state=${it.state})" }) +
             " 已挂=${views.keys}")
         if (can) {
@@ -97,9 +98,9 @@ object ScreenOnOverlay {
             val v = View(dctx)
             wm.addView(v, params())
             views[display.displayId] = v
-            Log.i(TAG, "常亮窗已挂载 display=${display.displayId}")
+            if (BuildConfig.DEBUG) Log.i(TAG, "常亮窗已挂载 display=${display.displayId}")
         }.onFailure {
-            Log.w(TAG, "常亮窗挂载失败 display=${display.displayId}: $it")
+            if (BuildConfig.DEBUG) Log.w(TAG, "常亮窗挂载失败 display=${display.displayId}: $it")
         }
     }
 

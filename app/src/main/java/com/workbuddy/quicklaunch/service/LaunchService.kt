@@ -19,6 +19,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.LaunchProxyActivity
 import com.workbuddy.quicklaunch.R
 
@@ -120,13 +121,13 @@ object Notifier {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
         if (!allowed) {
-            Log.w(TAG, "无通知权限，兜底通知无法送达：$pkg")
+            if (BuildConfig.DEBUG) Log.w(TAG, "无通知权限，兜底通知无法送达：$pkg")
             return
         }
         runCatching {
             NotificationManagerCompat.from(context)
                 .notify(pkg.hashCode(), build(context, pkg, appName, ongoing = false))
-        }.onFailure { Log.e(TAG, "兜底通知发送失败：$pkg", it) }
+        }.onFailure { if (BuildConfig.DEBUG) Log.e(TAG, "兜底通知发送失败：$pkg", it) }
     }
 
     private fun ensureChannel(context: Context) {

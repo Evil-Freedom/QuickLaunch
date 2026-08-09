@@ -8,24 +8,25 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.workbuddy.quicklaunch.R
-import java.util.concurrent.Executors
 
 /**
- * 应用选择列表适配器。
+ * 应用选择列表适配器（DiffUtil 版）。
  *
  * - 列表项 36dp 真实图标 + 15sp 应用名
  * - 图标在主线程之外（共享 2 线程池）加载，避免几百个应用逐个 getApplicationIcon 卡 UI
  * - 按 packageName 缓存 Drawable，过滤/复用时直接命中
  * - 回到主线程再设置图标，并用 bindingAdapterPosition 校验防止滚动复用串图
+ * - 使用 ListAdapter + DiffUtil 替代 notifyDataSetChanged，滚动更流畅
  */
 class AppPickerAdapter(
     private val pm: PackageManager,
     private val onItemClick: (AppInfo) -> Unit
-) : RecyclerView.Adapter<AppPickerAdapter.VH>() {
+) : ListAdapter<AppInfo, AppPickerAdapter.VH>(DIFF) {
 
-    private var items: List<AppInfo> = emptyList()
     private val executor = QuickLaunchExecutors.io
     private val mainHandler = Handler(Looper.getMainLooper())
     private val iconCache = mutableMapOf<String, Drawable>()
@@ -47,14 +48,14 @@ class AppPickerAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        val app = items[position]
+        val app = getItem(position)
         holder.tvAppName.text = app.appName
         // 先清空，避免复用旧 ViewHolder 时短暂串图
         holder.ivIcon.setImageDrawable(null)
 
         holder.root.setOnClickListener {
             val pos = holder.bindingAdapterPosition
-            if (pos in items.indices) onItemClick(items[pos])
+            if (pos in 0 until itemCount) onItemClick(getItem(pos))
         }
 
         val cached = iconCache[app.packageName]
@@ -75,14 +76,15 @@ class AppPickerAdapter(
         }
     }
 
-    override fun getItemCount(): Int = items.size
+    val currentItems: List<AppInfo> get() = currentList
 
-    fun setItems(newItems: List<AppInfo>) {
-        items = newItems
-        notifyDataSetChanged()
+    companion object {
+        private val DIFF = object : DiffUtil.ItemCallback<AppInfo>() {
+            override fun areItemsTheSame(oldItem: AppInfo, newItem: AppInfo) =
+                oldItem.packageName == newItem.packageName
+
+            override fun areContentsTheSame(oldItem: AppInfo, newItem: AppInfo) =
+                oldItem == newItem
+        }
     }
-
-    fun getItem(position: Int): AppInfo = items[position]
-
-    val currentItems: List<AppInfo> get() = items
 }

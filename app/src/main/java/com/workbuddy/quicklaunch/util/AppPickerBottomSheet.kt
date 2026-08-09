@@ -68,11 +68,11 @@ class AppPickerBottomSheet : BottomSheetDialogFragment() {
         rvApps = view.findViewById(R.id.rvApps)
         rvApps.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = AppPickerAdapter(requireContext().packageManager) { app ->
+        adapter = AppPickerAdapter(requireContext().applicationContext.packageManager) { app ->
             onSelected?.invoke(app)
             dismiss()
         }
-        adapter.setItems(apps)
+        adapter.submitList(apps)
         rvApps.adapter = adapter
 
         val etSearch = view.findViewById<EditText>(R.id.etSearch)
@@ -93,7 +93,7 @@ class AppPickerBottomSheet : BottomSheetDialogFragment() {
         } else {
             apps.filter { it.appName.lowercase().contains(q) || it.packageName.lowercase().contains(q) }
         }
-        adapter.setItems(result)
+        adapter.submitList(result)
     }
 
     fun setOnSelectedListener(block: (AppInfo) -> Unit): AppPickerBottomSheet {

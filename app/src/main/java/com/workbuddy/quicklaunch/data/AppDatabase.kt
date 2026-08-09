@@ -54,9 +54,6 @@ abstract class AppDatabase : RoomDatabase() {
                     // 装回旧版本 APK 时若不允许降级重建，Room 会直接抛 IllegalStateException，
                     // 表现为「一打开就闪退」且用户无法自救。宁可丢缓存也不要崩溃循环。
                     .fallbackToDestructiveMigrationOnDowngrade(true)
-                    // ponytail: 规则数量只有几十条，且 BroadcastReceiver/JobService 里必须同步取数，
-                    // 直接放开主线程查询。若将来规则上千条再换协程 + Flow。
-                    .allowMainThreadQueries()
                     .build().also { INSTANCE = it }
             }
         }
