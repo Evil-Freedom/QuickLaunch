@@ -60,7 +60,9 @@ data class HolidaySource(
  */
 fun resolveUrl(template: String, targetYear: Int): String {
     if (targetYear <= 0) return ""
-    return template.replace("【年份】", targetYear.toString())
+    return template
+        .replace("【年份】", targetYear.toString())
+        .replace("{year}", targetYear.toString())
 }
 
 /**
