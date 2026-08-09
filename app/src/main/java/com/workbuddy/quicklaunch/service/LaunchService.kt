@@ -34,6 +34,15 @@ class LaunchService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    /**
+     * Android 16 FGS 超时回调。LaunchService 是短时 FGS，正常流程在 stopSelf() 后就结束了，
+     * 此回调仅作兜底防护——若系统提前触发超时，主动 stopSelf() 避免 ANR。
+     */
+    override fun onTimeout(startId: Int) {
+        if (BuildConfig.DEBUG) Log.w("QL-Notifier", "FGS 超时，主动停止: startId=$startId")
+        stopSelf()
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val pkg = intent?.getStringExtra(EXTRA_PKG).orEmpty()
         val appName = intent?.getStringExtra(EXTRA_APP_NAME).orEmpty()

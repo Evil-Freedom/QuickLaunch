@@ -8,9 +8,12 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
+import android.util.Log
+import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.service.LaunchService
+import com.workbuddy.quicklaunch.util.WifiNetworks
 
 /**
  * WiFi 触发：设备连上 WLAN 时拉起目标 App。
@@ -27,9 +30,32 @@ class WifiReceiver : BroadcastReceiver() {
             val list = runCatching {
                 AppDatabase.get(app).automationDao().getEnabledByType(TriggerType.WIFI)
             }.getOrDefault(emptyList())
+
+            // 获取当前连接的 SSID，用于与规则的 wifiName 做匹配
+            val currentSsid = WifiNetworks.getCurrentSsid(app)
+
             // 单条启动失败不影响其余规则
-            list.forEach {
-                runCatching { LaunchService.start(app, it.targetPackage, it.targetAppName) }
+            list.forEach { rule ->
+                val wifiName = rule.wifiName
+                // wifiName 为空 = 任意 WiFi 触发；非空 = 仅匹配指定 SSID
+                val shouldTrigger = when {
+                    wifiName.isEmpty() -> true  // 任意 WiFi 连接都触发
+                    currentSsid == null -> {
+                        // 无法获取当前 SSID（权限未授予 / 未真正连接），跳过 SSID 过滤
+                        if (BuildConfig.DEBUG) Log.w("QL-WifiReceiver", "无法获取当前 SSID，跳过规则: ${rule.name}")
+                        false
+                    }
+                    else -> {
+                        val match = wifiName == currentSsid
+                        if (BuildConfig.DEBUG) {
+                            Log.i("QL-WifiReceiver", "规则「${rule.name}」SSID 匹配: 期望=$wifiName, 当前=$currentSsid, 结果=$match")
+                        }
+                        match
+                    }
+                }
+                if (shouldTrigger) {
+                    runCatching { LaunchService.start(app, rule.targetPackage, rule.targetAppName) }
+                }
             }
         }
     }

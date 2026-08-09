@@ -196,16 +196,59 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
         requestWifiPermissionIfNeeded { granted ->
             if (!granted) return@requestWifiPermissionIfNeeded
             val networkNames = WifiNetworks.getSavedNetworkNames(this)
-            DevicePickerBottomSheet.newInstance(
-                mode = DevicePickerBottomSheet.MODE_WIFI,
-                devices = networkNames,
-                selectedName = selectedWifiName
-            ).setOnSelectedListener { name ->
-                selectedWifiName = name
-                formController.wifiName = name.orEmpty()
-                updateWifiButtonText()
-            }.show(supportFragmentManager, "wifi_picker")
+            if (networkNames.isEmpty()) {
+                // Android 16+ 无法枚举已保存网络，弹出手动输入弹窗
+                showWifiManualInputDialog()
+            } else {
+                DevicePickerBottomSheet.newInstance(
+                    mode = DevicePickerBottomSheet.MODE_WIFI,
+                    devices = networkNames,
+                    selectedName = selectedWifiName
+                ).setOnSelectedListener { name ->
+                    selectedWifiName = name
+                    formController.wifiName = name.orEmpty()
+                    updateWifiButtonText()
+                }.show(supportFragmentManager, "wifi_picker")
+            }
         }
+    }
+
+    /**
+     * 手动输入 WiFi 名称弹窗。Android 16+ 无法枚举已保存的 WiFi 网络时，
+     * 让用户手动输入 SSID 进行匹配。
+     */
+    private fun showWifiManualInputDialog() {
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.wifi_manual_input_hint)
+            setSingleLine()
+        }
+
+        val currentSsid = WifiNetworks.getCurrentSsid(this)
+        val message = if (currentSsid != null) {
+            "${getString(R.string.wifi_manual_input_message)}\n\n${getString(R.string.wifi_manual_input_current, currentSsid)}"
+        } else {
+            getString(R.string.wifi_manual_input_message)
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.wifi_manual_input_title)
+            .setMessage(message)
+            .setView(input)
+            .setPositiveButton(R.string.wifi_manual_input_confirm) { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isNotEmpty()) {
+                    selectedWifiName = name
+                    formController.wifiName = name
+                    updateWifiButtonText()
+                }
+            }
+            .setNegativeButton(R.string.wifi_manual_input_use_any) { _, _ ->
+                selectedWifiName = null
+                formController.wifiName = ""
+                updateWifiButtonText()
+            }
+            .setNeutralButton(R.string.main_cancel, null)
+            .show()
     }
 
     private fun updateWifiButtonText() {

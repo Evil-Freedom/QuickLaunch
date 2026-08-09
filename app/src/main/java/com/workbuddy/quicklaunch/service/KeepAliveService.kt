@@ -53,6 +53,15 @@ class KeepAliveService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    /**
+     * Android 16 FGS 超时回调。系统在 FGS 运行超过阈值（specialUse 约 6 小时）时调用，
+     * 必须调用 stopSelf() 主动回收，否则系统会强制停止并可能导致 ANR。
+     */
+    override fun onTimeout(startId: Int) {
+        if (BuildConfig.DEBUG) Log.w("QL-AntiSleep", "FGS 超时，主动停止: startId=$startId")
+        stopSelf()
+    }
+
     /** 注册成功才允许反注册，否则 unregisterReceiver 会抛 IllegalArgumentException。 */
     private var receiverRegistered = false
     private var displayListenerRegistered = false

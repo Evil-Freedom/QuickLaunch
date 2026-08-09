@@ -102,4 +102,14 @@
     <string name="glass_sync_unsynced">未同步</string>
     <string name="glass_source_status">数据源状态</string>
     <string name="glass_add_custom_source">添加自定义数据源</string>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         WiFi 手动输入弹窗
+         ═══════════════════════════════════════════════════════════════ -->
+    <string name="wifi_manual_input_title">手动输入 WiFi 名称</string>
+    <string name="wifi_manual_input_message">无法获取已保存的 WiFi 网络列表，请输入要匹配的 WiFi 名称（SSID）</string>
+    <string name="wifi_manual_input_hint">WiFi 名称（SSID）</string>
+    <string name="wifi_manual_input_confirm">确定</string>
+    <string name="wifi_manual_input_use_any">任意 WiFi</string>
+    <string name="wifi_manual_input_current">当前: %1$s</string>
 </resources>
