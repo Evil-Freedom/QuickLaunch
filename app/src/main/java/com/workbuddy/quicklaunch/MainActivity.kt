@@ -46,7 +46,6 @@ import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.AppListLoader
 import com.workbuddy.quicklaunch.util.AppPickerBottomSheet
 import com.workbuddy.quicklaunch.util.DarkWheelTimePicker
-import com.workbuddy.quicklaunch.util.GlassBlurHelper
 import com.workbuddy.quicklaunch.util.HolidayPrefs
 import com.workbuddy.quicklaunch.util.HolidaySources
 import com.workbuddy.quicklaunch.util.HolidaySync
@@ -245,9 +244,8 @@ class MainActivity : AppCompatActivity() {
         })
         applyBottomNavStyle(true)
 
-        // Glassmorphism：底部悬浮 Tab 药丸模糊
-        GlassBlurHelper.apply(bottomNavLaunch, 24f)
-        GlassBlurHelper.apply(bottomNavSync, 20f)
+        // ⚠️ Round 10 修复：移除底部导航 blur — RenderEffect 会糊掉子 View 文字
+        // 毛玻璃拟态仅靠背景色透明度（#1FFFFFFF 等）实现，不施加 View 级模糊
     }
 
     private fun applyBottomNavStyle(isLaunch: Boolean) {
@@ -358,17 +356,9 @@ class MainActivity : AppCompatActivity() {
         updateTriggerUi()
         refreshRules()
 
-        // Glassmorphism：为关键组件绑定毛玻璃模糊（API 31+，低版本自动降级为纯色）
-        GlassBlurHelper.apply(layoutDashboard, 18f)
-        GlassBlurHelper.apply(layoutTime, 18f)
-        GlassBlurHelper.apply(layoutBt, 18f)
-        GlassBlurHelper.apply(layoutRulesEmpty, 18f)
-        GlassBlurHelper.apply(btnTime, 24f)
-        GlassBlurHelper.apply(btnWinStart, 24f)
-        GlassBlurHelper.apply(btnWinEnd, 24f)
-        GlassBlurHelper.applyAll(triggerChips, 24f)
-        GlassBlurHelper.applyAll(repeatChips, 24f)
-        GlassBlurHelper.applyAll(dayViews, 20f)
+        // ⚠️ Round 10 修复：移除全部 View 级 RenderEffect 模糊
+        // 毛玻璃拟态仅靠背景色透明度（#1FFFFFFF / #0FFFFFFF / #0DFFFFFF）实现
+        // RenderEffect 会模糊整个 View 的子树，导致文字和图标全部变糊
     }
 
     private fun setupTriggerChips() {
@@ -766,9 +756,7 @@ class MainActivity : AppCompatActivity() {
         }
         setupSourceSpinner()
 
-        // Glassmorphism：同步源页面卡片模糊
-        GlassBlurHelper.apply(layoutAntiSleep, 18f)
-        GlassBlurHelper.apply(layoutHolidayCard, 18f)
+        // ⚠️ Round 10 修复：移除同步页面 blur — RenderEffect 会糊掉子 View 文字
     }
 
     private fun setupSourceSpinner() {
