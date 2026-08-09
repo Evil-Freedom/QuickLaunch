@@ -9,7 +9,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_dark_root"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingBottom="@dimen/dark_scroll_bottom_gap">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -140,11 +142,6 @@
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
-
-        <!-- 底部留白：避让漂浮药丸底栏 + 系统手势条 -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dark_scroll_bottom_gap" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

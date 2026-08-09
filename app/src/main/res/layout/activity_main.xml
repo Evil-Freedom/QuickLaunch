@@ -25,6 +25,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- ═══ 底部暗黑渐变遮罩：淡化滚动到底部的内容，避免文字穿透悬浮胶囊 ═══ -->
+    <View
+        android:id="@+id/bottomGradientShadow"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:background="@drawable/bg_bottom_gradient"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <!-- ═══ 底部：纯平无遮罩漂浮药丸 ═══ -->
     <LinearLayout
         android:id="@+id/floatingBottomBar"

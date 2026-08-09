@@ -12,8 +12,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_dark_root"
+    android:clipToPadding="false"
     android:fillViewport="true"
-    android:overScrollMode="never">
+    android:overScrollMode="never"
+    android:paddingBottom="@dimen/dark_scroll_bottom_gap">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -526,8 +528,7 @@
             android:clipToPadding="false"
             android:minHeight="120dp"
             android:nestedScrollingEnabled="false"
-            android:overScrollMode="never"
-            android:paddingBottom="@dimen/dark_scroll_bottom_gap" />
+            android:overScrollMode="never" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

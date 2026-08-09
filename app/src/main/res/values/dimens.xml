@@ -81,7 +81,7 @@
     <dimen name="dark_card_padding">12dp</dimen>
     <dimen name="dark_section_gap">10dp</dimen>
     <!-- 滚动内容底部留白：避让悬浮底栏 + 系统手势条 -->
-    <dimen name="dark_scroll_bottom_gap">80dp</dimen>
+    <dimen name="dark_scroll_bottom_gap">100dp</dimen>
 
     <!-- iOS 3D 滚轮时间选择器 -->
     <dimen name="wheel_item_height">48dp</dimen>
