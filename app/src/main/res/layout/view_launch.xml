@@ -210,7 +210,7 @@
                 <TextView
                     android:id="@+id/btnTime"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
+                    android:layout_height="@dimen/glass_time_bubble_height"
                     android:background="@drawable/bg_dark_input"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
@@ -218,8 +218,8 @@
                     android:paddingEnd="24dp"
                     android:text="08:00"
                     android:textColor="@color/text_white"
-                    android:textFontWeight="500"
-                    android:textSize="18sp" />
+                    android:textFontWeight="700"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <TextView
@@ -422,14 +422,15 @@
                 <TextView
                     android:id="@+id/btnWinStart"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
+                    android:layout_height="@dimen/glass_time_bubble_height"
                     android:layout_weight="1"
                     android:background="@drawable/bg_dark_input"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="08:30"
                     android:textColor="@color/text_white"
-                    android:textSize="16sp" />
+                    android:textFontWeight="700"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -445,14 +446,15 @@
                 <TextView
                     android:id="@+id/btnWinEnd"
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
+                    android:layout_height="@dimen/glass_time_bubble_height"
                     android:layout_weight="1"
                     android:background="@drawable/bg_dark_input"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
                     android:text="08:50"
                     android:textColor="@color/text_white"
-                    android:textSize="16sp" />
+                    android:textFontWeight="700"
+                    android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
 

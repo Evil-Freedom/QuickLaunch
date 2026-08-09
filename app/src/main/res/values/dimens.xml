@@ -70,11 +70,16 @@
     <!-- 描边 -->
     <dimen name="dark_stroke_width">1px</dimen>
     <!-- 组件高度 -->
-    <dimen name="dark_button_height">52dp</dimen>
+    <dimen name="dark_button_height">46dp</dimen>
     <dimen name="dark_input_height">48dp</dimen>
     <dimen name="dark_chip_height">34dp</dimen>
     <dimen name="trigger_grid_item_height">56dp</dimen>
     <dimen name="trigger_grid_icon_size">20dp</dimen>
+    <!-- 统一按钮尺寸 Token：主/次按钮 46dp，时间气泡 40dp -->
+    <dimen name="glass_button_height">46dp</dimen>
+    <dimen name="glass_button_radius">23dp</dimen>
+    <dimen name="glass_time_bubble_height">40dp</dimen>
+    <dimen name="glass_time_bubble_radius">20dp</dimen>
     <!-- 间距（整体压缩 30% 左右，让界面更紧致） -->
     <dimen name="dark_card_margin_horizontal">16dp</dimen>
     <dimen name="dark_card_margin_vertical">6dp</dimen>
