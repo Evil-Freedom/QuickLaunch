@@ -13,11 +13,8 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.ImageView
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -45,6 +42,7 @@ import com.workbuddy.quicklaunch.service.KeepAliveService
 import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.AppListLoader
 import com.workbuddy.quicklaunch.util.AppPickerBottomSheet
+import com.workbuddy.quicklaunch.util.AutomationFormController
 import com.workbuddy.quicklaunch.util.DarkWheelTimePicker
 import com.workbuddy.quicklaunch.util.HolidayPrefs
 import com.workbuddy.quicklaunch.util.HolidaySources
@@ -53,21 +51,21 @@ import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import com.workbuddy.quicklaunch.util.RootUtils
 import com.workbuddy.quicklaunch.util.Scheduler
 import com.workbuddy.quicklaunch.util.ScreenOnOverlay
+import com.workbuddy.quicklaunch.util.SyncTabController
 import java.util.Calendar
 import java.util.Locale
-import java.util.concurrent.Executors
 
 /**
  * 主入口：底部双 Tab 导航，彻底取消二级页跳转。
  * - Tab 1 快捷启动：规则创建表单 + 规则列表平铺在同一页。
  * - Tab 2 同步源：法定节假日同步、数据源选择、手动管理、自定义源管理。
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), AutomationFormController.FormCallbacks, SyncTabController.SyncCallbacks {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var db: AppDatabase
 
-    // ---------- Tab 容器（独立 inflate 后注入 ViewPager2，见 setupViewPager） ----------
+    // ---------- Tab 容器 ----------
     private lateinit var launchBinding: ViewLaunchBinding
     private lateinit var syncBinding: ViewSyncBinding
 
@@ -89,7 +87,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvDashboardEnabled: TextView
     private lateinit var tvDashboardNext: TextView
 
-    // ---------- 创建表单 ----------
+    // ---------- 表单控制器 ----------
+    private lateinit var formController: AutomationFormController
+
+    // ---------- 同步源控制器 ----------
+    private lateinit var syncController: SyncTabController
+
+    // ---------- 表单 View 引用（供控制器回调刷新用） ----------
     private lateinit var btnPickApp: MaterialButton
     private lateinit var btnTime: TextView
     private lateinit var btnWinStart: TextView
@@ -112,43 +116,13 @@ class MainActivity : AppCompatActivity() {
     )
     private val repeatChips = mutableListOf<TextView>()
     private val dayViews = mutableListOf<TextView>()
-    private var selectedTriggerIndex = 0
-    private var selectedRepeatIndex = 0
-    private val selectedDays = BooleanArray(7)
-
-    private var selectedPackage: String? = null
-    private var selectedAppName: String? = null
-    private var hour = 8
-    private var minute = 0
-    private var randomWindow = false
-    private var skipHolidays = false
-    private var winStartHour = 8
-    private var winStartMinute = 30
-    private var winEndHour = 8
-    private var winEndMinute = 50
-
-    // ---------- 同步源 ----------
-    private lateinit var spinnerSource: Spinner
-    private lateinit var btnSyncHolidays: MaterialButton
-    private lateinit var btnManageHolidays: MaterialButton
-    private lateinit var btnManageSources: MaterialButton
-    private var sourceIds: List<String> = emptyList()
-
-    // ---------- 同步源页面卡片 ----------
-    private lateinit var layoutAntiSleep: View
-    private lateinit var layoutHolidayCard: View
 
     // ---------- 防息屏 ----------
     private lateinit var tvAntiSleep: TextView
     private lateinit var swAntiSleep: SwitchCompat
 
-    // ---------- 线程 ----------
-    private val io = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "main-io").apply { isDaemon = true }
-    }
-
     private fun runIo(block: () -> Unit) {
-        runCatching { io.execute { runCatching(block) } }
+        runCatching { QuickLaunchExecutors.io.execute { runCatching(block) } }
     }
 
     private fun postUi(block: () -> Unit) {
@@ -173,7 +147,6 @@ class MainActivity : AppCompatActivity() {
         setupViewPager()
         setupLaunchTab()
         setupSyncTab()
-        setupAntiSleep() // 必须在 setupSyncTab 之后，因需引用 swAntiSleep / tvAntiSleep
 
         KeepAliveService.start(this)
         checkPermissionsOnce()
@@ -181,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         // 首次启动（本地无节假日数据）自动同步一次，便于「跳过节假日」立即生效。
         runIo {
             val empty = runCatching { db.holidayDao().count() == 0 }.getOrDefault(false)
-            if (empty) postUi { syncHolidays() }
+            if (empty) postUi { syncController.syncHolidays(this@MainActivity) }
         }
     }
 
@@ -198,9 +171,6 @@ class MainActivity : AppCompatActivity() {
 
     // ═══════════════════════════════════════════════════════════════════
     // 底部悬浮毛玻璃底栏 + ViewPager2
-    // 不复用原 launchContainer / syncContainer（已从 activity_main 移除），
-    // 直接 inflate 两份独立页面注入 ViewPager2；launchBinding / syncBinding
-    // 上的全部表单、列表、开关逻辑零改动。
     // ═══════════════════════════════════════════════════════════════════
 
     private fun setupViewPager() {
@@ -236,17 +206,13 @@ class MainActivity : AppCompatActivity() {
             override fun onPageSelected(position: Int) {
                 applyBottomNavStyle(position == TAB_LAUNCH)
                 if (position == TAB_SYNC) {
-                    setupSourceSpinner()
-                    syncAntiSleepUi()
+                    onSyncPageSelected()
                 } else {
                     refreshRules()
                 }
             }
         })
         applyBottomNavStyle(true)
-
-        // ⚠️ Round 10 修复：移除底部导航 blur — RenderEffect 会糊掉子 View 文字
-        // 毛玻璃拟态仅靠背景色透明度（#1FFFFFFF 等）实现，不施加 View 级模糊
     }
 
     private fun applyBottomNavStyle(isLaunch: Boolean) {
@@ -331,295 +297,61 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        // 初始化时间
-        val now = Calendar.getInstance()
-        hour = now.get(Calendar.HOUR_OF_DAY)
-        minute = now.get(Calendar.MINUTE)
-        updateTimeLabel()
-
-        setupTriggerChips()
-        setupRepeatChips()
-        setupDayCapsules()
-
-        btnPickApp.setOnClickListener { pickApp() }
-        btnTime.setOnClickListener { showTimePicker() }
-        btnSaveRule.setOnClickListener { saveRule() }
-
-        cbRandom.setOnCheckedChangeListener { _, checked ->
-            randomWindow = checked
-            layoutRandom.visibility = if (checked) View.VISIBLE else View.GONE
-            btnTime.visibility = if (checked) View.GONE else View.VISIBLE
-        }
-        btnWinStart.setOnClickListener { showWindowPicker(true) }
-        btnWinEnd.setOnClickListener { showWindowPicker(false) }
-        cbSkipHolidays.setOnCheckedChangeListener { _, checked -> skipHolidays = checked }
-        updateWindowLabels()
-        updateTriggerUi()
+        // 初始化表单控制器
+        formController = AutomationFormController(
+            context = this,
+            db = db,
+            views = AutomationFormController.FormViews(
+                btnPickApp = btnPickApp,
+                btnTime = btnTime,
+                btnWinStart = btnWinStart,
+                btnWinEnd = btnWinEnd,
+                cbRandom = cbRandom,
+                cbSkipHolidays = cbSkipHolidays,
+                layoutRandom = layoutRandom,
+                layoutTime = layoutTime,
+                layoutBt = layoutBt,
+                layoutCustomDays = layoutCustomDays,
+                etBtName = etBtName,
+                btnSave = btnSaveRule,
+                triggerChips = triggerChips,
+                repeatChips = repeatChips,
+                dayViews = dayViews,
+                triggerIcons = triggerIcons
+            ),
+            callbacks = this
+        )
+        formController.setup()
         refreshRules()
-
-        // ⚠️ Round 10 修复：移除全部 View 级 RenderEffect 模糊
-        // 毛玻璃拟态仅靠背景色透明度（#1FFFFFFF / #0FFFFFFF / #0DFFFFFF）实现
-        // RenderEffect 会模糊整个 View 的子树，导致文字和图标全部变糊
     }
 
-    private fun setupTriggerChips() {
-        val iconSize = resources.getDimensionPixelSize(R.dimen.trigger_grid_icon_size)
-        triggerChips.forEachIndexed { index, textView ->
-            textView.setOnClickListener {
-                selectedTriggerIndex = index
-                updateTriggerUi()
-            }
-            // XML 层 drawableTint 已移除，改由代码强制 20dp 并动态着色
-            val drawable = AppCompatResources.getDrawable(this, triggerIcons[index])?.mutate()
-            drawable?.setBounds(0, 0, iconSize, iconSize)
-            textView.setCompoundDrawables(null, drawable, null, null)
-        }
-        selectedTriggerIndex = 0
-    }
+    // ═══════════════════════════════════════════════════════════════════
+    // Tab 2：同步源 + 防息屏
+    // ═══════════════════════════════════════════════════════════════════
 
-    private fun setupRepeatChips() {
-        repeatChips.forEachIndexed { index, textView ->
-            textView.setOnClickListener {
-                selectedRepeatIndex = index
-                updateRepeatUi()
-            }
-        }
-        selectedRepeatIndex = 0
-    }
+    private fun setupSyncTab() {
+        tvAntiSleep = syncBinding.tvAntiSleep
+        swAntiSleep = syncBinding.swAntiSleep
 
-    private fun setupDayCapsules() {
-        dayViews.forEachIndexed { idx, view ->
-            view.setOnClickListener {
-                selectedDays[idx] = !selectedDays[idx]
-                refreshDayCapsule(view, selectedDays[idx])
-            }
-        }
-    }
-
-    private fun refreshDayCapsule(view: TextView, selected: Boolean) {
-        view.setBackgroundResource(
-            if (selected) R.drawable.bg_dark_capsule_selected else R.drawable.bg_dark_capsule_unselected
-        )
-        view.setTextColor(
-            if (selected) resources.getColor(R.color.item_active_text, null)
-            else resources.getColor(R.color.item_inactive_text, null)
-        )
-    }
-
-    private fun refreshTriggerChip(textView: TextView, selected: Boolean) {
-        if (selected) {
-            textView.setBackgroundResource(R.drawable.bg_trigger_grid_item_selected)
-            textView.setTextColor(resources.getColor(R.color.item_active_text, null))
-            textView.setTypeface(null, android.graphics.Typeface.BOLD)
-        } else {
-            textView.setBackgroundResource(R.drawable.bg_trigger_grid_item)
-            textView.setTextColor(resources.getColor(R.color.item_inactive_text, null))
-            textView.setTypeface(null, android.graphics.Typeface.NORMAL)
-        }
-        // 同步刷新顶部图标颜色（代码层强制 20dp 尺寸）
-        textView.compoundDrawables[1]?.setTint(
-            resources.getColor(
-                if (selected) R.color.item_active_text else R.color.item_inactive_text,
-                null
+        syncController = SyncTabController(
+            context = this,
+            views = SyncTabController.SyncViews(
+                spinnerSource = syncBinding.spinnerSource,
+                btnSyncHolidays = syncBinding.btnSyncHolidays,
+                btnManageHolidays = syncBinding.btnManageHolidays,
+                btnManageSources = syncBinding.btnManageSources,
+                tvAntiSleep = syncBinding.tvAntiSleep,
+                swAntiSleep = syncBinding.swAntiSleep,
+                layoutAntiSleep = syncBinding.layoutAntiSleep,
+                layoutHolidayCard = syncBinding.layoutHolidayCard
             )
         )
+        syncController.setup(this)
     }
 
-    private fun refreshRepeatChip(textView: TextView, selected: Boolean) {
-        if (selected) {
-            textView.setBackgroundResource(R.drawable.bg_dark_capsule_selected)
-            textView.setTextColor(resources.getColor(R.color.item_active_text, null))
-            textView.setTypeface(null, android.graphics.Typeface.BOLD)
-        } else {
-            textView.setBackgroundResource(R.drawable.bg_dark_capsule_unselected)
-            textView.setTextColor(resources.getColor(R.color.item_inactive_text, null))
-            textView.setTypeface(null, android.graphics.Typeface.NORMAL)
-        }
-    }
-
-    private fun updateTriggerUi() {
-        triggerChips.forEachIndexed { index, textView ->
-            refreshTriggerChip(textView, index == selectedTriggerIndex)
-        }
-        val isTime = selectedTriggerIndex == 0
-        layoutTime.visibility = if (isTime) View.VISIBLE else View.GONE
-        cbRandom.visibility = if (isTime) View.VISIBLE else View.GONE
-        cbSkipHolidays.visibility = if (isTime) View.VISIBLE else View.GONE
-        if (!isTime) {
-            layoutRandom.visibility = View.GONE
-            btnTime.visibility = View.VISIBLE
-            cbRandom.isChecked = false
-            cbSkipHolidays.isChecked = false
-            randomWindow = false
-            skipHolidays = false
-        }
-        updateRepeatUi()
-        layoutBt.visibility = if (selectedTriggerIndex == 3) View.VISIBLE else View.GONE
-    }
-
-    private fun updateRepeatUi() {
-        repeatChips.forEachIndexed { index, textView ->
-            refreshRepeatChip(textView, index == selectedRepeatIndex)
-        }
-        val isCustom = selectedRepeatIndex == 3
-        layoutCustomDays.visibility = if (isCustom) View.VISIBLE else View.GONE
-    }
-
-    private fun currentTriggerType(): String = when (selectedTriggerIndex) {
-        0 -> TriggerType.TIME
-        1 -> TriggerType.CHARGING
-        2 -> TriggerType.WIFI
-        else -> TriggerType.BLUETOOTH
-    }
-
-    private fun currentRepeatKey(): String = when (selectedRepeatIndex) {
-        0 -> "daily"
-        1 -> "weekdays"
-        2 -> "weekend"
-        3 -> "custom"
-        4 -> "once"
-        else -> "daily"
-    }
-
-    private fun updateTimeLabel() {
-        btnTime.text = String.format(Locale.US, "%02d:%02d", hour, minute)
-    }
-
-    private fun updateWindowLabels() {
-        btnWinStart.text = String.format(Locale.US, "%02d:%02d", winStartHour, winStartMinute)
-        btnWinEnd.text = String.format(Locale.US, "%02d:%02d", winEndHour, winEndMinute)
-    }
-
-    private fun showTimePicker() {
-        DarkWheelTimePicker.newInstance(hour, minute)
-            .setOnConfirmListener { h, m ->
-                hour = h
-                minute = m
-                updateTimeLabel()
-            }
-            .show(supportFragmentManager, "dark_wheel_time_picker")
-    }
-
-    private fun showWindowPicker(isStart: Boolean) {
-        val (h, m) = if (isStart) winStartHour to winStartMinute else winEndHour to winEndMinute
-        DarkWheelTimePicker.newInstance(h, m)
-            .setOnConfirmListener { pickedH, pickedM ->
-                if (isStart) {
-                    winStartHour = pickedH
-                    winStartMinute = pickedM
-                } else {
-                    winEndHour = pickedH
-                    winEndMinute = pickedM
-                }
-                updateWindowLabels()
-            }
-            .show(supportFragmentManager, "dark_wheel_window_picker")
-    }
-
-    private fun pickApp() {
-        btnPickApp.isEnabled = false
-        AppListLoader.loadAsync(this) { apps ->
-            if (isFinishing || isDestroyed) return@loadAsync
-            btnPickApp.isEnabled = true
-            if (apps.isEmpty()) {
-                toast(getString(R.string.main_no_apps))
-                return@loadAsync
-            }
-            runCatching {
-                AppPickerBottomSheet.newInstance(apps)
-                    .setOnSelectedListener { app ->
-                        selectedPackage = app.packageName
-                        selectedAppName = app.appName
-                        btnPickApp.text = getString(R.string.main_pick_app_done, selectedAppName)
-                    }
-                    .show(supportFragmentManager, "app_picker")
-            }
-        }
-    }
-
-    private fun saveRule() {
-        val pkg = selectedPackage
-        if (pkg == null) {
-            toast(getString(R.string.main_pick_app_first))
-            return
-        }
-        val name = selectedAppName ?: getString(R.string.main_default_name)
-        val repeatKey = currentRepeatKey()
-        val repeatDaysMask = if (repeatKey == "custom") {
-            var mask = 0
-            for (i in 0..6) if (selectedDays[i]) mask = mask or (1 shl i)
-            mask
-        } else 0
-        if (repeatKey == "custom" && repeatDaysMask == 0) {
-            toast(getString(R.string.main_pick_day))
-            return
-        }
-
-        val rawStart = winStartHour * 60 + winStartMinute
-        val rawEnd = winEndHour * 60 + winEndMinute
-        val (wsMin, weMin) = if (randomWindow) {
-            Math.min(rawStart, rawEnd) to Math.max(rawStart, rawEnd)
-        } else 0 to 0
-
-        val a = Automation(
-            name = name,
-            targetPackage = pkg,
-            targetAppName = selectedAppName ?: "",
-            triggerType = currentTriggerType(),
-            timeHour = hour,
-            timeMinute = minute,
-            repeatMode = repeatKey,
-            repeatDays = repeatDaysMask,
-            skipHolidays = skipHolidays,
-            randomWindow = randomWindow,
-            windowStartMin = wsMin,
-            windowEndMin = weMin,
-            bluetoothName = etBtName.text.toString().trim()
-        )
-
-        btnSaveRule.isEnabled = false
-        val app = applicationContext
-        QuickLaunchExecutors.save.execute {
-            val ok = runCatching {
-                val id = db.automationDao().insert(a)
-                if (a.triggerType == TriggerType.TIME) {
-                    Scheduler.schedule(app, a.copy(id = id))
-                }
-            }.isSuccess
-            postUi {
-                if (isFinishing || isDestroyed) return@postUi
-                btnSaveRule.isEnabled = true
-                if (ok) {
-                    toast(getString(R.string.main_saved))
-                    resetForm()
-                    refreshRules()
-                } else {
-                    toast(getString(R.string.main_save_failed))
-                }
-            }
-        }
-    }
-
-    private fun resetForm() {
-        selectedPackage = null
-        selectedAppName = null
-        btnPickApp.text = getString(R.string.main_pick_app)
-        selectedTriggerIndex = 0
-        selectedRepeatIndex = 0
-        selectedDays.fill(false)
-        dayViews.forEachIndexed { i, v -> refreshDayCapsule(v, selectedDays[i]) }
-        cbRandom.isChecked = false
-        cbSkipHolidays.isChecked = false
-        randomWindow = false
-        skipHolidays = false
-        etBtName.text = ""
-        val now = Calendar.getInstance()
-        hour = now.get(Calendar.HOUR_OF_DAY)
-        minute = now.get(Calendar.MINUTE)
-        updateTimeLabel()
-        updateWindowLabels()
-        updateTriggerUi()
-    }
+    // ═══════════════════════════════════════════════════════════════════
+    // 规则列表 / 仪表盘
+    // ═══════════════════════════════════════════════════════════════════
 
     private fun refreshRules() {
         runIo {
@@ -735,179 +467,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    // Tab 2：同步源
-    // ═══════════════════════════════════════════════════════════════════
-
-    private fun setupSyncTab() {
-        spinnerSource = syncBinding.spinnerSource
-        btnSyncHolidays = syncBinding.btnSyncHolidays
-        btnManageHolidays = syncBinding.btnManageHolidays
-        btnManageSources = syncBinding.btnManageSources
-        tvAntiSleep = syncBinding.tvAntiSleep
-        swAntiSleep = syncBinding.swAntiSleep
-        layoutAntiSleep = syncBinding.layoutAntiSleep
-        layoutHolidayCard = syncBinding.layoutHolidayCard
-
-        btnSyncHolidays.setOnClickListener { syncHolidays() }
-        btnManageHolidays.setOnClickListener {
-            startActivity(Intent(this, HolidayManageActivity::class.java))
-        }
-        btnManageSources.setOnClickListener {
-            startActivity(Intent(this, SourceManageActivity::class.java))
-        }
-        setupSourceSpinner()
-
-        // ⚠️ Round 10 修复：移除同步页面 blur — RenderEffect 会糊掉子 View 文字
-    }
-
-    private fun setupSourceSpinner() {
-        val ids = mutableListOf("auto")
-        val labels = mutableListOf(getString(R.string.main_source_auto))
-        HolidaySources.ALL.forEach {
-            ids.add(it.id)
-            labels.add(it.label)
-        }
-        runCatching { HolidayPrefs.getCustomSources(this) }.getOrDefault(emptyList()).forEach {
-            ids.add(it.id)
-            labels.add(getString(R.string.main_source_custom, it.label))
-        }
-
-        val pref = runCatching { HolidayPrefs.getSourcePref(this) }.getOrNull() ?: "auto"
-        val target = ids.indexOf(pref).coerceAtLeast(0)
-
-        if (ids == sourceIds && spinnerSource.adapter != null) {
-            if (spinnerSource.selectedItemPosition != target) {
-                spinnerSource.setSelection(target)
-            }
-            return
-        }
-        sourceIds = ids
-
-        spinnerSource.onItemSelectedListener = null
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerSource.adapter = adapter
-        spinnerSource.setSelection(target)
-        spinnerSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>, v: android.view.View?, pos: Int, id: Long) {
-                val chosen = ids.getOrNull(pos) ?: return
-                runCatching { HolidayPrefs.setSourcePref(this@MainActivity, chosen) }
-            }
-            override fun onNothingSelected(p: AdapterView<*>) {}
-        }
-    }
-
-    private fun syncHolidays() {
-        if (btnSyncHolidays.isEnabled) {
-            btnSyncHolidays.isEnabled = false
-            btnSyncHolidays.text = getString(R.string.main_syncing)
-        }
-        val pref = HolidayPrefs.getSourcePref(this)
-        val prefId = if (pref == "auto") null else pref
-        val app = applicationContext
-        HolidaySync.sync(this, prefId) { res ->
-            if (isFinishing || isDestroyed) return@sync
-            btnSyncHolidays.isEnabled = true
-            btnSyncHolidays.text = getString(R.string.main_sync_holidays)
-            val msg = if (res.success) {
-                runIo { Scheduler.rescheduleAll(app) }
-                getString(R.string.main_synced, res.sourceLabel, res.count)
-            } else {
-                getString(R.string.main_sync_failed)
-            }
-            runCatching { Snackbar.make(binding.rootContainer, msg, Snackbar.LENGTH_SHORT).show() }
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════
-    // 防外屏息屏
-    // ═══════════════════════════════════════════════════════════════════
-
-    private fun setupAntiSleep() {
-        syncAntiSleepUi()
-        runIo {
-            val rooted = RootUtils.hasRoot()
-            postUi {
-                if (!ScreenOnOverlay.canDraw(this)) return@postUi
-                tvAntiSleep.text =
-                    if (rooted) getString(R.string.main_anti_sleep_on) else getString(R.string.main_anti_sleep_on_no_root)
-            }
-        }
-    }
-
-    private fun syncAntiSleepUi() {
-        if (!::swAntiSleep.isInitialized) return
-        val granted = ScreenOnOverlay.canDraw(this)
-        tvAntiSleep.text =
-            if (granted) getString(R.string.main_anti_sleep_on_no_root) else "防外屏息屏 —— 需要悬浮窗权限"
-        swAntiSleep.setOnCheckedChangeListener(null)
-        swAntiSleep.isChecked = AntiSleep.isEnabled(this) && granted
-        swAntiSleep.isEnabled = true
-        bindAntiSleepSwitch()
-    }
-
-    private fun bindAntiSleepSwitch() {
-        swAntiSleep.setOnCheckedChangeListener { view, checked ->
-            if (checked && !ScreenOnOverlay.canDraw(this)) {
-                resetAntiSleepSwitch(false)
-                Snackbar.make(binding.rootContainer, getString(R.string.main_anti_sleep_need_overlay), Snackbar.LENGTH_LONG)
-                    .setAction(R.string.main_anti_sleep_go_auth) { requestOverlayPermission() }
-                    .show()
-                return@setOnCheckedChangeListener
-            }
-            view.isEnabled = false
-            val app = applicationContext
-            runIo {
-                val ok = runCatching {
-                    if (checked) AntiSleep.enable(app) else AntiSleep.disable(app)
-                }.getOrDefault(false)
-                if (checked) KeepAliveService.start(app)
-                postUi {
-                    view.isEnabled = true
-                    if (ok) {
-                        val tip = if (checked) getString(R.string.main_anti_sleep_turned_on) else getString(R.string.main_anti_sleep_turned_off)
-                        Snackbar.make(binding.rootContainer, tip, Snackbar.LENGTH_SHORT).show()
-                    } else {
-                        resetAntiSleepSwitch(!checked)
-                        Snackbar.make(binding.rootContainer, getString(R.string.main_anti_sleep_failed), Snackbar.LENGTH_LONG).show()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun resetAntiSleepSwitch(checked: Boolean) {
-        swAntiSleep.setOnCheckedChangeListener(null)
-        swAntiSleep.isChecked = checked
-        swAntiSleep.isEnabled = true
-        bindAntiSleepSwitch()
-    }
-
-    private fun requestOverlayPermission() {
-        runCatching {
-            startActivity(
-                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-            )
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════
     // 生命周期 / 权限
     // ═══════════════════════════════════════════════════════════════════
 
     override fun onResume() {
         super.onResume()
         refreshRules()
-        setupSourceSpinner()
-        syncAntiSleepUi()
+        syncController.setupSourceSpinner(this)
+        syncController.syncAntiSleepUi(this)
         if (ScreenOnOverlay.canDraw(this) && !AntiSleep.isDisabled(this)) {
             KeepAliveService.start(this)
         }
-    }
-
-    override fun onDestroy() {
-        io.shutdown()
-        super.onDestroy()
     }
 
     private fun toast(msg: String) {
@@ -982,6 +552,139 @@ class MainActivity : AppCompatActivity() {
             } catch (_: ActivityNotFoundException) {
             } catch (_: SecurityException) {
             }
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // FormCallbacks 实现
+    // ═══════════════════════════════════════════════════════════════════
+
+    override fun onStateUiUpdate() {
+        // 触发条件芯片
+        triggerChips.forEachIndexed { index, textView ->
+            refreshTriggerChip(textView, index == formController.selectedTriggerIndex)
+        }
+        val isTime = formController.selectedTriggerIndex == 0
+        layoutTime.visibility = if (isTime) View.VISIBLE else View.GONE
+        cbRandom.visibility = if (isTime) View.VISIBLE else View.GONE
+        cbSkipHolidays.visibility = if (isTime) View.VISIBLE else View.GONE
+        if (!isTime) {
+            layoutRandom.visibility = View.GONE
+            btnTime.visibility = View.VISIBLE
+            cbRandom.isChecked = false
+            cbSkipHolidays.isChecked = false
+            formController.randomWindow = false
+            formController.skipHolidays = false
+        }
+        // 重复模式芯片
+        repeatChips.forEachIndexed { index, textView ->
+            refreshRepeatChip(textView, index == formController.selectedRepeatIndex)
+        }
+        val isCustom = formController.selectedRepeatIndex == 3
+        layoutCustomDays.visibility = if (isCustom) View.VISIBLE else View.GONE
+        // 星期胶囊
+        dayViews.forEachIndexed { idx, view ->
+            refreshDayCapsule(view, formController.selectedDays[idx])
+        }
+        layoutBt.visibility = if (formController.selectedTriggerIndex == 3) View.VISIBLE else View.GONE
+    }
+
+    override fun onAppPicked(appName: String) {
+        btnPickApp.text = getString(R.string.main_pick_app_done, appName)
+    }
+
+    override fun onAppPickEmpty() {
+        toast(getString(R.string.main_no_apps))
+    }
+
+    override fun onValidationError(messageResId: Int) {
+        toast(getString(messageResId))
+    }
+
+    override fun onSaveSuccess() {
+        toast(getString(R.string.main_saved))
+        formController.reset()
+        refreshRules()
+    }
+
+    override fun onSaveFailed() {
+        toast(getString(R.string.main_save_failed))
+    }
+
+    override fun onFormReset() {
+        btnPickApp.text = getString(R.string.main_pick_app)
+        onStateUiUpdate()
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // SyncCallbacks 实现
+    // ═══════════════════════════════════════════════════════════════════
+
+    override fun showSnackbar(msg: String, duration: Int) {
+        runCatching { Snackbar.make(snackbarRoot, msg, duration).show() }
+    }
+
+    override fun onSyncPageSelected() {
+        syncController.setupSourceSpinner(this)
+        syncController.syncAntiSleepUi(this)
+    }
+
+    override val snackbarRoot: View get() = binding.rootContainer
+
+    override fun onRootCheckResult(rooted: Boolean) {
+        if (!ScreenOnOverlay.canDraw(this)) return
+        tvAntiSleep.text = if (rooted) getString(R.string.main_anti_sleep_on) else getString(R.string.main_anti_sleep_on_no_root)
+    }
+
+    override fun requestOverlayPermission() {
+        runCatching {
+            startActivity(
+                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+            )
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // 视觉刷新辅助
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun refreshDayCapsule(view: TextView, selected: Boolean) {
+        view.setBackgroundResource(
+            if (selected) R.drawable.bg_dark_capsule_selected else R.drawable.bg_dark_capsule_unselected
+        )
+        view.setTextColor(
+            if (selected) resources.getColor(R.color.item_active_text, null)
+            else resources.getColor(R.color.item_inactive_text, null)
+        )
+    }
+
+    private fun refreshTriggerChip(textView: TextView, selected: Boolean) {
+        if (selected) {
+            textView.setBackgroundResource(R.drawable.bg_trigger_grid_item_selected)
+            textView.setTextColor(resources.getColor(R.color.item_active_text, null))
+            textView.setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+            textView.setBackgroundResource(R.drawable.bg_trigger_grid_item)
+            textView.setTextColor(resources.getColor(R.color.item_inactive_text, null))
+            textView.setTypeface(null, android.graphics.Typeface.NORMAL)
+        }
+        textView.compoundDrawables[1]?.setTint(
+            resources.getColor(
+                if (selected) R.color.item_active_text else R.color.item_inactive_text,
+                null
+            )
+        )
+    }
+
+    private fun refreshRepeatChip(textView: TextView, selected: Boolean) {
+        if (selected) {
+            textView.setBackgroundResource(R.drawable.bg_dark_capsule_selected)
+            textView.setTextColor(resources.getColor(R.color.item_active_text, null))
+            textView.setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+            textView.setBackgroundResource(R.drawable.bg_dark_capsule_unselected)
+            textView.setTextColor(resources.getColor(R.color.item_inactive_text, null))
+            textView.setTypeface(null, android.graphics.Typeface.NORMAL)
         }
     }
 

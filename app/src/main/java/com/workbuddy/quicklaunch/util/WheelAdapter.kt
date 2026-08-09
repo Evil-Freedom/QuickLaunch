@@ -56,7 +56,4 @@ class WheelAdapter(private val values: List<Int>) : RecyclerView.Adapter<WheelAd
         val base = center - (center % size)
         return (base + normalized).coerceIn(0, itemCount - 1)
     }
-
-    @Deprecated("Use valueAt(position) instead", ReplaceWith("valueAt(pos)"))
-    fun getValue(pos: Int): Int = valueAt(pos)
 }
