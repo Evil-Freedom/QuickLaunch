@@ -1,200 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  控制中心主框架（Edge-to-Edge 沉浸式 + 纯平漂浮药丸底栏）
+
+  - 顶部无 Tab：标题与内容顶到状态栏下方
+  - 主体：ViewPager2 左右滑动，复用 view_launch / view_sync
+  - 底部：纯平无遮罩，两个独立漂浮胶囊药丸
+      [ ic_home  快捷启动 ]  [ ic_source  节假日与数据源 ]
+      选中 = 白磨砂 + 细白边框；未选中 = 普通暗卡片
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 标题栏：surfaceContainer 底色 + headlineSmall 字号 + 加粗，视觉与 M3 对齐 -->
-    <TextView
-        android:id="@+id/tvTitle"
+    <!-- ═══ 主体：ViewPager2（页面由 MainActivity 注入，复用原 view_launch / view_sync） ═══ -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorSurfaceContainer"
-        android:paddingStart="16dp"
-        android:paddingTop="12dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="12dp"
-        android:text="@string/app_name"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall"
-        android:textStyle="bold"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 操作区：整组收纳进一张卡片，固定高度不随列表压缩 -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardOperations"
+    <!-- ═══ 底部暗黑渐变遮罩：淡化滚动到底部的内容，避免文字穿透悬浮胶囊 ═══ -->
+    <View
+        android:id="@+id/bottomGradientShadow"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        app:cardBackgroundColor="?attr/colorSurfaceContainer"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="1dp"
+        android:layout_height="120dp"
+        android:background="@drawable/bg_bottom_gradient"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
-
-            <LinearLayout
-                android:id="@+id/layoutAntiSleep"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
-
-                <TextView
-                    android:id="@+id/tvAntiSleep"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="防外屏息屏（需 root）"
-                    android:textSize="15sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/swAntiSleep"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:enabled="false" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="?attr/colorOutlineVariant" />
-
-            <LinearLayout
-                android:id="@+id/layoutSource"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="数据源"
-                    android:textSize="15sp" />
-
-                <Spinner
-                    android:id="@+id/spinnerSource"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1" />
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSyncHolidays"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="16dp"
-                android:text="同步法定节假日" />
-
-            <LinearLayout
-                android:id="@+id/layoutHolidayActions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnManageHolidays"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:text="手动管理节假日" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnManageSources"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:text="管理数据源" />
-            </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- 空状态：图标 + 文案，与 recycler 同区域叠放（visible 互斥） -->
+    <!-- ═══ 底部：纯平无遮罩漂浮药丸 ═══ -->
     <LinearLayout
-        android:id="@+id/tvEmpty"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardOperations"
-        app:layout_constraintVertical_bias="0.5">
-
-        <ImageView
-            android:id="@+id/ivEmptyIcon"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_empty_state"
-            app:tint="?attr/colorOnSurfaceVariant" />
-
-        <TextView
-            android:id="@+id/tvEmptyText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="还没有自动化规则"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp" />
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:paddingStart="8dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="88dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardOperations" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAdd"
+        android:id="@+id/floatingBottomBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:contentDescription="新建"
+        android:layout_marginBottom="24dp"
+        android:background="@android:color/transparent"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- 快捷启动 -->
+        <LinearLayout
+            android:id="@+id/bottomNavLaunch"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_nav_capsule_selected"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp">
+
+            <ImageView
+                android:id="@+id/ivNavLaunch"
+                android:layout_width="@dimen/dark_floating_bar_item_icon"
+                android:layout_height="@dimen/dark_floating_bar_item_icon"
+                android:background="@drawable/bg_nav_icon_circle"
+                android:contentDescription="快捷启动"
+                android:scaleType="centerInside"
+                android:padding="5dp"
+                android:src="@drawable/ic_tab_launch"
+                app:tint="@color/item_active_text" />
+
+            <TextView
+                android:id="@+id/tvNavLaunch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif"
+                android:text="快捷启动"
+                android:textColor="@color/item_active_text"
+                android:textFontWeight="500"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <!-- 节假日与数据源 -->
+        <LinearLayout
+            android:id="@+id/bottomNavSync"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_nav_capsule_inactive"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp">
+
+            <ImageView
+                android:id="@+id/ivNavSync"
+                android:layout_width="@dimen/dark_floating_bar_item_icon"
+                android:layout_height="@dimen/dark_floating_bar_item_icon"
+                android:background="@drawable/bg_nav_icon_circle"
+                android:contentDescription="节假日与数据源"
+                android:scaleType="centerInside"
+                android:padding="5dp"
+                android:src="@drawable/ic_tab_sync"
+                app:tint="@color/item_inactive_text" />
+
+            <TextView
+                android:id="@+id/tvNavSync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif"
+                android:text="节假日与数据源"
+                android:textColor="@color/item_inactive_text"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

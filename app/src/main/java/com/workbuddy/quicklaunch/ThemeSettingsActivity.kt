@@ -34,12 +34,13 @@ class ThemeSettingsActivity : AppCompatActivity() {
         val styleRes = when (themeId) {
             ThemeManager.LILAC.id -> R.style.Theme_QuickLaunch_Lavender
             ThemeManager.CLASSIC_GREEN.id -> R.style.Theme_QuickLaunch_Classic
+            ThemeManager.LAVENDER_PRO.id -> R.style.Theme_QuickLaunch_LavenderPro
             else -> R.style.Theme_QuickLaunch_Mint
         }
         setTheme(styleRes)
     }
 
-    /** 主题色选择：三选一，点击卡片即选中，实时预览。 */
+    /** 主题色选择：四选一，点击卡片即选中，实时预览。 */
     private fun bindThemeSelection() {
         updateRadioButtons()
 
@@ -58,12 +59,18 @@ class ThemeSettingsActivity : AppCompatActivity() {
             updateRadioButtons()
             applyThemeWithRecreate()
         }
+        binding.cardLavenderPro.setOnClickListener {
+            selectedThemeId = ThemeManager.LAVENDER_PRO.id
+            updateRadioButtons()
+            applyThemeWithRecreate()
+        }
     }
 
     private fun updateRadioButtons() {
         binding.rbMint.isChecked = selectedThemeId == ThemeManager.MINT_GREEN.id
         binding.rbLavender.isChecked = selectedThemeId == ThemeManager.LILAC.id
         binding.rbClassic.isChecked = selectedThemeId == ThemeManager.CLASSIC_GREEN.id
+        binding.rbLavenderPro.isChecked = selectedThemeId == ThemeManager.LAVENDER_PRO.id
     }
 
     /** 切换主题色后重启 Activity 使新主题完整生效，并持久化选择。 */

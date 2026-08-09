@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3" xmlns:ns1="http://schemas.android.com/tools"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res"><file name="ic_launcher" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_launcher.xml" qualifiers="" type="drawable"/><file name="activity_create" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_create.xml" qualifiers="" type="layout"/><file name="activity_holiday_manage" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_holiday_manage.xml" qualifiers="" type="layout"/><file name="activity_main" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_main.xml" qualifiers="" type="layout"/><file name="activity_source_manage" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_source_manage.xml" qualifiers="" type="layout"/><file name="item_automation" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_automation.xml" qualifiers="" type="layout"/><file name="item_holiday" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_holiday.xml" qualifiers="" type="layout"/><file name="item_source" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_source.xml" qualifiers="" type="layout"/><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\arrays.xml" qualifiers=""><string-array name="trigger_types">
+<merger version="3" xmlns:ns1="http://schemas.android.com/tools"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res"><file name="bg_bottom_gradient" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_bottom_gradient.xml" qualifiers="" type="drawable"/><file name="bg_bottom_nav_glass" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_bottom_nav_glass.xml" qualifiers="" type="drawable"/><file name="bg_bottom_nav_indicator" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_bottom_nav_indicator.xml" qualifiers="" type="drawable"/><file name="bg_btn_primary" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_btn_primary.xml" qualifiers="" type="drawable"/><file name="bg_card_dark" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_card_dark.xml" qualifiers="" type="drawable"/><file name="bg_card_elegant" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_card_elegant.xml" qualifiers="" type="drawable"/><file name="bg_dark_capsule_selected" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_dark_capsule_selected.xml" qualifiers="" type="drawable"/><file name="bg_dark_capsule_unselected" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_dark_capsule_unselected.xml" qualifiers="" type="drawable"/><file name="bg_dark_card_primary" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_dark_card_primary.xml" qualifiers="" type="drawable"/><file name="bg_dark_card_secondary" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_dark_card_secondary.xml" qualifiers="" type="drawable"/><file name="bg_dark_input" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_dark_input.xml" qualifiers="" type="drawable"/><file name="bg_dark_root" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_dark_root.xml" qualifiers="" type="drawable"/><file name="bg_dialog_scrim" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_dialog_scrim.xml" qualifiers="" type="drawable"/><file name="bg_floating_bottom_bar" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_floating_bottom_bar.xml" qualifiers="" type="drawable"/><file name="bg_icon_squircle" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_icon_squircle.xml" qualifiers="" type="drawable"/><file name="bg_ios26_wallpaper" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_ios26_wallpaper.xml" qualifiers="" type="drawable"/><file name="bg_item_active" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_item_active.xml" qualifiers="" type="drawable"/><file name="bg_item_inactive" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_item_inactive.xml" qualifiers="" type="drawable"/><file name="bg_liquid_glass" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_liquid_glass.xml" qualifiers="" type="drawable"/><file name="bg_nav_capsule_inactive" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_nav_capsule_inactive.xml" qualifiers="" type="drawable"/><file name="bg_nav_capsule_selected" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_nav_capsule_selected.xml" qualifiers="" type="drawable"/><file name="bg_nav_icon_circle" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_nav_icon_circle.xml" qualifiers="" type="drawable"/><file name="bg_nav_item_selected" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_nav_item_selected.xml" qualifiers="" type="drawable"/><file name="bg_progress_battery" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_progress_battery.xml" qualifiers="" type="drawable"/><file name="bg_rule_item_active" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_rule_item_active.xml" qualifiers="" type="drawable"/><file name="bg_rule_item_inactive" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_rule_item_inactive.xml" qualifiers="" type="drawable"/><file name="bg_search_liquid" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_search_liquid.xml" qualifiers="" type="drawable"/><file name="bg_search_pill" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_search_pill.xml" qualifiers="" type="drawable"/><file name="bg_segment_selected" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_segment_selected.xml" qualifiers="" type="drawable"/><file name="bg_segment_track" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_segment_track.xml" qualifiers="" type="drawable"/><file name="bg_segment_unselected" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_segment_unselected.xml" qualifiers="" type="drawable"/><file name="bg_trigger_grid_item" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_trigger_grid_item.xml" qualifiers="" type="drawable"/><file name="bg_trigger_grid_item_selected" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\bg_trigger_grid_item_selected.xml" qualifiers="" type="drawable"/><file name="cb_glass" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\cb_glass.xml" qualifiers="" type="drawable"/><file name="cb_glass_checked" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\cb_glass_checked.xml" qualifiers="" type="drawable"/><file name="cb_glass_unchecked" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\cb_glass_unchecked.xml" qualifiers="" type="drawable"/><file name="color_swatch_classic" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\color_swatch_classic.xml" qualifiers="" type="drawable"/><file name="color_swatch_lavender" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\color_swatch_lavender.xml" qualifiers="" type="drawable"/><file name="color_swatch_lavender_pro" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\color_swatch_lavender_pro.xml" qualifiers="" type="drawable"/><file name="color_swatch_mint" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\color_swatch_mint.xml" qualifiers="" type="drawable"/><file name="ic_add_ios" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_add_ios.xml" qualifiers="" type="drawable"/><file name="ic_check_small" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_check_small.xml" qualifiers="" type="drawable"/><file name="ic_empty_state" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_empty_state.xml" qualifiers="" type="drawable"/><file name="ic_launcher" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_launcher.xml" qualifiers="" type="drawable"/><file name="ic_launcher_background" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_launcher_background.xml" qualifiers="" type="drawable"/><file name="ic_launcher_foreground" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_launcher_foreground.xml" qualifiers="" type="drawable"/><file name="ic_mic_ios" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_mic_ios.xml" qualifiers="" type="drawable"/><file name="ic_notification_stat" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_notification_stat.xml" qualifiers="" type="drawable"/><file name="ic_search_ios" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_search_ios.xml" qualifiers="" type="drawable"/><file name="ic_tab_launch" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_tab_launch.xml" qualifiers="" type="drawable"/><file name="ic_tab_sync" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_tab_sync.xml" qualifiers="" type="drawable"/><file name="ic_trigger_bluetooth" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_trigger_bluetooth.xml" qualifiers="" type="drawable"/><file name="ic_trigger_charging" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_trigger_charging.xml" qualifiers="" type="drawable"/><file name="ic_trigger_time" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_trigger_time.xml" qualifiers="" type="drawable"/><file name="ic_trigger_wifi" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_trigger_wifi.xml" qualifiers="" type="drawable"/><file name="status_dot_off" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\status_dot_off.xml" qualifiers="" type="drawable"/><file name="status_dot_on" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\status_dot_on.xml" qualifiers="" type="drawable"/><file name="activity_create" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_create.xml" qualifiers="" type="layout"/><file name="activity_holiday_manage" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_holiday_manage.xml" qualifiers="" type="layout"/><file name="activity_main" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_main.xml" qualifiers="" type="layout"/><file name="activity_main_ios" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_main_ios.xml" qualifiers="" type="layout"/><file name="activity_source_manage" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_source_manage.xml" qualifiers="" type="layout"/><file name="activity_theme_settings" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_theme_settings.xml" qualifiers="" type="layout"/><file name="dialog_app_picker_bottom_sheet" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\dialog_app_picker_bottom_sheet.xml" qualifiers="" type="layout"/><file name="dialog_dark_wheel_time_picker" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\dialog_dark_wheel_time_picker.xml" qualifiers="" type="layout"/><file name="item_app" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_app.xml" qualifiers="" type="layout"/><file name="item_app_select" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_app_select.xml" qualifiers="" type="layout"/><file name="item_automation" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_automation.xml" qualifiers="" type="layout"/><file name="item_dock_app" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_dock_app.xml" qualifiers="" type="layout"/><file name="item_holiday" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_holiday.xml" qualifiers="" type="layout"/><file name="item_source" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_source.xml" qualifiers="" type="layout"/><file name="item_wheel" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\item_wheel.xml" qualifiers="" type="layout"/><file name="view_launch" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\view_launch.xml" qualifiers="" type="layout"/><file name="view_sync" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\view_sync.xml" qualifiers="" type="layout"/><file name="bottom_nav_menu" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\menu\bottom_nav_menu.xml" qualifiers="" type="menu"/><file name="menu_app_context" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\menu\menu_app_context.xml" qualifiers="" type="menu"/><file name="ic_launcher" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi\ic_launcher.xml" qualifiers="anydpi-v4" type="mipmap"/><file name="ic_launcher_round" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi\ic_launcher_round.xml" qualifiers="anydpi-v4" type="mipmap"/><file name="ic_launcher" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml" qualifiers="anydpi-v26" type="mipmap"/><file name="ic_launcher_round" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi-v26\ic_launcher_round.xml" qualifiers="anydpi-v26" type="mipmap"/><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\arrays.xml" qualifiers=""><string-array name="trigger_types">
         <item>定时</item>
         <item>充电时</item>
         <item>连接WiFi</item>
@@ -10,7 +10,227 @@
         <item>周末</item>
         <item>一次性</item>
         <item>自定义</item>
-    </string-array></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\colors.xml" qualifiers=""><color name="green">#3DDC84</color><color name="green_dark">#2BB673</color><color name="black">#FF000000</color><color name="white">#FFFFFFFF</color><color name="text_hint">#666666</color><color name="m3_primary_container">#B8E6D4</color><color name="preset_classic_on_surface">#191D17</color><color name="m3_surface">#F5FBF7</color><color name="preset_lavender_on_surface">#1A1825</color><color name="preset_mint_primary_container">#B8E6D4</color><color name="m3_inverse_surface">#2E322B</color><color name="preset_classic_on_primary_container">#002105</color><color name="preset_classic_tertiary_container">#BCE8EE</color><color name="preset_mint_on_error">#FFFFFF</color><color name="preset_lavender_secondary_container">#E0D4F0</color><color name="preset_mint_inverse_on_surface">#F0F4EA</color><color name="preset_lavender_on_surface_variant">#454250</color><color name="m3_outline">#6F7972</color><color name="preset_classic_surface_variant">#DFE5D8</color><color name="m3_surface_container">#E9F1EB</color><color name="m3_secondary_container">#D5E8CB</color><color name="preset_lavender_error">#BA1A1A</color><color name="preset_lavender_on_tertiary_container">#1C0E35</color><color name="preset_lavender_on_error">#FFFFFF</color><color name="preset_classic_primary">#2E7D32</color><color name="preset_lavender_inverse_on_surface">#EDE8F4</color><color name="preset_classic_error">#BA1A1A</color><color name="preset_mint_on_tertiary">#FFFFFF</color><color name="preset_classic_on_tertiary_container">#001F24</color><color name="preset_classic_on_secondary">#FFFFFF</color><color name="preset_mint_on_background">#191D17</color><color name="preset_mint_on_primary">#FFFFFF</color><color name="preset_classic_on_error">#FFFFFF</color><color name="preset_lavender_inverse_surface">#2E2B38</color><color name="preset_lavender_on_tertiary">#FFFFFF</color><color name="preset_classic_inverse_surface">#2E322B</color><color name="m3_on_secondary">#FFFFFF</color><color name="preset_mint_background">#F5FBF7</color><color name="m3_secondary">#52634D</color><color name="m3_tertiary_container">#B2D8CB</color><color name="preset_classic_secondary">#52634D</color><color name="preset_lavender_on_secondary">#FFFFFF</color><color name="m3_surface_variant">#D9E5DD</color><color name="status_disabled">#5A6B62</color><color name="ic_launcher_bg_top">#5EA88B</color><color name="m3_tertiary">#3A6B5A</color><color name="m3_surface_container_highest">#DDE7E1</color><color name="preset_mint_surface_variant">#D9E5DD</color><color name="preset_classic_on_tertiary">#FFFFFF</color><color name="preset_mint_on_surface_variant">#43483E</color><color name="m3_on_surface_variant">#43483E</color><color name="preset_mint_on_tertiary_container">#002019</color><color name="preset_mint_surface">#F5FBF7</color><color name="preset_lavender_inverse_primary">#B89FE0</color><color name="preset_mint_on_surface">#191D17</color><color name="preset_mint_outline">#6F7972</color><color name="preset_lavender_error_container">#FFDAD6</color><color name="m3_surface_container_lowest">#FFFFFF</color><color name="preset_mint_tertiary">#3A6B5A</color><color name="preset_lavender_outline_variant">#C8C2D2</color><color name="ic_launcher_lightning_highlight">#B8E6D4</color><color name="preset_mint_primary">#5EA88B</color><color name="preset_classic_on_surface_variant">#43483E</color><color name="preset_mint_on_secondary_container">#121F0E</color><color name="preset_classic_primary_container">#A8EDA5</color><color name="preset_mint_inverse_primary">#8BD5C0</color><color name="preset_classic_outline">#73796C</color><color name="m3_error">#BA1A1A</color><color name="preset_lavender_surface_variant">#E2DCEB</color><color name="preset_lavender_secondary">#6B5B80</color><color name="preset_classic_surface">#F9FAF3</color><color name="preset_lavender_tertiary_container">#D8CCEB</color><color name="preset_classic_on_primary">#FFFFFF</color><color name="preset_classic_background">#F9FAF3</color><color name="preset_lavender_background">#F8F5FC</color><color name="preset_classic_error_container">#FFDAD6</color><color name="preset_classic_on_background">#191D17</color><color name="m3_on_primary_container">#00210A</color><color name="preset_lavender_on_primary">#FFFFFF</color><color name="preset_mint_on_secondary">#FFFFFF</color><color name="preset_mint_secondary_container">#D5E8CB</color><color name="preset_lavender_on_secondary_container">#1E1530</color><color name="m3_on_background">#191D17</color><color name="m3_surface_container_low">#EFF6F1</color><color name="m3_on_secondary_container">#121F0E</color><color name="preset_classic_tertiary">#38656B</color><color name="ic_launcher_bg_bottom">#2D6B52</color><color name="preset_classic_inverse_primary">#8BD58C</color><color name="preset_lavender_on_error_container">#410002</color><color name="preset_classic_outline_variant">#C3C9BC</color><color name="preset_mint_secondary">#52634D</color><color name="preset_lavender_outline">#716C7D</color><color name="preset_mint_tertiary_container">#B2D8CB</color><color name="preset_lavender_primary_container">#D4C4ED</color><color name="preset_mint_error">#BA1A1A</color><color name="m3_error_container">#FFDAD6</color><color name="m3_on_error">#FFFFFF</color><color name="preset_mint_error_container">#FFDAD6</color><color name="preset_mint_on_error_container">#410002</color><color name="preset_lavender_on_background">#1A1825</color><color name="preset_lavender_primary">#9B7EC4</color><color name="preset_lavender_surface">#F8F5FC</color><color name="preset_classic_on_error_container">#410002</color><color name="preset_mint_on_primary_container">#00210A</color><color name="m3_surface_container_high">#E3ECE6</color><color name="m3_inverse_on_surface">#F0F4EA</color><color name="preset_lavender_on_primary_container">#1A0A30</color><color name="preset_mint_inverse_surface">#2E322B</color><color name="preset_classic_secondary_container">#D5E8CB</color><color name="m3_background">#F5FBF7</color><color name="status_enabled">#3D8B6F</color><color name="preset_mint_outline_variant">#C3C9BC</color><color name="m3_primary">#5EA88B</color><color name="preset_classic_inverse_on_surface">#F0F4EA</color><color name="preset_lavender_tertiary">#7A5EA0</color><color name="m3_on_tertiary">#FFFFFF</color><color name="m3_inverse_primary">#8BD5C0</color><color name="m3_on_surface">#191D17</color><color name="m3_outline_variant">#C3C9BC</color><color name="preset_classic_on_secondary_container">#121F0E</color><color name="m3_on_primary">#FFFFFF</color><color name="m3_on_error_container">#410002</color><color name="m3_on_tertiary_container">#002019</color></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\strings.xml" qualifiers=""><string name="app_name">快捷启动</string><string name="theme_apply">应用</string><string name="theme_mode_light">浅色</string><string name="theme_mode_system">跟随系统</string><string name="theme_mint">薄荷绿</string><string name="theme_cancel">取消</string><string name="theme_lavender">丁香紫</string><string name="theme_mode_dark">深色</string><string name="theme_settings">主题设置</string><string name="theme_classic">经典绿</string></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\themes.xml" qualifiers=""><style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
+    </string-array></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\colors.xml" qualifiers=""><color name="glass_bg_root">#0C0C0C</color><color name="glass_btn_primary_bg">#FFFFFF</color><color name="glass_btn_primary_text">#1A1A1A</color><color name="glass_active_bg">#1FFFFFFF</color><color name="glass_active_stroke">#33FFFFFF</color><color name="glass_active_text">#FFFFFF</color><color name="glass_inactive_bg">#0FFFFFFF</color><color name="glass_inactive_text">#C6C6C6</color><color name="glass_card_bg">#0DFFFFFF</color><color name="glass_checkbox_stroke">#38FFFFFF</color><color name="bg_root">@color/glass_bg_root</color><color name="btn_primary_bg">@color/glass_btn_primary_bg</color><color name="btn_primary_text">@color/glass_btn_primary_text</color><color name="item_active_bg">@color/glass_active_bg</color><color name="item_active_stroke">@color/glass_active_stroke</color><color name="item_active_text">@color/glass_active_text</color><color name="item_inactive_bg">@color/glass_inactive_bg</color><color name="item_inactive_text">@color/glass_inactive_text</color><color name="card_dark_bg">@color/glass_card_bg</color><color name="text_white">@color/glass_active_text</color><color name="text_secondary">@color/glass_inactive_text</color><color name="text_tertiary">#888888</color><color name="text_caption">#A1A1AA</color><color name="bg_card">@color/glass_inactive_bg</color><color name="bg_widget">@color/glass_card_bg</color><color name="stroke_hairline">#20FFFFFF</color><color name="stroke_glass">@color/glass_active_stroke</color><color name="bg_floating_bar">#00121212</color><color name="brand_accent">@color/glass_active_text</color><color name="brand_accent_press">#E0FFFFFF</color><color name="brand_accent_surface">@color/glass_active_bg</color><color name="accent_lavender">#B794F6</color><color name="accent_lavender_soft">#9F7AEA</color><color name="accent_lavender_surface">#1A9F7AEA</color><color name="accent_lavender_press">#805AD5</color><color name="text_primary">@color/glass_active_text</color><color name="destructive">#FF453A</color><color name="dark_root">@color/glass_bg_root</color><color name="dark_bg_primary">@color/glass_bg_root</color><color name="dark_card_primary">@color/glass_card_bg</color><color name="dark_card_secondary">@color/glass_inactive_bg</color><color name="dark_button_bg">@color/glass_inactive_bg</color><color name="dark_input_bg">@color/glass_card_bg</color><color name="dark_search_bg">@color/glass_card_bg</color><color name="dark_divider">@color/stroke_hairline</color><color name="dark_stroke">@color/stroke_hairline</color><color name="dark_text_primary">@color/glass_active_text</color><color name="dark_text_secondary">@color/glass_inactive_text</color><color name="dark_text_tertiary">@color/text_tertiary</color><color name="dark_text_hint">@color/text_tertiary</color><color name="dark_accent">@color/glass_active_text</color><color name="dark_accent_green">@color/glass_active_text</color><color name="dark_accent_press">#E0FFFFFF</color><color name="dark_switch_thumb">@color/glass_active_text</color><color name="dark_switch_track">@color/stroke_hairline</color><color name="dark_destructive">@color/destructive</color><color name="bottom_gradient_solid">#0F0F0F</color><color name="bottom_gradient_transparent">#000F0F0F</color><color name="white">#FFFFFFFF</color><color name="black">#FF000000</color></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\dimens.xml" qualifiers=""><dimen name="ios_radius_xs">8dp</dimen><dimen name="ios_radius_sm">12dp</dimen><dimen name="ios_radius_md">16dp</dimen><dimen name="ios_radius_lg">24dp</dimen><dimen name="ios_radius_xl">32dp</dimen><dimen name="ios_radius_pill">999dp</dimen><dimen name="ios_space_xs">4dp</dimen><dimen name="ios_space_sm">8dp</dimen><dimen name="ios_space_md">12dp</dimen><dimen name="ios_space_lg">16dp</dimen><dimen name="ios_space_xl">24dp</dimen><dimen name="ios_space_2xl">32dp</dimen><dimen name="ios_space_3xl">48dp</dimen><dimen name="ios_search_height">48dp</dimen><dimen name="ios_dock_height">96dp</dimen><dimen name="ios_fab_size">56dp</dimen><dimen name="ios_button_height">50dp</dimen><dimen name="ios_icon_sm">24dp</dimen><dimen name="ios_icon_md">32dp</dimen><dimen name="ios_icon_lg">48dp</dimen><dimen name="ios_icon_xl">64dp</dimen><dimen name="ios_dock_icon">56dp</dimen><dimen name="ios_text_caption">12sp</dimen><dimen name="ios_text_body">14sp</dimen><dimen name="ios_text_subhead">16sp</dimen><dimen name="ios_text_title">20sp</dimen><dimen name="ios_text_large_title">28sp</dimen><dimen name="ios_border_hairline">1px</dimen><dimen name="ios_border_thin">1dp</dimen><dimen name="ios_elevation_low">2dp</dimen><dimen name="ios_elevation_md">4dp</dimen><dimen name="ios_elevation_high">8dp</dimen><dimen name="dark_radius_card">28dp</dimen><dimen name="dark_radius_pill">24dp</dimen><dimen name="dark_radius_icon">14dp</dimen><dimen name="dark_floating_bar_height">64dp</dimen><dimen name="dark_floating_bar_margin">16dp</dimen><dimen name="dark_floating_bar_radius">32dp</dimen><dimen name="dark_floating_bar_item_icon">24dp</dimen><dimen name="dark_stroke_width">1px</dimen><dimen name="dark_button_height">46dp</dimen><dimen name="dark_input_height">48dp</dimen><dimen name="dark_chip_height">34dp</dimen><dimen name="trigger_grid_item_height">56dp</dimen><dimen name="trigger_grid_icon_size">20dp</dimen><dimen name="glass_button_height">46dp</dimen><dimen name="glass_button_radius">23dp</dimen><dimen name="glass_time_bubble_height">40dp</dimen><dimen name="glass_time_bubble_radius">20dp</dimen><dimen name="dark_card_margin_horizontal">16dp</dimen><dimen name="dark_card_margin_vertical">6dp</dimen><dimen name="dark_card_padding">12dp</dimen><dimen name="dark_section_gap">10dp</dimen><dimen name="dark_scroll_bottom_gap">100dp</dimen><dimen name="wheel_item_height">48dp</dimen><dimen name="wheel_visible_rows">5</dimen><dimen name="wheel_container_height">240dp</dimen></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\strings.xml" qualifiers=""><string name="app_name">快捷启动</string><string name="theme_settings">主题设置</string><string name="theme_mint">薄荷绿</string><string name="theme_lavender">丁香紫</string><string name="theme_classic">经典绿</string><string name="theme_lavender_pro">薰衣草紫 Pro</string><string name="theme_mode_light">浅色</string><string name="theme_mode_dark">深色</string><string name="theme_mode_system">跟随系统</string><string name="theme_apply">应用</string><string name="theme_cancel">取消</string><string name="main_no_apps">未找到可启动的应用</string><string name="main_pick_app_first">请先选择要启动的应用</string><string name="main_default_name">自动化</string><string name="main_pick_day">请至少选择一天</string><string name="main_saved">已保存</string><string name="main_save_failed">保存失败，请重试</string><string name="main_pick_app">选择要启动的应用</string><string name="main_pick_app_done">已选择：%1$s</string><string name="main_rule_enabled">已开启「%1$s」</string><string name="main_rule_disabled">已关闭「%1$s」</string><string name="main_delete_rule">删除自动化？</string><string name="main_delete_rule_msg">「%1$s」将被删除，其定时任务会一并取消。</string><string name="main_delete">删除</string><string name="main_cancel">取消</string><string name="main_undo">撤销</string><string name="main_rule_deleted">已删除「%1$s」</string><string name="main_source_auto">自动（推荐）</string><string name="main_source_custom">%1$s（自定义）</string><string name="main_syncing">同步中…</string><string name="main_sync_holidays">同步法定节假日</string><string name="main_synced">已同步（来源：%1$s，%2$d 天）</string><string name="main_sync_failed">节假日数据同步失败（已保留上次数据），定时规则不受影响，可稍后重试</string><string name="main_anti_sleep_on">防外屏息屏（屏幕常亮，已叠加 root 增强）</string><string name="main_anti_sleep_on_no_root">防外屏息屏（屏幕常亮）</string><string name="main_anti_sleep_need_overlay">需要悬浮窗权限才能防止外屏息屏</string><string name="main_anti_sleep_go_auth">去授权</string><string name="main_anti_sleep_turned_on">已开启：屏幕（含外屏）保持常亮</string><string name="main_anti_sleep_turned_off">已关闭：恢复系统默认息屏</string><string name="main_anti_sleep_failed">开启失败，请检查悬浮窗权限是否被系统撤回</string><string name="main_permission_required">需要开启以下权限</string><string name="main_permission_overlay">悬浮窗权限 —— 后台自动拉起应用的必备条件，不开则只能靠点通知启动</string><string name="main_permission_battery">忽略电池优化 —— 否则休眠时定时任务会被系统推迟或杀掉</string><string name="main_permission_exact_alarm">精确闹钟 —— 否则定时触发会有几分钟误差</string><string name="main_permission_autostart">自启动 / 后台弹出界面 —— Motorola myui 等厂商 ROM 需在「应用管理」中单独放行</string><string name="main_permission_go_settings">去设置</string><string name="main_permission_later">以后再说</string><string name="create_no_apps">未找到可启动的应用</string><string name="create_pick_app_first">请先选择要启动的应用</string><string name="create_default_name">自动化</string><string name="create_pick_day">请至少选择一天</string><string name="create_saved">已保存</string><string name="create_save_failed">保存失败，请重试</string><string name="holiday_name_hint">名称（可选，如 元旦）</string><string name="holiday_add">添加 %1$s</string><string name="source_name_hint">名称，如 我的节假日API</string><string name="source_url_hint">https://example.com/【年份】.json</string><string name="source_format_holiday_cn">holiday-cn 格式</string><string name="source_format_timor">timor.tech 格式</string><string name="source_add_custom">添加自定义数据源</string><string name="source_empty_fields">名称和 URL 不能为空</string><string name="source_url_need_year">网址里必须包含「年份」标记</string><string name="source_url_invalid">URL 必须是 http:// 或 https:// 开头的合法地址</string><string name="keepalive_channel_name">保活服务</string><string name="keepalive_notification_title">QuickLaunch 后台保活中</string><string name="keepalive_notification_text">保障自动启动规则不被系统回收</string><string name="launch_channel_name">应用启动</string><string name="launch_notification_title">正在启动 %1$s</string></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\styles.xml" qualifiers=""><style name="Widget.QuickLaunch.Dark.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/card_dark_bg</item>
+        <item name="contentPadding">@dimen/dark_card_padding</item>
+        <item name="android:layout_marginHorizontal">@dimen/dark_card_margin_horizontal</item>
+        <item name="android:layout_marginVertical">@dimen/dark_card_margin_vertical</item>
+        <item name="strokeColor">@color/stroke_glass</item>
+        <item name="strokeWidth">@dimen/dark_stroke_width</item>
+    </style><style name="Widget.QuickLaunch.Dark.Button.Primary" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/glass_button_radius</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textFontWeight">700</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:background">@drawable/bg_btn_primary</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:textColor">@color/glass_btn_primary_text</item>
+        <item name="android:minHeight">@dimen/glass_button_height</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">0dp</item>
+    </style><style name="Widget.QuickLaunch.Dark.Button.Secondary" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:backgroundTint">@color/dark_card_secondary</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:minHeight">@dimen/dark_button_height</item>
+    </style><style name="Widget.QuickLaunch.Dark.Button.Action" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/glass_button_radius</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textFontWeight">700</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:backgroundTint">@color/glass_inactive_bg</item>
+        <item name="android:textColor">@color/glass_active_text</item>
+        <item name="android:minHeight">@dimen/glass_button_height</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">0dp</item>
+    </style><style name="Widget.QuickLaunch.Glass.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/dark_card_primary</item>
+    </style><style name="Widget.QuickLaunch.Group.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/dark_card_primary</item>
+    </style><style name="Widget.QuickLaunch.Dark.Button.Capsule.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:paddingVertical">14dp</item>
+        <item name="strokeColor">@color/dark_stroke</item>
+        <item name="strokeWidth">@dimen/dark_stroke_width</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style><style name="Widget.QuickLaunch.Dark.Chip" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/dark_chip_height</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/bg_dark_capsule_unselected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style><style name="Widget.QuickLaunch.Dark.Chip.Selected" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">@dimen/dark_chip_height</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/bg_dark_capsule_selected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:textColor">@color/item_active_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style><style name="Widget.QuickLaunch.Dark.GridChip" parent="">
+        <item name="android:background">@drawable/bg_trigger_grid_item</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:drawablePadding">4dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style><style name="Widget.QuickLaunch.Dark.GridChip.Selected" parent="">
+        <item name="android:background">@drawable/bg_trigger_grid_item_selected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:textColor">@color/item_active_text</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:drawablePadding">4dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style><style name="Widget.QuickLaunch.Dark.Input" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <item name="boxBackgroundMode">filled</item>
+        <item name="boxBackgroundColor">@color/card_dark_bg</item>
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="boxStrokeColor">@color/stroke_glass</item>
+        <item name="boxStrokeWidth">@dimen/dark_stroke_width</item>
+        <item name="hintTextColor">@color/text_tertiary</item>
+    </style><style name="TextAppearance.QuickLaunch.Dark.Title" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">600</item>
+    </style><style name="TextAppearance.QuickLaunch.Dark.Subtitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">500</item>
+    </style><style name="TextAppearance.QuickLaunch.Dark.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style><style name="TextAppearance.QuickLaunch.Dark.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+    </style><style name="TextAppearance.QuickLaunch.Dark.GroupHeader" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style><style name="Widget.QuickLaunch.Dark.Segment" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/bg_item_inactive</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/item_inactive_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style><style name="Widget.QuickLaunch.Dark.Segment.Selected" parent="Widget.QuickLaunch.Dark.Segment">
+        <item name="android:background">@drawable/bg_item_active</item>
+        <item name="android:textColor">@color/item_active_text</item>
+        <item name="android:textFontWeight">600</item>
+    </style><style name="Widget.QuickLaunch.Dark.BottomNav.Item" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style><style name="Widget.QuickLaunch.Dark.BottomNav.Text" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">@color/item_inactive_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style><style name="TextAppearance.QuickLaunch.Title" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">300</item>
+    </style><style name="TextAppearance.QuickLaunch.Subtitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+        <item name="android:textFontWeight">500</item>
+    </style><style name="TextAppearance.QuickLaunch.Subhead" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style><style name="TextAppearance.QuickLaunch.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style><style name="TextAppearance.QuickLaunch.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/dark_text_tertiary</item>
+    </style><style name="TextAppearance.QuickLaunch.Group.Header" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/dark_text_secondary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style><style name="TextAppearance.QuickLaunch.LargeTitle" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">34sp</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style><style name="Widget.QuickLaunch.Search.Pill" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/dark_radius_pill</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:backgroundTint">@color/dark_card_secondary</item>
+        <item name="android:textColor">@color/dark_text_primary</item>
+    </style><style name="Widget.QuickLaunch.Glass.Dock" parent="Widget.Material3.CardView.Filled">
+        <item name="cardCornerRadius">@dimen/dark_radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/dark_card_primary</item>
+    </style><style name="Widget.QuickLaunch.Icon.Squircle" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/dark_radius_icon</item>
+    </style><style name="Widget.QuickLaunch.Icon.Squircle.Dock" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/dark_radius_icon</item>
+    </style><style name="Widget.QuickLaunch.DayCapsule" parent="">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textFontWeight">600</item>
+        <item name="android:background">@drawable/bg_dark_capsule_unselected</item>
+        <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_marginHorizontal">4dp</item>
+    </style></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values\themes.xml" qualifiers=""><style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/preset_mint_primary</item>
         <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
         <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>
@@ -42,13 +262,6 @@
         <item name="colorOnSurfaceInverse">@color/preset_mint_inverse_on_surface</item>
         <item name="colorPrimaryInverse">@color/preset_mint_inverse_primary</item>
         <item name="android:windowBackground">@color/preset_mint_background</item>
-        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
-    </style><style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorPrimary">@color/preset_mint_primary</item>
         <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
     </style><style name="Theme.QuickLaunch.Mint" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/preset_mint_primary</item>
@@ -116,6 +329,41 @@
         <item name="colorPrimaryInverse">@color/preset_lavender_inverse_primary</item>
         <item name="android:windowBackground">@color/preset_lavender_background</item>
         <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+    </style><style name="Theme.QuickLaunch.LavenderPro" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent_lavender</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/accent_lavender_surface</item>
+        <item name="colorOnPrimaryContainer">@color/accent_lavender</item>
+        <item name="colorSecondary">@color/accent_lavender_soft</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/accent_lavender_surface</item>
+        <item name="colorOnSecondaryContainer">@color/accent_lavender_soft</item>
+        <item name="colorTertiary">@color/accent_lavender_press</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorTertiaryContainer">@color/accent_lavender_surface</item>
+        <item name="colorOnTertiaryContainer">@color/accent_lavender_press</item>
+        <item name="colorError">#FF453A</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="colorErrorContainer">#3A2A2A</item>
+        <item name="colorOnErrorContainer">#FF453A</item>
+        <item name="android:colorBackground">@color/glass_bg_root</item>
+        <item name="colorOnBackground">@color/text_white</item>
+        <item name="colorSurface">@color/glass_bg_root</item>
+        <item name="colorOnSurface">@color/text_white</item>
+        <item name="colorSurfaceVariant">@color/glass_card_bg</item>
+        <item name="colorOnSurfaceVariant">@color/text_white</item>
+        <item name="colorOutline">@color/stroke_hairline</item>
+        <item name="colorOutlineVariant">@color/stroke_hairline</item>
+        <item name="colorSurfaceContainerLow">@color/glass_bg_root</item>
+        <item name="colorSurfaceContainer">@color/glass_card_bg</item>
+        <item name="colorSurfaceContainerHigh">@color/glass_inactive_bg</item>
+        <item name="colorSurfaceInverse">@color/text_white</item>
+        <item name="colorOnSurfaceInverse">@color/glass_bg_root</item>
+        <item name="colorPrimaryInverse">@color/text_white</item>
+        <item name="android:windowBackground">@color/glass_bg_root</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textAppearance">@style/TextAppearance.QuickLaunch.Body</item>
     </style><style name="Theme.QuickLaunch.Classic" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/preset_classic_primary</item>
         <item name="colorOnPrimary">@color/preset_classic_on_primary</item>
@@ -149,7 +397,141 @@
         <item name="colorPrimaryInverse">@color/preset_classic_inverse_primary</item>
         <item name="android:windowBackground">@color/preset_classic_background</item>
         <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
-    </style></file><file name="color_swatch_classic" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\color_swatch_classic.xml" qualifiers="" type="drawable"/><file name="color_swatch_lavender" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\color_swatch_lavender.xml" qualifiers="" type="drawable"/><file name="color_swatch_mint" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\color_swatch_mint.xml" qualifiers="" type="drawable"/><file name="ic_empty_state" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_empty_state.xml" qualifiers="" type="drawable"/><file name="ic_launcher_background" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_launcher_background.xml" qualifiers="" type="drawable"/><file name="ic_launcher_foreground" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\ic_launcher_foreground.xml" qualifiers="" type="drawable"/><file name="status_dot_off" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\status_dot_off.xml" qualifiers="" type="drawable"/><file name="status_dot_on" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\drawable\status_dot_on.xml" qualifiers="" type="drawable"/><file name="activity_theme_settings" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\layout\activity_theme_settings.xml" qualifiers="" type="layout"/><file name="ic_launcher" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi\ic_launcher.xml" qualifiers="anydpi-v4" type="mipmap"/><file name="ic_launcher_round" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi\ic_launcher_round.xml" qualifiers="anydpi-v4" type="mipmap"/><file name="ic_launcher" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml" qualifiers="anydpi-v26" type="mipmap"/><file name="ic_launcher_round" path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\mipmap-anydpi-v26\ic_launcher_round.xml" qualifiers="anydpi-v26" type="mipmap"/><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values-night\colors.xml" qualifiers="night-v8"><color name="m3_primary">#8BD5C0</color><color name="m3_on_primary">#00210A</color><color name="m3_primary_container">#17541F</color><color name="m3_on_primary_container">#B8E6D4</color><color name="m3_secondary">#BBCBB0</color><color name="m3_on_secondary">#263524</color><color name="m3_secondary_container">#3C4B38</color><color name="m3_on_secondary_container">#D5E8CB</color><color name="m3_tertiary">#9CCDD3</color><color name="m3_on_tertiary">#00363D</color><color name="m3_tertiary_container">#204D53</color><color name="m3_on_tertiary_container">#BCE8EE</color><color name="m3_error">#FFB4AB</color><color name="m3_on_error">#690005</color><color name="m3_error_container">#93000A</color><color name="m3_on_error_container">#FFDAD6</color><color name="m3_background">#11140F</color><color name="m3_on_background">#E1E5DC</color><color name="m3_surface">#11140F</color><color name="m3_on_surface">#E1E5DC</color><color name="m3_surface_variant">#43483E</color><color name="m3_on_surface_variant">#C3C9BC</color><color name="m3_outline">#8D9386</color><color name="m3_outline_variant">#43483E</color><color name="m3_surface_container_lowest">#0C0F0A</color><color name="m3_surface_container_low">#191C17</color><color name="m3_surface_container">#1D211B</color><color name="m3_surface_container_high">#272B25</color><color name="m3_surface_container_highest">#32362F</color><color name="m3_inverse_surface">#E1E5DC</color><color name="m3_inverse_on_surface">#2E322B</color><color name="m3_inverse_primary">#5EA88B</color><color name="status_enabled">#8BD5C0</color><color name="status_disabled">#7E857A</color><color name="ic_launcher_bg_top">#5EA88B</color><color name="ic_launcher_bg_bottom">#1B4A38</color><color name="ic_launcher_lightning_highlight">#8BD5C0</color><color name="preset_mint_primary">#8BD5C0</color><color name="preset_mint_on_primary">#00210A</color><color name="preset_mint_primary_container">#17541F</color><color name="preset_mint_on_primary_container">#B8E6D4</color><color name="preset_mint_secondary">#BBCBB0</color><color name="preset_mint_on_secondary">#263524</color><color name="preset_mint_secondary_container">#3C4B38</color><color name="preset_mint_on_secondary_container">#D5E8CB</color><color name="preset_mint_tertiary">#9CCDD3</color><color name="preset_mint_on_tertiary">#00363D</color><color name="preset_mint_tertiary_container">#204D53</color><color name="preset_mint_on_tertiary_container">#BCE8EE</color><color name="preset_mint_error">#FFB4AB</color><color name="preset_mint_on_error">#690005</color><color name="preset_mint_error_container">#93000A</color><color name="preset_mint_on_error_container">#FFDAD6</color><color name="preset_mint_background">#11140F</color><color name="preset_mint_on_background">#E1E5DC</color><color name="preset_mint_surface">#11140F</color><color name="preset_mint_on_surface">#E1E5DC</color><color name="preset_mint_surface_variant">#43483E</color><color name="preset_mint_on_surface_variant">#C3C9BC</color><color name="preset_mint_outline">#8D9386</color><color name="preset_mint_outline_variant">#43483E</color><color name="preset_mint_inverse_surface">#E1E5DC</color><color name="preset_mint_inverse_on_surface">#2E322B</color><color name="preset_mint_inverse_primary">#5EA88B</color><color name="preset_lavender_primary">#B89FE0</color><color name="preset_lavender_on_primary">#1A0A30</color><color name="preset_lavender_primary_container">#2E1A50</color><color name="preset_lavender_on_primary_container">#D4C4ED</color><color name="preset_lavender_secondary">#B8A0D0</color><color name="preset_lavender_on_secondary">#2A1A40</color><color name="preset_lavender_secondary_container">#3A2A55</color><color name="preset_lavender_on_secondary_container">#E0D4F0</color><color name="preset_lavender_tertiary">#C0A0E5</color><color name="preset_lavender_on_tertiary">#251040</color><color name="preset_lavender_tertiary_container">#352050</color><color name="preset_lavender_on_tertiary_container">#D8CCEB</color><color name="preset_lavender_error">#FFB4AB</color><color name="preset_lavender_on_error">#690005</color><color name="preset_lavender_error_container">#93000A</color><color name="preset_lavender_on_error_container">#FFDAD6</color><color name="preset_lavender_background">#151320</color><color name="preset_lavender_on_background">#E0DAEB</color><color name="preset_lavender_surface">#151320</color><color name="preset_lavender_on_surface">#E0DAEB</color><color name="preset_lavender_surface_variant">#454055</color><color name="preset_lavender_on_surface_variant">#C8C2D2</color><color name="preset_lavender_outline">#8A8095</color><color name="preset_lavender_outline_variant">#454055</color><color name="preset_lavender_inverse_surface">#E0DAEB</color><color name="preset_lavender_inverse_on_surface">#2E2B38</color><color name="preset_lavender_inverse_primary">#9B7EC4</color><color name="preset_classic_primary">#8BD58C</color><color name="preset_classic_on_primary">#00390A</color><color name="preset_classic_primary_container">#17541F</color><color name="preset_classic_on_primary_container">#A8EDA5</color><color name="preset_classic_secondary">#BBCBB0</color><color name="preset_classic_on_secondary">#263524</color><color name="preset_classic_secondary_container">#3C4B38</color><color name="preset_classic_on_secondary_container">#D5E8CB</color><color name="preset_classic_tertiary">#9CCDD3</color><color name="preset_classic_on_tertiary">#00363D</color><color name="preset_classic_tertiary_container">#204D53</color><color name="preset_classic_on_tertiary_container">#BCE8EE</color><color name="preset_classic_error">#FFB4AB</color><color name="preset_classic_on_error">#690005</color><color name="preset_classic_error_container">#93000A</color><color name="preset_classic_on_error_container">#FFDAD6</color><color name="preset_classic_background">#11140F</color><color name="preset_classic_on_background">#E1E5DC</color><color name="preset_classic_surface">#11140F</color><color name="preset_classic_on_surface">#E1E5DC</color><color name="preset_classic_surface_variant">#43483E</color><color name="preset_classic_on_surface_variant">#C3C9BC</color><color name="preset_classic_outline">#8D9386</color><color name="preset_classic_outline_variant">#43483E</color><color name="preset_classic_inverse_surface">#E1E5DC</color><color name="preset_classic_inverse_on_surface">#2E322B</color><color name="preset_classic_inverse_primary">#2E7D32</color></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values-night\themes.xml" qualifiers="night-v8"><style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
+    </style><style name="Theme.QuickLaunch.Dark" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        <item name="colorPrimary">@color/text_white</item>
+        <item name="colorOnPrimary">@color/bg_root</item>
+        <item name="colorPrimaryContainer">@color/item_active_bg</item>
+        <item name="colorOnPrimaryContainer">@color/text_white</item>
+
+        
+        <item name="colorSecondary">@color/card_dark_bg</item>
+        <item name="colorOnSecondary">@color/text_white</item>
+        <item name="colorSecondaryContainer">@color/item_inactive_bg</item>
+        <item name="colorOnSecondaryContainer">@color/text_white</item>
+
+        
+        <item name="colorTertiary">@color/text_secondary</item>
+        <item name="colorOnTertiary">@color/bg_root</item>
+        <item name="colorTertiaryContainer">@color/stroke_hairline</item>
+        <item name="colorOnTertiaryContainer">@color/text_white</item>
+
+        
+        <item name="colorError">#FF453A</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="colorErrorContainer">#3A2A2A</item>
+        <item name="colorOnErrorContainer">#FF453A</item>
+
+        
+        <item name="android:colorBackground">@color/bg_root</item>
+        <item name="colorOnBackground">@color/text_white</item>
+        <item name="colorSurface">@color/bg_root</item>
+        <item name="colorOnSurface">@color/text_white</item>
+        <item name="colorSurfaceVariant">@color/card_dark_bg</item>
+        <item name="colorOnSurfaceVariant">@color/text_white</item>
+        <item name="colorOutline">@color/stroke_hairline</item>
+        <item name="colorOutlineVariant">@color/stroke_hairline</item>
+        <item name="colorSurfaceContainerLow">@color/bg_root</item>
+        <item name="colorSurfaceContainer">@color/card_dark_bg</item>
+        <item name="colorSurfaceContainerHigh">@color/item_inactive_bg</item>
+        <item name="colorSurfaceInverse">@color/text_white</item>
+        <item name="colorOnSurfaceInverse">@color/bg_root</item>
+        <item name="colorPrimaryInverse">@color/text_white</item>
+
+        
+        <item name="android:windowBackground">@color/bg_root</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+
+        
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarDividerColor" ns1:targetApi="28">@android:color/transparent</item>
+        
+        <item name="android:windowLightStatusBar" ns1:targetApi="23">false</item>
+        <item name="android:windowLightNavigationBar" ns1:targetApi="27">false</item>
+        
+        <item name="android:enforceStatusBarContrast" ns1:targetApi="29">false</item>
+        <item name="android:enforceNavigationBarContrast" ns1:targetApi="29">false</item>
+        
+        <item name="android:windowLayoutInDisplayCutoutMode" ns1:targetApi="27">shortEdges</item>
+
+        
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textAppearance">@style/TextAppearance.QuickLaunch.Body</item>
+    </style><style name="Theme.QuickLaunch.iOS18" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        <item name="colorPrimary">@color/preset_mint_primary</item>
+        <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_mint_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_mint_secondary</item>
+        <item name="colorOnSecondary">@color/preset_mint_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_mint_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_mint_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_mint_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_mint_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_mint_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_mint_on_tertiary_container</item>
+        <item name="colorError">@color/preset_mint_error</item>
+        <item name="colorOnError">@color/preset_mint_on_error</item>
+        <item name="colorErrorContainer">@color/preset_mint_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_mint_on_error_container</item>
+
+        
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="colorOnBackground">@color/preset_mint_on_background</item>
+        <item name="colorSurface">@android:color/transparent</item>
+        <item name="colorOnSurface">@color/preset_mint_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_mint_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_mint_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_mint_outline</item>
+        <item name="colorOutlineVariant">@color/preset_mint_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@android:color/transparent</item>
+        <item name="colorSurfaceContainer">@android:color/transparent</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_mint_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_mint_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_mint_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_mint_inverse_primary</item>
+
+        
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" ns1:targetApi="23">true</item>
+        <item name="android:windowLightNavigationBar" ns1:targetApi="27">true</item>
+
+        
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+
+        
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textAppearance">@style/TextAppearance.QuickLaunch.Body</item>
+    </style><style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorPrimary">@color/preset_mint_primary</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+    </style><style name="DarkBottomSheetDialogTheme" parent="Theme.Material3.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/DarkBottomSheetStyle</item>
+        <item name="android:windowIsFloating">false</item>
+        
+        <item name="android:windowBackground">@drawable/bg_dialog_scrim</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" ns1:targetApi="29">false</item>
+    </style><style name="DarkBottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">@color/dark_bg_primary</item>
+        <item name="shapeAppearance">@style/DarkBottomSheetShape</item>
+    </style><style name="DarkBottomSheetShape" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">28dp</item>
+    </style></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values-night\colors.xml" qualifiers="night-v8"><color name="m3_primary">#8BD5C0</color><color name="m3_on_primary">#00210A</color><color name="m3_primary_container">#17541F</color><color name="m3_on_primary_container">#B8E6D4</color><color name="m3_secondary">#BBCBB0</color><color name="m3_on_secondary">#263524</color><color name="m3_secondary_container">#3C4B38</color><color name="m3_on_secondary_container">#D5E8CB</color><color name="m3_tertiary">#9CCDD3</color><color name="m3_on_tertiary">#00363D</color><color name="m3_tertiary_container">#204D53</color><color name="m3_on_tertiary_container">#BCE8EE</color><color name="m3_error">#FFB4AB</color><color name="m3_on_error">#690005</color><color name="m3_error_container">#93000A</color><color name="m3_on_error_container">#FFDAD6</color><color name="m3_background">#11140F</color><color name="m3_on_background">#E1E5DC</color><color name="m3_surface">#11140F</color><color name="m3_on_surface">#E1E5DC</color><color name="m3_surface_variant">#43483E</color><color name="m3_on_surface_variant">#C3C9BC</color><color name="m3_outline">#8D9386</color><color name="m3_outline_variant">#43483E</color><color name="m3_surface_container_lowest">#0C0F0A</color><color name="m3_surface_container_low">#191C17</color><color name="m3_surface_container">#1D211B</color><color name="m3_surface_container_high">#272B25</color><color name="m3_surface_container_highest">#32362F</color><color name="m3_inverse_surface">#E1E5DC</color><color name="m3_inverse_on_surface">#2E322B</color><color name="m3_inverse_primary">#5EA88B</color><color name="status_enabled">#FFFFFF</color><color name="status_disabled">#888888</color><color name="ic_launcher_bg_top">#5EA88B</color><color name="ic_launcher_bg_bottom">#1B4A38</color><color name="ic_launcher_lightning_highlight">#8BD5C0</color><color name="preset_mint_primary">#8BD5C0</color><color name="preset_mint_on_primary">#00210A</color><color name="preset_mint_primary_container">#17541F</color><color name="preset_mint_on_primary_container">#B8E6D4</color><color name="preset_mint_secondary">#BBCBB0</color><color name="preset_mint_on_secondary">#263524</color><color name="preset_mint_secondary_container">#3C4B38</color><color name="preset_mint_on_secondary_container">#D5E8CB</color><color name="preset_mint_tertiary">#9CCDD3</color><color name="preset_mint_on_tertiary">#00363D</color><color name="preset_mint_tertiary_container">#204D53</color><color name="preset_mint_on_tertiary_container">#BCE8EE</color><color name="preset_mint_error">#FFB4AB</color><color name="preset_mint_on_error">#690005</color><color name="preset_mint_error_container">#93000A</color><color name="preset_mint_on_error_container">#FFDAD6</color><color name="preset_mint_background">#11140F</color><color name="preset_mint_on_background">#E1E5DC</color><color name="preset_mint_surface">#11140F</color><color name="preset_mint_on_surface">#E1E5DC</color><color name="preset_mint_surface_variant">#43483E</color><color name="preset_mint_on_surface_variant">#C3C9BC</color><color name="preset_mint_outline">#8D9386</color><color name="preset_mint_outline_variant">#43483E</color><color name="preset_mint_inverse_surface">#E1E5DC</color><color name="preset_mint_inverse_on_surface">#2E322B</color><color name="preset_mint_inverse_primary">#5EA88B</color><color name="preset_lavender_primary">#B89FE0</color><color name="preset_lavender_on_primary">#1A0A30</color><color name="preset_lavender_primary_container">#2E1A50</color><color name="preset_lavender_on_primary_container">#D4C4ED</color><color name="preset_lavender_secondary">#B8A0D0</color><color name="preset_lavender_on_secondary">#2A1A40</color><color name="preset_lavender_secondary_container">#3A2A55</color><color name="preset_lavender_on_secondary_container">#E0D4F0</color><color name="preset_lavender_tertiary">#C0A0E5</color><color name="preset_lavender_on_tertiary">#251040</color><color name="preset_lavender_tertiary_container">#352050</color><color name="preset_lavender_on_tertiary_container">#D8CCEB</color><color name="preset_lavender_error">#FFB4AB</color><color name="preset_lavender_on_error">#690005</color><color name="preset_lavender_error_container">#93000A</color><color name="preset_lavender_on_error_container">#FFDAD6</color><color name="preset_lavender_background">#151320</color><color name="preset_lavender_on_background">#E0DAEB</color><color name="preset_lavender_surface">#151320</color><color name="preset_lavender_on_surface">#E0DAEB</color><color name="preset_lavender_surface_variant">#454055</color><color name="preset_lavender_on_surface_variant">#C8C2D2</color><color name="preset_lavender_outline">#8A8095</color><color name="preset_lavender_outline_variant">#454055</color><color name="preset_lavender_inverse_surface">#E0DAEB</color><color name="preset_lavender_inverse_on_surface">#2E2B38</color><color name="preset_lavender_inverse_primary">#9B7EC4</color><color name="preset_classic_primary">#8BD58C</color><color name="preset_classic_on_primary">#00390A</color><color name="preset_classic_primary_container">#17541F</color><color name="preset_classic_on_primary_container">#A8EDA5</color><color name="preset_classic_secondary">#BBCBB0</color><color name="preset_classic_on_secondary">#263524</color><color name="preset_classic_secondary_container">#3C4B38</color><color name="preset_classic_on_secondary_container">#D5E8CB</color><color name="preset_classic_tertiary">#9CCDD3</color><color name="preset_classic_on_tertiary">#00363D</color><color name="preset_classic_tertiary_container">#204D53</color><color name="preset_classic_on_tertiary_container">#BCE8EE</color><color name="preset_classic_error">#FFB4AB</color><color name="preset_classic_on_error">#690005</color><color name="preset_classic_error_container">#93000A</color><color name="preset_classic_on_error_container">#FFDAD6</color><color name="preset_classic_background">#11140F</color><color name="preset_classic_on_background">#E1E5DC</color><color name="preset_classic_surface">#11140F</color><color name="preset_classic_on_surface">#E1E5DC</color><color name="preset_classic_surface_variant">#43483E</color><color name="preset_classic_on_surface_variant">#C3C9BC</color><color name="preset_classic_outline">#8D9386</color><color name="preset_classic_outline_variant">#43483E</color><color name="preset_classic_inverse_surface">#E1E5DC</color><color name="preset_classic_inverse_on_surface">#2E322B</color><color name="preset_classic_inverse_primary">#2E7D32</color><color name="ios_glass_surface_light">#B01C1C1E</color><color name="ios_glass_search_light">#CC1C1C1E</color><color name="ios_glass_dock_light">#A01C1C1E</color><color name="ios_glass_group_light">#BF1C1C1E</color><color name="ios_glass_border">#30FFFFFF</color><color name="ios_morand_blush">#5C3A3A</color><color name="ios_morand_lavender">#4A3D5C</color><color name="ios_morand_mint">#3D5C4A</color><color name="ios_morand_sky">#3D4A5C</color><color name="ios_morand_sand">#5C4A3D</color><color name="ios_morand_peach">#5C4A3D</color><color name="ios_morand_rose">#5C3D3D</color><color name="ios_text_primary">#FFFFFF</color><color name="ios_text_secondary">#8E8E93</color><color name="ios_text_tertiary">#636366</color><color name="ios_blue">#0A84FF</color><color name="ios_green">#30D158</color><color name="ios_orange">#FF9F0A</color><color name="ios_red">#FF453A</color><color name="ios_purple">#BF5AF2</color><color name="ios_pink">#FF375F</color><color name="ios_teal">#64D2FF</color></file><file path="C:\Users\Administrator\WorkBuddy\2026-08-07-17-57-48\QuickLaunch\app\src\main\res\values-night\themes.xml" qualifiers="night-v8"><style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/preset_mint_primary</item>
         <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
         <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>

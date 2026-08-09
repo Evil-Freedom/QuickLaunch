@@ -1,225 +1,450 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  规则编辑页（纯白 + 半透灰白磨砂玻璃风格）
+  - 扁平化重构：最大嵌套深度 ≤4 层（原 6 层）
+-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_dark_root"
+    android:fillViewport="true">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="16dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="名称（可选）">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
+        <!-- 应用选择按钮 -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPickApp"
-            android:layout_width="match_parent"
+            style="@style/Widget.QuickLaunch.Dark.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_marginTop="12dp"
+            android:text="选择要启动的应用"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 触发条件分组卡片 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutTrigger"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="选择要启动的应用" />
+            android:background="@drawable/bg_card_elegant"
+            android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnPickApp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="触发条件"
-            android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tvTriggerTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.05"
+                android:text="触发条件"
+                android:textAllCaps="true"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <Spinner
-            android:id="@+id/spinnerTrigger"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/trigger_types" />
+            <HorizontalScrollView
+                android:id="@+id/scrollTrigger"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:scrollbars="none"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvTriggerTitle">
 
-        <LinearLayout
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chipTrigger0"
+                        style="@style/Widget.QuickLaunch.Dark.Chip.Selected"
+                        android:text="定时" />
+
+                    <TextView
+                        android:id="@+id/chipTrigger1"
+                        style="@style/Widget.QuickLaunch.Dark.Chip"
+                        android:text="充电" />
+
+                    <TextView
+                        android:id="@+id/chipTrigger2"
+                        style="@style/Widget.QuickLaunch.Dark.Chip"
+                        android:text="WiFi" />
+
+                    <TextView
+                        android:id="@+id/chipTrigger3"
+                        style="@style/Widget.QuickLaunch.Dark.Chip"
+                        android:text="蓝牙" />
+                </LinearLayout>
+            </HorizontalScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 时间设置分组卡片 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutTime"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card_elegant"
+            android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutTrigger">
 
-            <Button
+            <TextView
+                android:id="@+id/tvTimeTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="执行时间"
+                android:textAllCaps="true"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
                 android:id="@+id/btnTime"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="08:00" />
-
-            <Spinner
-                android:id="@+id/spinnerRepeat"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:entries="@array/repeat_modes" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layoutCustomDays"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="vertical"
-            android:visibility="gone">
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_dark_input"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="08:00"
+                android:textColor="@color/text_white"
+                android:textFontWeight="700"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvTimeTitle" />
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="选择星期（可多选）"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal">
-
-                <ToggleButton
-                    android:id="@+id/tbDay0"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minWidth="0dp"
-                    android:textSize="13sp"
-                    android:textOff="日"
-                    android:textOn="日" />
-
-                <ToggleButton
-                    android:id="@+id/tbDay1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minWidth="0dp"
-                    android:textSize="13sp"
-                    android:textOff="一"
-                    android:textOn="一" />
-
-                <ToggleButton
-                    android:id="@+id/tbDay2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minWidth="0dp"
-                    android:textSize="13sp"
-                    android:textOff="二"
-                    android:textOn="二" />
-
-                <ToggleButton
-                    android:id="@+id/tbDay3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minWidth="0dp"
-                    android:textSize="13sp"
-                    android:textOff="三"
-                    android:textOn="三" />
-
-                <ToggleButton
-                    android:id="@+id/tbDay4"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minWidth="0dp"
-                    android:textSize="13sp"
-                    android:textOff="四"
-                    android:textOn="四" />
-
-                <ToggleButton
-                    android:id="@+id/tbDay5"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minWidth="0dp"
-                    android:textSize="13sp"
-                    android:textOff="五"
-                    android:textOn="五" />
-
-                <ToggleButton
-                    android:id="@+id/tbDay6"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minWidth="0dp"
-                    android:textSize="13sp"
-                    android:textOff="六"
-                    android:textOn="六" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <CheckBox
-            android:id="@+id/cbSkipHolidays"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="跳过中国法定节假日（含调休休息日）不触发" />
-
-        <CheckBox
-            android:id="@+id/cbRandom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="随机时间（在窗口内，避免每天固定打卡）" />
-
-        <LinearLayout
-            android:id="@+id/layoutRandom"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/btnWinStart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="08:30" />
-
-            <TextView
+                android:id="@+id/tvRepeatTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text=" 至 " />
+                android:layout_marginTop="@dimen/dark_section_gap"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.05"
+                android:text="重复"
+                android:textAllCaps="true"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnTime" />
 
-            <Button
-                android:id="@+id/btnWinEnd"
+            <HorizontalScrollView
+                android:id="@+id/scrollRepeat"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="08:50" />
-        </LinearLayout>
+                android:layout_marginTop="12dp"
+                android:scrollbars="none"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvRepeatTitle">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutBt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="蓝牙设备名（可选，留空表示任意设备）"
-            android:visibility="gone">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etBtName"
-                android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/chipRepeat0"
+                        style="@style/Widget.QuickLaunch.Dark.Chip.Selected"
+                        android:text="每天" />
+
+                    <TextView
+                        android:id="@+id/chipRepeat1"
+                        style="@style/Widget.QuickLaunch.Dark.Chip"
+                        android:text="工作日" />
+
+                    <TextView
+                        android:id="@+id/chipRepeat2"
+                        style="@style/Widget.QuickLaunch.Dark.Chip"
+                        android:text="周末" />
+
+                    <TextView
+                        android:id="@+id/chipRepeat3"
+                        style="@style/Widget.QuickLaunch.Dark.Chip"
+                        android:text="自定义" />
+
+                    <TextView
+                        android:id="@+id/chipRepeat4"
+                        style="@style/Widget.QuickLaunch.Dark.Chip"
+                        android:text="一次性" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- 自定义星期多选 -->
+            <LinearLayout
+                android:id="@+id/layoutCustomDays"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/scrollRepeat">
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:text="选择星期（可多选）"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tbDay0"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_dark_capsule_unselected"
+                        android:fontFamily="sans-serif-light"
+                        android:gravity="center"
+                        android:text="日"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tbDay1"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_dark_capsule_unselected"
+                        android:fontFamily="sans-serif-light"
+                        android:gravity="center"
+                        android:text="一"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tbDay2"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_dark_capsule_unselected"
+                        android:fontFamily="sans-serif-light"
+                        android:gravity="center"
+                        android:text="二"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tbDay3"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_dark_capsule_unselected"
+                        android:fontFamily="sans-serif-light"
+                        android:gravity="center"
+                        android:text="三"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tbDay4"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_dark_capsule_unselected"
+                        android:fontFamily="sans-serif-light"
+                        android:gravity="center"
+                        android:text="四"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tbDay5"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_dark_capsule_unselected"
+                        android:fontFamily="sans-serif-light"
+                        android:gravity="center"
+                        android:text="五"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tbDay6"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_dark_capsule_unselected"
+                        android:fontFamily="sans-serif-light"
+                        android:gravity="center"
+                        android:text="六"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 选项分组卡片 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutOptions"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="保存" />
-    </LinearLayout>
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card_elegant"
+            android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutTime">
 
+            <CheckBox
+                android:id="@+id/cbSkipHolidays"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/text_white"
+                android:fontFamily="sans-serif-light"
+                android:text="跳过中国法定节假日（含调休休息日）不触发"
+                android:textColor="@color/text_white"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <CheckBox
+                android:id="@+id/cbRandom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:buttonTint="@color/text_white"
+                android:fontFamily="sans-serif-light"
+                android:text="随机时间（在窗口内，避免每天固定打卡）"
+                android:textColor="@color/text_white"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cbSkipHolidays" />
+
+            <LinearLayout
+                android:id="@+id/layoutRandom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cbRandom">
+
+                <TextView
+                    android:id="@+id/btnWinStart"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_dark_input"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:text="08:30"
+                    android:textColor="@color/text_white"
+                    android:textFontWeight="700"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="sans-serif-light"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:text="至"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/btnWinEnd"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_dark_input"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:text="08:50"
+                    android:textColor="@color/text_white"
+                    android:textFontWeight="700"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 蓝牙设备名 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutBt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card_elegant"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutOptions">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="蓝牙设备名（可选，留空表示任意设备）"
+                android:textColorHint="@color/text_tertiary"
+                app:boxBackgroundMode="none"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:hintTextColor="@color/text_tertiary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etBtName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:fontFamily="sans-serif-light"
+                    android:inputType="text"
+                    android:textColor="@color/text_white"
+                    android:textSize="16sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 保存按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            style="@style/Widget.QuickLaunch.Dark.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="46dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:text="保存"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutBt" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

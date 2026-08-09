@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <color name="ic_launcher_bg_bottom">#1B4A38</color>
+    <color name="ic_launcher_bg_top">#5EA88B</color>
+    <color name="ic_launcher_lightning_highlight">#8BD5C0</color>
+    <color name="ios_blue">#0A84FF</color>
+    <color name="ios_glass_border">#30FFFFFF</color>
+    <color name="ios_glass_dock_light">#A01C1C1E</color>
+    <color name="ios_glass_group_light">#BF1C1C1E</color>
+    <color name="ios_glass_search_light">#CC1C1C1E</color>
+    <color name="ios_glass_surface_light">#B01C1C1E</color>
+    <color name="ios_green">#30D158</color>
+    <color name="ios_morand_blush">#5C3A3A</color>
+    <color name="ios_morand_lavender">#4A3D5C</color>
+    <color name="ios_morand_mint">#3D5C4A</color>
+    <color name="ios_morand_peach">#5C4A3D</color>
+    <color name="ios_morand_rose">#5C3D3D</color>
+    <color name="ios_morand_sand">#5C4A3D</color>
+    <color name="ios_morand_sky">#3D4A5C</color>
+    <color name="ios_orange">#FF9F0A</color>
+    <color name="ios_pink">#FF375F</color>
+    <color name="ios_purple">#BF5AF2</color>
+    <color name="ios_red">#FF453A</color>
+    <color name="ios_teal">#64D2FF</color>
+    <color name="ios_text_primary">#FFFFFF</color>
+    <color name="ios_text_secondary">#8E8E93</color>
+    <color name="ios_text_tertiary">#636366</color>
+    <color name="m3_background">#11140F</color>
+    <color name="m3_error">#FFB4AB</color>
+    <color name="m3_error_container">#93000A</color>
+    <color name="m3_inverse_on_surface">#2E322B</color>
+    <color name="m3_inverse_primary">#5EA88B</color>
+    <color name="m3_inverse_surface">#E1E5DC</color>
+    <color name="m3_on_background">#E1E5DC</color>
+    <color name="m3_on_error">#690005</color>
+    <color name="m3_on_error_container">#FFDAD6</color>
+    <color name="m3_on_primary">#00210A</color>
+    <color name="m3_on_primary_container">#B8E6D4</color>
+    <color name="m3_on_secondary">#263524</color>
+    <color name="m3_on_secondary_container">#D5E8CB</color>
+    <color name="m3_on_surface">#E1E5DC</color>
+    <color name="m3_on_surface_variant">#C3C9BC</color>
+    <color name="m3_on_tertiary">#00363D</color>
+    <color name="m3_on_tertiary_container">#BCE8EE</color>
+    <color name="m3_outline">#8D9386</color>
+    <color name="m3_outline_variant">#43483E</color>
+    <color name="m3_primary">#8BD5C0</color>
+    <color name="m3_primary_container">#17541F</color>
+    <color name="m3_secondary">#BBCBB0</color>
+    <color name="m3_secondary_container">#3C4B38</color>
+    <color name="m3_surface">#11140F</color>
+    <color name="m3_surface_container">#1D211B</color>
+    <color name="m3_surface_container_high">#272B25</color>
+    <color name="m3_surface_container_highest">#32362F</color>
+    <color name="m3_surface_container_low">#191C17</color>
+    <color name="m3_surface_container_lowest">#0C0F0A</color>
+    <color name="m3_surface_variant">#43483E</color>
+    <color name="m3_tertiary">#9CCDD3</color>
+    <color name="m3_tertiary_container">#204D53</color>
+    <color name="preset_classic_background">#11140F</color>
+    <color name="preset_classic_error">#FFB4AB</color>
+    <color name="preset_classic_error_container">#93000A</color>
+    <color name="preset_classic_inverse_on_surface">#2E322B</color>
+    <color name="preset_classic_inverse_primary">#2E7D32</color>
+    <color name="preset_classic_inverse_surface">#E1E5DC</color>
+    <color name="preset_classic_on_background">#E1E5DC</color>
+    <color name="preset_classic_on_error">#690005</color>
+    <color name="preset_classic_on_error_container">#FFDAD6</color>
+    <color name="preset_classic_on_primary">#00390A</color>
+    <color name="preset_classic_on_primary_container">#A8EDA5</color>
+    <color name="preset_classic_on_secondary">#263524</color>
+    <color name="preset_classic_on_secondary_container">#D5E8CB</color>
+    <color name="preset_classic_on_surface">#E1E5DC</color>
+    <color name="preset_classic_on_surface_variant">#C3C9BC</color>
+    <color name="preset_classic_on_tertiary">#00363D</color>
+    <color name="preset_classic_on_tertiary_container">#BCE8EE</color>
+    <color name="preset_classic_outline">#8D9386</color>
+    <color name="preset_classic_outline_variant">#43483E</color>
+    <color name="preset_classic_primary">#8BD58C</color>
+    <color name="preset_classic_primary_container">#17541F</color>
+    <color name="preset_classic_secondary">#BBCBB0</color>
+    <color name="preset_classic_secondary_container">#3C4B38</color>
+    <color name="preset_classic_surface">#11140F</color>
+    <color name="preset_classic_surface_variant">#43483E</color>
+    <color name="preset_classic_tertiary">#9CCDD3</color>
+    <color name="preset_classic_tertiary_container">#204D53</color>
+    <color name="preset_lavender_background">#151320</color>
+    <color name="preset_lavender_error">#FFB4AB</color>
+    <color name="preset_lavender_error_container">#93000A</color>
+    <color name="preset_lavender_inverse_on_surface">#2E2B38</color>
+    <color name="preset_lavender_inverse_primary">#9B7EC4</color>
+    <color name="preset_lavender_inverse_surface">#E0DAEB</color>
+    <color name="preset_lavender_on_background">#E0DAEB</color>
+    <color name="preset_lavender_on_error">#690005</color>
+    <color name="preset_lavender_on_error_container">#FFDAD6</color>
+    <color name="preset_lavender_on_primary">#1A0A30</color>
+    <color name="preset_lavender_on_primary_container">#D4C4ED</color>
+    <color name="preset_lavender_on_secondary">#2A1A40</color>
+    <color name="preset_lavender_on_secondary_container">#E0D4F0</color>
+    <color name="preset_lavender_on_surface">#E0DAEB</color>
+    <color name="preset_lavender_on_surface_variant">#C8C2D2</color>
+    <color name="preset_lavender_on_tertiary">#251040</color>
+    <color name="preset_lavender_on_tertiary_container">#D8CCEB</color>
+    <color name="preset_lavender_outline">#8A8095</color>
+    <color name="preset_lavender_outline_variant">#454055</color>
+    <color name="preset_lavender_primary">#B89FE0</color>
+    <color name="preset_lavender_primary_container">#2E1A50</color>
+    <color name="preset_lavender_secondary">#B8A0D0</color>
+    <color name="preset_lavender_secondary_container">#3A2A55</color>
+    <color name="preset_lavender_surface">#151320</color>
+    <color name="preset_lavender_surface_variant">#454055</color>
+    <color name="preset_lavender_tertiary">#C0A0E5</color>
+    <color name="preset_lavender_tertiary_container">#352050</color>
+    <color name="preset_mint_background">#11140F</color>
+    <color name="preset_mint_error">#FFB4AB</color>
+    <color name="preset_mint_error_container">#93000A</color>
+    <color name="preset_mint_inverse_on_surface">#2E322B</color>
+    <color name="preset_mint_inverse_primary">#5EA88B</color>
+    <color name="preset_mint_inverse_surface">#E1E5DC</color>
+    <color name="preset_mint_on_background">#E1E5DC</color>
+    <color name="preset_mint_on_error">#690005</color>
+    <color name="preset_mint_on_error_container">#FFDAD6</color>
+    <color name="preset_mint_on_primary">#00210A</color>
+    <color name="preset_mint_on_primary_container">#B8E6D4</color>
+    <color name="preset_mint_on_secondary">#263524</color>
+    <color name="preset_mint_on_secondary_container">#D5E8CB</color>
+    <color name="preset_mint_on_surface">#E1E5DC</color>
+    <color name="preset_mint_on_surface_variant">#C3C9BC</color>
+    <color name="preset_mint_on_tertiary">#00363D</color>
+    <color name="preset_mint_on_tertiary_container">#BCE8EE</color>
+    <color name="preset_mint_outline">#8D9386</color>
+    <color name="preset_mint_outline_variant">#43483E</color>
+    <color name="preset_mint_primary">#8BD5C0</color>
+    <color name="preset_mint_primary_container">#17541F</color>
+    <color name="preset_mint_secondary">#BBCBB0</color>
+    <color name="preset_mint_secondary_container">#3C4B38</color>
+    <color name="preset_mint_surface">#11140F</color>
+    <color name="preset_mint_surface_variant">#43483E</color>
+    <color name="preset_mint_tertiary">#9CCDD3</color>
+    <color name="preset_mint_tertiary_container">#204D53</color>
+    <color name="status_disabled">#888888</color>
+    <color name="status_enabled">#FFFFFF</color>
+    <style name="Theme.AppCompat.DayNight" parent="Theme.AppCompat"/>
+    <style name="Theme.AppCompat.DayNight.DarkActionBar" parent="Theme.AppCompat"/>
+    <style name="Theme.AppCompat.DayNight.Dialog" parent="Theme.AppCompat.Dialog"/>
+    <style name="Theme.AppCompat.DayNight.Dialog.Alert" parent="Theme.AppCompat.Dialog.Alert"/>
+    <style name="Theme.AppCompat.DayNight.Dialog.MinWidth" parent="Theme.AppCompat.Dialog.MinWidth"/>
+    <style name="Theme.AppCompat.DayNight.DialogWhenLarge" parent="Theme.AppCompat.DialogWhenLarge"/>
+    <style name="Theme.AppCompat.DayNight.NoActionBar" parent="Theme.AppCompat.NoActionBar"/>
+    <style name="Theme.Material3.DayNight" parent="Theme.Material3.Dark"/>
+    <style name="Theme.Material3.DayNight.BottomSheetDialog" parent="Theme.Material3.Dark.BottomSheetDialog"/>
+    <style name="Theme.Material3.DayNight.Dialog" parent="Theme.Material3.Dark.Dialog"/>
+    <style name="Theme.Material3.DayNight.Dialog.Alert" parent="Theme.Material3.Dark.Dialog.Alert"/>
+    <style name="Theme.Material3.DayNight.Dialog.MinWidth" parent="Theme.Material3.Dark.Dialog.MinWidth"/>
+    <style name="Theme.Material3.DayNight.DialogWhenLarge" parent="Theme.Material3.Dark.DialogWhenLarge"/>
+    <style name="Theme.Material3.DayNight.NoActionBar" parent="Theme.Material3.Dark.NoActionBar"/>
+    <style name="Theme.Material3.DayNight.SideSheetDialog" parent="Theme.Material3.Dark.SideSheetDialog"/>
+    <style name="Theme.Material3.DynamicColors.DayNight" parent="Theme.Material3.DynamicColors.Dark"/>
+    <style name="Theme.Material3.DynamicColors.DayNight.NoActionBar" parent="Theme.Material3.DynamicColors.Dark.NoActionBar"/>
+    <style name="Theme.MaterialComponents.DayNight" parent="Theme.MaterialComponents"/>
+    <style name="Theme.MaterialComponents.DayNight.BottomSheetDialog" parent="Theme.MaterialComponents.BottomSheetDialog"/>
+    <style name="Theme.MaterialComponents.DayNight.Bridge" parent="Theme.MaterialComponents.Bridge"/>
+    <style name="Theme.MaterialComponents.DayNight.DarkActionBar" parent="Theme.MaterialComponents"/>
+    <style name="Theme.MaterialComponents.DayNight.DarkActionBar.Bridge" parent="Theme.MaterialComponents.Bridge"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog" parent="Theme.MaterialComponents.Dialog"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog.Alert" parent="Theme.MaterialComponents.Dialog.Alert"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog.Alert.Bridge" parent="Theme.MaterialComponents.Dialog.Alert.Bridge"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog.Bridge" parent="Theme.MaterialComponents.Dialog.Bridge"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog.FixedSize" parent="Theme.MaterialComponents.Dialog.FixedSize"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog.FixedSize.Bridge" parent="Theme.MaterialComponents.Dialog.FixedSize.Bridge"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog.MinWidth" parent="Theme.MaterialComponents.Dialog.MinWidth"/>
+    <style name="Theme.MaterialComponents.DayNight.Dialog.MinWidth.Bridge" parent="Theme.MaterialComponents.Dialog.MinWidth.Bridge"/>
+    <style name="Theme.MaterialComponents.DayNight.DialogWhenLarge" parent="Theme.MaterialComponents.DialogWhenLarge"/>
+    <style name="Theme.MaterialComponents.DayNight.NoActionBar" parent="Theme.MaterialComponents.NoActionBar"/>
+    <style name="Theme.MaterialComponents.DayNight.NoActionBar.Bridge" parent="Theme.MaterialComponents.NoActionBar.Bridge"/>
+    <style name="Theme.QuickLaunch" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/preset_mint_primary</item>
+        <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_mint_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_mint_secondary</item>
+        <item name="colorOnSecondary">@color/preset_mint_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_mint_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_mint_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_mint_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_mint_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_mint_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_mint_on_tertiary_container</item>
+        <item name="colorError">@color/preset_mint_error</item>
+        <item name="colorOnError">@color/preset_mint_on_error</item>
+        <item name="colorErrorContainer">@color/preset_mint_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_mint_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_mint_background</item>
+        <item name="colorOnBackground">@color/preset_mint_on_background</item>
+        <item name="colorSurface">@color/preset_mint_surface</item>
+        <item name="colorOnSurface">@color/preset_mint_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_mint_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_mint_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_mint_outline</item>
+        <item name="colorOutlineVariant">@color/preset_mint_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_mint_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_mint_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_mint_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_mint_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_mint_background</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+    </style>
+    <style name="Theme.QuickLaunch.Classic" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/preset_classic_primary</item>
+        <item name="colorOnPrimary">@color/preset_classic_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_classic_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_classic_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_classic_secondary</item>
+        <item name="colorOnSecondary">@color/preset_classic_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_classic_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_classic_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_classic_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_classic_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_classic_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_classic_on_tertiary_container</item>
+        <item name="colorError">@color/preset_classic_error</item>
+        <item name="colorOnError">@color/preset_classic_on_error</item>
+        <item name="colorErrorContainer">@color/preset_classic_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_classic_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_classic_background</item>
+        <item name="colorOnBackground">@color/preset_classic_on_background</item>
+        <item name="colorSurface">@color/preset_classic_surface</item>
+        <item name="colorOnSurface">@color/preset_classic_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_classic_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_classic_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_classic_outline</item>
+        <item name="colorOutlineVariant">@color/preset_classic_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_classic_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_classic_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_classic_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_classic_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_classic_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_classic_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_classic_background</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+    </style>
+    <style name="Theme.QuickLaunch.Lavender" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/preset_lavender_primary</item>
+        <item name="colorOnPrimary">@color/preset_lavender_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_lavender_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_lavender_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_lavender_secondary</item>
+        <item name="colorOnSecondary">@color/preset_lavender_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_lavender_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_lavender_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_lavender_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_lavender_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_lavender_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_lavender_on_tertiary_container</item>
+        <item name="colorError">@color/preset_lavender_error</item>
+        <item name="colorOnError">@color/preset_lavender_on_error</item>
+        <item name="colorErrorContainer">@color/preset_lavender_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_lavender_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_lavender_background</item>
+        <item name="colorOnBackground">@color/preset_lavender_on_background</item>
+        <item name="colorSurface">@color/preset_lavender_surface</item>
+        <item name="colorOnSurface">@color/preset_lavender_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_lavender_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_lavender_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_lavender_outline</item>
+        <item name="colorOutlineVariant">@color/preset_lavender_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_lavender_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_lavender_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_lavender_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_lavender_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_lavender_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_lavender_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_lavender_background</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+    </style>
+    <style name="Theme.QuickLaunch.Mint" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/preset_mint_primary</item>
+        <item name="colorOnPrimary">@color/preset_mint_on_primary</item>
+        <item name="colorPrimaryContainer">@color/preset_mint_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/preset_mint_on_primary_container</item>
+        <item name="colorSecondary">@color/preset_mint_secondary</item>
+        <item name="colorOnSecondary">@color/preset_mint_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/preset_mint_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/preset_mint_on_secondary_container</item>
+        <item name="colorTertiary">@color/preset_mint_tertiary</item>
+        <item name="colorOnTertiary">@color/preset_mint_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/preset_mint_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/preset_mint_on_tertiary_container</item>
+        <item name="colorError">@color/preset_mint_error</item>
+        <item name="colorOnError">@color/preset_mint_on_error</item>
+        <item name="colorErrorContainer">@color/preset_mint_error_container</item>
+        <item name="colorOnErrorContainer">@color/preset_mint_on_error_container</item>
+        <item name="android:colorBackground">@color/preset_mint_background</item>
+        <item name="colorOnBackground">@color/preset_mint_on_background</item>
+        <item name="colorSurface">@color/preset_mint_surface</item>
+        <item name="colorOnSurface">@color/preset_mint_on_surface</item>
+        <item name="colorSurfaceVariant">@color/preset_mint_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/preset_mint_on_surface_variant</item>
+        <item name="colorOutline">@color/preset_mint_outline</item>
+        <item name="colorOutlineVariant">@color/preset_mint_outline_variant</item>
+        <item name="colorSurfaceContainerLow">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainer">@color/preset_mint_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/preset_mint_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/preset_mint_inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/preset_mint_inverse_on_surface</item>
+        <item name="colorPrimaryInverse">@color/preset_mint_inverse_primary</item>
+        <item name="android:windowBackground">@color/preset_mint_background</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+    </style>
+    <style name="Theme.QuickLaunch.Transparent" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorPrimary">@color/preset_mint_primary</item>
+        <item name="android:forceDarkAllowed" ns1:targetApi="29">false</item>
+    </style>
+    <style name="ThemeOverlay.AppCompat.DayNight" parent="ThemeOverlay.AppCompat.Dark"/>
+    <style name="ThemeOverlay.Material3.DynamicColors.DayNight" parent="ThemeOverlay.Material3.DynamicColors.Dark"/>
+    <style name="Widget.MaterialComponents.ActionBar.PrimarySurface" parent="Widget.MaterialComponents.ActionBar.Surface"/>
+    <style name="Widget.MaterialComponents.AppBarLayout.PrimarySurface" parent="Widget.MaterialComponents.AppBarLayout.Surface"/>
+    <style name="Widget.MaterialComponents.BottomAppBar.PrimarySurface" parent="Widget.MaterialComponents.BottomAppBar"/>
+    <style name="Widget.MaterialComponents.BottomNavigationView.PrimarySurface" parent="Widget.MaterialComponents.BottomNavigationView"/>
+    <style name="Widget.MaterialComponents.NavigationRailView.PrimarySurface" parent="Widget.MaterialComponents.NavigationRailView"/>
+    <style name="Widget.MaterialComponents.TabLayout.PrimarySurface" parent="Widget.MaterialComponents.TabLayout"/>
+    <style name="Widget.MaterialComponents.Toolbar.PrimarySurface" parent="Widget.MaterialComponents.Toolbar.Surface"/>
+</resources>

@@ -6,13 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.card.MaterialCardView;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -32,13 +33,16 @@ public final class ActivityThemeSettingsBinding implements ViewBinding {
   public final MaterialButton btnModeSystem;
 
   @NonNull
-  public final MaterialCardView cardClassic;
+  public final ConstraintLayout cardClassic;
 
   @NonNull
-  public final MaterialCardView cardLavender;
+  public final ConstraintLayout cardLavender;
 
   @NonNull
-  public final MaterialCardView cardMint;
+  public final ConstraintLayout cardLavenderPro;
+
+  @NonNull
+  public final ConstraintLayout cardMint;
 
   @NonNull
   public final RadioButton rbClassic;
@@ -47,28 +51,69 @@ public final class ActivityThemeSettingsBinding implements ViewBinding {
   public final RadioButton rbLavender;
 
   @NonNull
+  public final RadioButton rbLavenderPro;
+
+  @NonNull
   public final RadioButton rbMint;
+
+  @NonNull
+  public final View swatchClassic;
+
+  @NonNull
+  public final View swatchLavender;
+
+  @NonNull
+  public final View swatchLavenderPro;
+
+  @NonNull
+  public final View swatchMint;
 
   @NonNull
   public final MaterialButtonToggleGroup toggleThemeMode;
 
+  @NonNull
+  public final TextView tvColorTitle;
+
+  @NonNull
+  public final TextView tvModeTitle;
+
+  @NonNull
+  public final TextView tvSubtitle;
+
+  @NonNull
+  public final TextView tvTitle;
+
   private ActivityThemeSettingsBinding(@NonNull ScrollView rootView,
       @NonNull MaterialButton btnModeDark, @NonNull MaterialButton btnModeLight,
-      @NonNull MaterialButton btnModeSystem, @NonNull MaterialCardView cardClassic,
-      @NonNull MaterialCardView cardLavender, @NonNull MaterialCardView cardMint,
-      @NonNull RadioButton rbClassic, @NonNull RadioButton rbLavender, @NonNull RadioButton rbMint,
-      @NonNull MaterialButtonToggleGroup toggleThemeMode) {
+      @NonNull MaterialButton btnModeSystem, @NonNull ConstraintLayout cardClassic,
+      @NonNull ConstraintLayout cardLavender, @NonNull ConstraintLayout cardLavenderPro,
+      @NonNull ConstraintLayout cardMint, @NonNull RadioButton rbClassic,
+      @NonNull RadioButton rbLavender, @NonNull RadioButton rbLavenderPro,
+      @NonNull RadioButton rbMint, @NonNull View swatchClassic, @NonNull View swatchLavender,
+      @NonNull View swatchLavenderPro, @NonNull View swatchMint,
+      @NonNull MaterialButtonToggleGroup toggleThemeMode, @NonNull TextView tvColorTitle,
+      @NonNull TextView tvModeTitle, @NonNull TextView tvSubtitle, @NonNull TextView tvTitle) {
     this.rootView = rootView;
     this.btnModeDark = btnModeDark;
     this.btnModeLight = btnModeLight;
     this.btnModeSystem = btnModeSystem;
     this.cardClassic = cardClassic;
     this.cardLavender = cardLavender;
+    this.cardLavenderPro = cardLavenderPro;
     this.cardMint = cardMint;
     this.rbClassic = rbClassic;
     this.rbLavender = rbLavender;
+    this.rbLavenderPro = rbLavenderPro;
     this.rbMint = rbMint;
+    this.swatchClassic = swatchClassic;
+    this.swatchLavender = swatchLavender;
+    this.swatchLavenderPro = swatchLavenderPro;
+    this.swatchMint = swatchMint;
     this.toggleThemeMode = toggleThemeMode;
+    this.tvColorTitle = tvColorTitle;
+    this.tvModeTitle = tvModeTitle;
+    this.tvSubtitle = tvSubtitle;
+    this.tvTitle = tvTitle;
   }
 
   @Override
@@ -117,19 +162,25 @@ public final class ActivityThemeSettingsBinding implements ViewBinding {
       }
 
       id = R.id.cardClassic;
-      MaterialCardView cardClassic = ViewBindings.findChildViewById(rootView, id);
+      ConstraintLayout cardClassic = ViewBindings.findChildViewById(rootView, id);
       if (cardClassic == null) {
         break missingId;
       }
 
       id = R.id.cardLavender;
-      MaterialCardView cardLavender = ViewBindings.findChildViewById(rootView, id);
+      ConstraintLayout cardLavender = ViewBindings.findChildViewById(rootView, id);
       if (cardLavender == null) {
         break missingId;
       }
 
+      id = R.id.cardLavenderPro;
+      ConstraintLayout cardLavenderPro = ViewBindings.findChildViewById(rootView, id);
+      if (cardLavenderPro == null) {
+        break missingId;
+      }
+
       id = R.id.cardMint;
-      MaterialCardView cardMint = ViewBindings.findChildViewById(rootView, id);
+      ConstraintLayout cardMint = ViewBindings.findChildViewById(rootView, id);
       if (cardMint == null) {
         break missingId;
       }
@@ -146,9 +197,39 @@ public final class ActivityThemeSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.rbLavenderPro;
+      RadioButton rbLavenderPro = ViewBindings.findChildViewById(rootView, id);
+      if (rbLavenderPro == null) {
+        break missingId;
+      }
+
       id = R.id.rbMint;
       RadioButton rbMint = ViewBindings.findChildViewById(rootView, id);
       if (rbMint == null) {
+        break missingId;
+      }
+
+      id = R.id.swatchClassic;
+      View swatchClassic = ViewBindings.findChildViewById(rootView, id);
+      if (swatchClassic == null) {
+        break missingId;
+      }
+
+      id = R.id.swatchLavender;
+      View swatchLavender = ViewBindings.findChildViewById(rootView, id);
+      if (swatchLavender == null) {
+        break missingId;
+      }
+
+      id = R.id.swatchLavenderPro;
+      View swatchLavenderPro = ViewBindings.findChildViewById(rootView, id);
+      if (swatchLavenderPro == null) {
+        break missingId;
+      }
+
+      id = R.id.swatchMint;
+      View swatchMint = ViewBindings.findChildViewById(rootView, id);
+      if (swatchMint == null) {
         break missingId;
       }
 
@@ -158,9 +239,34 @@ public final class ActivityThemeSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tvColorTitle;
+      TextView tvColorTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvColorTitle == null) {
+        break missingId;
+      }
+
+      id = R.id.tvModeTitle;
+      TextView tvModeTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvModeTitle == null) {
+        break missingId;
+      }
+
+      id = R.id.tvSubtitle;
+      TextView tvSubtitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvSubtitle == null) {
+        break missingId;
+      }
+
+      id = R.id.tvTitle;
+      TextView tvTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvTitle == null) {
+        break missingId;
+      }
+
       return new ActivityThemeSettingsBinding((ScrollView) rootView, btnModeDark, btnModeLight,
-          btnModeSystem, cardClassic, cardLavender, cardMint, rbClassic, rbLavender, rbMint,
-          toggleThemeMode);
+          btnModeSystem, cardClassic, cardLavender, cardLavenderPro, cardMint, rbClassic,
+          rbLavender, rbLavenderPro, rbMint, swatchClassic, swatchLavender, swatchLavenderPro,
+          swatchMint, toggleThemeMode, tvColorTitle, tvModeTitle, tvSubtitle, tvTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

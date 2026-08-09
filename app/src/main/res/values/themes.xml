@@ -124,6 +124,46 @@
     </style>
 
     <!-- ════════════════════════════════════════════════════════════════
+         薰衣草紫主题（LavenderPro）—— Ardot 设计灵感 · 精致紫调高亮
+         ════════════════════════════════════════════════════════════════ -->
+    <style name="Theme.QuickLaunch.LavenderPro" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent_lavender</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/accent_lavender_surface</item>
+        <item name="colorOnPrimaryContainer">@color/accent_lavender</item>
+        <item name="colorSecondary">@color/accent_lavender_soft</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/accent_lavender_surface</item>
+        <item name="colorOnSecondaryContainer">@color/accent_lavender_soft</item>
+        <item name="colorTertiary">@color/accent_lavender_press</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorTertiaryContainer">@color/accent_lavender_surface</item>
+        <item name="colorOnTertiaryContainer">@color/accent_lavender_press</item>
+        <item name="colorError">#FF453A</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="colorErrorContainer">#3A2A2A</item>
+        <item name="colorOnErrorContainer">#FF453A</item>
+        <item name="android:colorBackground">@color/glass_bg_root</item>
+        <item name="colorOnBackground">@color/text_white</item>
+        <item name="colorSurface">@color/glass_bg_root</item>
+        <item name="colorOnSurface">@color/text_white</item>
+        <item name="colorSurfaceVariant">@color/glass_card_bg</item>
+        <item name="colorOnSurfaceVariant">@color/text_white</item>
+        <item name="colorOutline">@color/stroke_hairline</item>
+        <item name="colorOutlineVariant">@color/stroke_hairline</item>
+        <item name="colorSurfaceContainerLow">@color/glass_bg_root</item>
+        <item name="colorSurfaceContainer">@color/glass_card_bg</item>
+        <item name="colorSurfaceContainerHigh">@color/glass_inactive_bg</item>
+        <item name="colorSurfaceInverse">@color/text_white</item>
+        <item name="colorOnSurfaceInverse">@color/glass_bg_root</item>
+        <item name="colorPrimaryInverse">@color/text_white</item>
+        <item name="android:windowBackground">@color/glass_bg_root</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textAppearance">@style/TextAppearance.QuickLaunch.Body</item>
+    </style>
+
+    <!-- ════════════════════════════════════════════════════════════════
          经典绿主题（Classic）—— 沉稳、传统 Android 绿
          ════════════════════════════════════════════════════════════════ -->
     <style name="Theme.QuickLaunch.Classic" parent="Theme.Material3.DayNight.NoActionBar">

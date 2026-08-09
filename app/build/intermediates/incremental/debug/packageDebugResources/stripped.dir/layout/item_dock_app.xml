@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  iOS 26 Dock 栏应用项
+  - 大尺寸 Squircle 图标
+  - 图标下方应用名称（小字）
+  - 按压缩放动画
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/ios_space_md"
+    android:paddingVertical="@dimen/ios_space_sm">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivDockIcon"
+        android:layout_width="@dimen/ios_dock_icon"
+        android:layout_height="@dimen/ios_dock_icon"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_empty_state"
+        app:shapeAppearanceOverlay="@style/Widget.QuickLaunch.Icon.Squircle.Dock" />
+
+    <TextView
+        android:id="@+id/tvDockName"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/ios_space_xs"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.QuickLaunch.Caption" />
+
+</LinearLayout>

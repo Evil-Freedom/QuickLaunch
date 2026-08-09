@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  滚轮单项：固定 48dp 行高，文字居中。
+  字号/颜色/透明度/缩放由 DarkWheelTimePicker.updateWheelAlpha() 按距中心距离动态设定。
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvValue"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/wheel_item_height"
+    android:fontFamily="sans-serif"
+    android:gravity="center"
+    android:includeFontPadding="false"
+    android:textColor="@color/dark_text_primary"
+    android:textSize="28sp"
+    android:textStyle="bold" />

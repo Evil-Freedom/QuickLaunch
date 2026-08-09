@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 底部导航胶囊选中态：Ardot 设计灵感 · 磨砂 + 柔和光晕边框 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 底层：微弱光晕 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/brand_accent_surface" />
+            <corners android:radius="@dimen/dark_floating_bar_radius" />
+        </shape>
+    </item>
+    <!-- 顶层：磨砂 + 细白边框 -->
+    <item android:left="1dp" android:top="1dp" android:right="1dp" android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/item_active_bg" />
+            <corners android:radius="@dimen/dark_floating_bar_radius" />
+            <stroke
+                android:width="1dp"
+                android:color="@color/item_active_stroke" />
+        </shape>
+    </item>
+</layer-list>

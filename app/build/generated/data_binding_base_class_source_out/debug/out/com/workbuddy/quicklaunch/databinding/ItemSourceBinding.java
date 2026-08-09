@@ -5,10 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.workbuddy.quicklaunch.R;
@@ -18,7 +18,7 @@ import java.lang.String;
 
 public final class ItemSourceBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final ConstraintLayout rootView;
 
   @NonNull
   public final Button btnDelete;
@@ -32,7 +32,7 @@ public final class ItemSourceBinding implements ViewBinding {
   @NonNull
   public final TextView tvUrl;
 
-  private ItemSourceBinding(@NonNull LinearLayout rootView, @NonNull Button btnDelete,
+  private ItemSourceBinding(@NonNull ConstraintLayout rootView, @NonNull Button btnDelete,
       @NonNull TextView tvLabel, @NonNull TextView tvTag, @NonNull TextView tvUrl) {
     this.rootView = rootView;
     this.btnDelete = btnDelete;
@@ -43,7 +43,7 @@ public final class ItemSourceBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public ConstraintLayout getRoot() {
     return rootView;
   }
 
@@ -92,7 +92,7 @@ public final class ItemSourceBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemSourceBinding((LinearLayout) rootView, btnDelete, tvLabel, tvTag, tvUrl);
+      return new ItemSourceBinding((ConstraintLayout) rootView, btnDelete, tvLabel, tvTag, tvUrl);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

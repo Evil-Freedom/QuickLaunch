@@ -63,8 +63,18 @@ object ThemeManager {
         onPrimaryContainer = 0xFFBF360C.toInt()
     )
 
+    /** 预设主题色：薰衣草紫 Pro（Ardot 设计灵感 · 精致紫调高亮） */
+    val LAVENDER_PRO = PresetColor(
+        id = "lavender_pro",
+        label = "薰衣草紫 Pro",
+        primary = 0xFFB794F6.toInt(),
+        onPrimary = 0xFFFFFFFF.toInt(),
+        primaryContainer = 0xFF1A9F7AEA.toInt(),
+        onPrimaryContainer = 0xFFB794F6.toInt()
+    )
+
     /** 所有预设主题色 */
-    val PRESETS: List<PresetColor> = listOf(MINT_GREEN, LILAC, CLASSIC_GREEN, CORAL)
+    val PRESETS: List<PresetColor> = listOf(MINT_GREEN, LILAC, CLASSIC_GREEN, CORAL, LAVENDER_PRO)
 
     /**
      * 主题色描述。

@@ -64,6 +64,12 @@
     <color name="brand_accent_press">#E0FFFFFF</color>
     <color name="brand_accent_surface">@color/glass_active_bg</color>
 
+    <!-- 薰衣草紫精致强调色（Ardot 设计灵感 — 用于可选主题/特定高亮） -->
+    <color name="accent_lavender">#B794F6</color>
+    <color name="accent_lavender_soft">#9F7AEA</color>
+    <color name="accent_lavender_surface">#1A9F7AEA</color>
+    <color name="accent_lavender_press">#805AD5</color>
+
     <!-- 文字 -->
     <color name="text_primary">@color/glass_active_text</color>
 

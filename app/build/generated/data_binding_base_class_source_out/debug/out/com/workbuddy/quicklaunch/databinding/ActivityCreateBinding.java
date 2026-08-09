@@ -4,18 +4,18 @@ package com.workbuddy.quicklaunch.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.ToggleButton;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -26,19 +26,19 @@ public final class ActivityCreateBinding implements ViewBinding {
   private final ScrollView rootView;
 
   @NonNull
-  public final Button btnPickApp;
+  public final MaterialButton btnPickApp;
 
   @NonNull
-  public final Button btnSave;
+  public final MaterialButton btnSave;
 
   @NonNull
-  public final Button btnTime;
+  public final TextView btnTime;
 
   @NonNull
-  public final Button btnWinEnd;
+  public final TextView btnWinEnd;
 
   @NonNull
-  public final Button btnWinStart;
+  public final TextView btnWinStart;
 
   @NonNull
   public final CheckBox cbRandom;
@@ -47,59 +47,104 @@ public final class ActivityCreateBinding implements ViewBinding {
   public final CheckBox cbSkipHolidays;
 
   @NonNull
+  public final TextView chipRepeat0;
+
+  @NonNull
+  public final TextView chipRepeat1;
+
+  @NonNull
+  public final TextView chipRepeat2;
+
+  @NonNull
+  public final TextView chipRepeat3;
+
+  @NonNull
+  public final TextView chipRepeat4;
+
+  @NonNull
+  public final TextView chipTrigger0;
+
+  @NonNull
+  public final TextView chipTrigger1;
+
+  @NonNull
+  public final TextView chipTrigger2;
+
+  @NonNull
+  public final TextView chipTrigger3;
+
+  @NonNull
   public final TextInputEditText etBtName;
 
   @NonNull
-  public final TextInputEditText etName;
-
-  @NonNull
-  public final TextInputLayout layoutBt;
+  public final ConstraintLayout layoutBt;
 
   @NonNull
   public final LinearLayout layoutCustomDays;
 
   @NonNull
+  public final ConstraintLayout layoutOptions;
+
+  @NonNull
   public final LinearLayout layoutRandom;
 
   @NonNull
-  public final LinearLayout layoutTime;
+  public final ConstraintLayout layoutTime;
 
   @NonNull
-  public final Spinner spinnerRepeat;
+  public final ConstraintLayout layoutTrigger;
 
   @NonNull
-  public final Spinner spinnerTrigger;
+  public final HorizontalScrollView scrollRepeat;
 
   @NonNull
-  public final ToggleButton tbDay0;
+  public final HorizontalScrollView scrollTrigger;
 
   @NonNull
-  public final ToggleButton tbDay1;
+  public final TextView tbDay0;
 
   @NonNull
-  public final ToggleButton tbDay2;
+  public final TextView tbDay1;
 
   @NonNull
-  public final ToggleButton tbDay3;
+  public final TextView tbDay2;
 
   @NonNull
-  public final ToggleButton tbDay4;
+  public final TextView tbDay3;
 
   @NonNull
-  public final ToggleButton tbDay5;
+  public final TextView tbDay4;
 
   @NonNull
-  public final ToggleButton tbDay6;
+  public final TextView tbDay5;
 
-  private ActivityCreateBinding(@NonNull ScrollView rootView, @NonNull Button btnPickApp,
-      @NonNull Button btnSave, @NonNull Button btnTime, @NonNull Button btnWinEnd,
-      @NonNull Button btnWinStart, @NonNull CheckBox cbRandom, @NonNull CheckBox cbSkipHolidays,
-      @NonNull TextInputEditText etBtName, @NonNull TextInputEditText etName,
-      @NonNull TextInputLayout layoutBt, @NonNull LinearLayout layoutCustomDays,
-      @NonNull LinearLayout layoutRandom, @NonNull LinearLayout layoutTime,
-      @NonNull Spinner spinnerRepeat, @NonNull Spinner spinnerTrigger, @NonNull ToggleButton tbDay0,
-      @NonNull ToggleButton tbDay1, @NonNull ToggleButton tbDay2, @NonNull ToggleButton tbDay3,
-      @NonNull ToggleButton tbDay4, @NonNull ToggleButton tbDay5, @NonNull ToggleButton tbDay6) {
+  @NonNull
+  public final TextView tbDay6;
+
+  @NonNull
+  public final TextView tvRepeatTitle;
+
+  @NonNull
+  public final TextView tvTimeTitle;
+
+  @NonNull
+  public final TextView tvTriggerTitle;
+
+  private ActivityCreateBinding(@NonNull ScrollView rootView, @NonNull MaterialButton btnPickApp,
+      @NonNull MaterialButton btnSave, @NonNull TextView btnTime, @NonNull TextView btnWinEnd,
+      @NonNull TextView btnWinStart, @NonNull CheckBox cbRandom, @NonNull CheckBox cbSkipHolidays,
+      @NonNull TextView chipRepeat0, @NonNull TextView chipRepeat1, @NonNull TextView chipRepeat2,
+      @NonNull TextView chipRepeat3, @NonNull TextView chipRepeat4, @NonNull TextView chipTrigger0,
+      @NonNull TextView chipTrigger1, @NonNull TextView chipTrigger2,
+      @NonNull TextView chipTrigger3, @NonNull TextInputEditText etBtName,
+      @NonNull ConstraintLayout layoutBt, @NonNull LinearLayout layoutCustomDays,
+      @NonNull ConstraintLayout layoutOptions, @NonNull LinearLayout layoutRandom,
+      @NonNull ConstraintLayout layoutTime, @NonNull ConstraintLayout layoutTrigger,
+      @NonNull HorizontalScrollView scrollRepeat, @NonNull HorizontalScrollView scrollTrigger,
+      @NonNull TextView tbDay0, @NonNull TextView tbDay1, @NonNull TextView tbDay2,
+      @NonNull TextView tbDay3, @NonNull TextView tbDay4, @NonNull TextView tbDay5,
+      @NonNull TextView tbDay6, @NonNull TextView tvRepeatTitle, @NonNull TextView tvTimeTitle,
+      @NonNull TextView tvTriggerTitle) {
     this.rootView = rootView;
     this.btnPickApp = btnPickApp;
     this.btnSave = btnSave;
@@ -108,14 +153,24 @@ public final class ActivityCreateBinding implements ViewBinding {
     this.btnWinStart = btnWinStart;
     this.cbRandom = cbRandom;
     this.cbSkipHolidays = cbSkipHolidays;
+    this.chipRepeat0 = chipRepeat0;
+    this.chipRepeat1 = chipRepeat1;
+    this.chipRepeat2 = chipRepeat2;
+    this.chipRepeat3 = chipRepeat3;
+    this.chipRepeat4 = chipRepeat4;
+    this.chipTrigger0 = chipTrigger0;
+    this.chipTrigger1 = chipTrigger1;
+    this.chipTrigger2 = chipTrigger2;
+    this.chipTrigger3 = chipTrigger3;
     this.etBtName = etBtName;
-    this.etName = etName;
     this.layoutBt = layoutBt;
     this.layoutCustomDays = layoutCustomDays;
+    this.layoutOptions = layoutOptions;
     this.layoutRandom = layoutRandom;
     this.layoutTime = layoutTime;
-    this.spinnerRepeat = spinnerRepeat;
-    this.spinnerTrigger = spinnerTrigger;
+    this.layoutTrigger = layoutTrigger;
+    this.scrollRepeat = scrollRepeat;
+    this.scrollTrigger = scrollTrigger;
     this.tbDay0 = tbDay0;
     this.tbDay1 = tbDay1;
     this.tbDay2 = tbDay2;
@@ -123,6 +178,9 @@ public final class ActivityCreateBinding implements ViewBinding {
     this.tbDay4 = tbDay4;
     this.tbDay5 = tbDay5;
     this.tbDay6 = tbDay6;
+    this.tvRepeatTitle = tvRepeatTitle;
+    this.tvTimeTitle = tvTimeTitle;
+    this.tvTriggerTitle = tvTriggerTitle;
   }
 
   @Override
@@ -153,31 +211,31 @@ public final class ActivityCreateBinding implements ViewBinding {
     int id;
     missingId: {
       id = R.id.btnPickApp;
-      Button btnPickApp = ViewBindings.findChildViewById(rootView, id);
+      MaterialButton btnPickApp = ViewBindings.findChildViewById(rootView, id);
       if (btnPickApp == null) {
         break missingId;
       }
 
       id = R.id.btnSave;
-      Button btnSave = ViewBindings.findChildViewById(rootView, id);
+      MaterialButton btnSave = ViewBindings.findChildViewById(rootView, id);
       if (btnSave == null) {
         break missingId;
       }
 
       id = R.id.btnTime;
-      Button btnTime = ViewBindings.findChildViewById(rootView, id);
+      TextView btnTime = ViewBindings.findChildViewById(rootView, id);
       if (btnTime == null) {
         break missingId;
       }
 
       id = R.id.btnWinEnd;
-      Button btnWinEnd = ViewBindings.findChildViewById(rootView, id);
+      TextView btnWinEnd = ViewBindings.findChildViewById(rootView, id);
       if (btnWinEnd == null) {
         break missingId;
       }
 
       id = R.id.btnWinStart;
-      Button btnWinStart = ViewBindings.findChildViewById(rootView, id);
+      TextView btnWinStart = ViewBindings.findChildViewById(rootView, id);
       if (btnWinStart == null) {
         break missingId;
       }
@@ -194,20 +252,68 @@ public final class ActivityCreateBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.chipRepeat0;
+      TextView chipRepeat0 = ViewBindings.findChildViewById(rootView, id);
+      if (chipRepeat0 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipRepeat1;
+      TextView chipRepeat1 = ViewBindings.findChildViewById(rootView, id);
+      if (chipRepeat1 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipRepeat2;
+      TextView chipRepeat2 = ViewBindings.findChildViewById(rootView, id);
+      if (chipRepeat2 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipRepeat3;
+      TextView chipRepeat3 = ViewBindings.findChildViewById(rootView, id);
+      if (chipRepeat3 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipRepeat4;
+      TextView chipRepeat4 = ViewBindings.findChildViewById(rootView, id);
+      if (chipRepeat4 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipTrigger0;
+      TextView chipTrigger0 = ViewBindings.findChildViewById(rootView, id);
+      if (chipTrigger0 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipTrigger1;
+      TextView chipTrigger1 = ViewBindings.findChildViewById(rootView, id);
+      if (chipTrigger1 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipTrigger2;
+      TextView chipTrigger2 = ViewBindings.findChildViewById(rootView, id);
+      if (chipTrigger2 == null) {
+        break missingId;
+      }
+
+      id = R.id.chipTrigger3;
+      TextView chipTrigger3 = ViewBindings.findChildViewById(rootView, id);
+      if (chipTrigger3 == null) {
+        break missingId;
+      }
+
       id = R.id.etBtName;
       TextInputEditText etBtName = ViewBindings.findChildViewById(rootView, id);
       if (etBtName == null) {
         break missingId;
       }
 
-      id = R.id.etName;
-      TextInputEditText etName = ViewBindings.findChildViewById(rootView, id);
-      if (etName == null) {
-        break missingId;
-      }
-
       id = R.id.layoutBt;
-      TextInputLayout layoutBt = ViewBindings.findChildViewById(rootView, id);
+      ConstraintLayout layoutBt = ViewBindings.findChildViewById(rootView, id);
       if (layoutBt == null) {
         break missingId;
       }
@@ -218,6 +324,12 @@ public final class ActivityCreateBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.layoutOptions;
+      ConstraintLayout layoutOptions = ViewBindings.findChildViewById(rootView, id);
+      if (layoutOptions == null) {
+        break missingId;
+      }
+
       id = R.id.layoutRandom;
       LinearLayout layoutRandom = ViewBindings.findChildViewById(rootView, id);
       if (layoutRandom == null) {
@@ -225,69 +337,95 @@ public final class ActivityCreateBinding implements ViewBinding {
       }
 
       id = R.id.layoutTime;
-      LinearLayout layoutTime = ViewBindings.findChildViewById(rootView, id);
+      ConstraintLayout layoutTime = ViewBindings.findChildViewById(rootView, id);
       if (layoutTime == null) {
         break missingId;
       }
 
-      id = R.id.spinnerRepeat;
-      Spinner spinnerRepeat = ViewBindings.findChildViewById(rootView, id);
-      if (spinnerRepeat == null) {
+      id = R.id.layoutTrigger;
+      ConstraintLayout layoutTrigger = ViewBindings.findChildViewById(rootView, id);
+      if (layoutTrigger == null) {
         break missingId;
       }
 
-      id = R.id.spinnerTrigger;
-      Spinner spinnerTrigger = ViewBindings.findChildViewById(rootView, id);
-      if (spinnerTrigger == null) {
+      id = R.id.scrollRepeat;
+      HorizontalScrollView scrollRepeat = ViewBindings.findChildViewById(rootView, id);
+      if (scrollRepeat == null) {
+        break missingId;
+      }
+
+      id = R.id.scrollTrigger;
+      HorizontalScrollView scrollTrigger = ViewBindings.findChildViewById(rootView, id);
+      if (scrollTrigger == null) {
         break missingId;
       }
 
       id = R.id.tbDay0;
-      ToggleButton tbDay0 = ViewBindings.findChildViewById(rootView, id);
+      TextView tbDay0 = ViewBindings.findChildViewById(rootView, id);
       if (tbDay0 == null) {
         break missingId;
       }
 
       id = R.id.tbDay1;
-      ToggleButton tbDay1 = ViewBindings.findChildViewById(rootView, id);
+      TextView tbDay1 = ViewBindings.findChildViewById(rootView, id);
       if (tbDay1 == null) {
         break missingId;
       }
 
       id = R.id.tbDay2;
-      ToggleButton tbDay2 = ViewBindings.findChildViewById(rootView, id);
+      TextView tbDay2 = ViewBindings.findChildViewById(rootView, id);
       if (tbDay2 == null) {
         break missingId;
       }
 
       id = R.id.tbDay3;
-      ToggleButton tbDay3 = ViewBindings.findChildViewById(rootView, id);
+      TextView tbDay3 = ViewBindings.findChildViewById(rootView, id);
       if (tbDay3 == null) {
         break missingId;
       }
 
       id = R.id.tbDay4;
-      ToggleButton tbDay4 = ViewBindings.findChildViewById(rootView, id);
+      TextView tbDay4 = ViewBindings.findChildViewById(rootView, id);
       if (tbDay4 == null) {
         break missingId;
       }
 
       id = R.id.tbDay5;
-      ToggleButton tbDay5 = ViewBindings.findChildViewById(rootView, id);
+      TextView tbDay5 = ViewBindings.findChildViewById(rootView, id);
       if (tbDay5 == null) {
         break missingId;
       }
 
       id = R.id.tbDay6;
-      ToggleButton tbDay6 = ViewBindings.findChildViewById(rootView, id);
+      TextView tbDay6 = ViewBindings.findChildViewById(rootView, id);
       if (tbDay6 == null) {
         break missingId;
       }
 
+      id = R.id.tvRepeatTitle;
+      TextView tvRepeatTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvRepeatTitle == null) {
+        break missingId;
+      }
+
+      id = R.id.tvTimeTitle;
+      TextView tvTimeTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvTimeTitle == null) {
+        break missingId;
+      }
+
+      id = R.id.tvTriggerTitle;
+      TextView tvTriggerTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvTriggerTitle == null) {
+        break missingId;
+      }
+
       return new ActivityCreateBinding((ScrollView) rootView, btnPickApp, btnSave, btnTime,
-          btnWinEnd, btnWinStart, cbRandom, cbSkipHolidays, etBtName, etName, layoutBt,
-          layoutCustomDays, layoutRandom, layoutTime, spinnerRepeat, spinnerTrigger, tbDay0, tbDay1,
-          tbDay2, tbDay3, tbDay4, tbDay5, tbDay6);
+          btnWinEnd, btnWinStart, cbRandom, cbSkipHolidays, chipRepeat0, chipRepeat1, chipRepeat2,
+          chipRepeat3, chipRepeat4, chipTrigger0, chipTrigger1, chipTrigger2, chipTrigger3,
+          etBtName, layoutBt, layoutCustomDays, layoutOptions, layoutRandom, layoutTime,
+          layoutTrigger, scrollRepeat, scrollTrigger, tbDay0, tbDay1, tbDay2, tbDay3, tbDay4,
+          tbDay5, tbDay6, tvRepeatTitle, tvTimeTitle, tvTriggerTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

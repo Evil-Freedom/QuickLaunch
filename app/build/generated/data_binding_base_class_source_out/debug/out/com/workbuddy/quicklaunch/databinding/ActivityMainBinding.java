@@ -6,18 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.viewpager2.widget.ViewPager2;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -28,79 +23,52 @@ public final class ActivityMainBinding implements ViewBinding {
   private final ConstraintLayout rootView;
 
   @NonNull
-  public final MaterialButton btnManageHolidays;
+  public final View bottomGradientShadow;
 
   @NonNull
-  public final MaterialButton btnManageSources;
+  public final LinearLayout bottomNavLaunch;
 
   @NonNull
-  public final MaterialButton btnSyncHolidays;
+  public final LinearLayout bottomNavSync;
 
   @NonNull
-  public final MaterialCardView cardOperations;
+  public final LinearLayout floatingBottomBar;
 
   @NonNull
-  public final FloatingActionButton fabAdd;
+  public final ImageView ivNavLaunch;
 
   @NonNull
-  public final ImageView ivEmptyIcon;
+  public final ImageView ivNavSync;
 
   @NonNull
-  public final LinearLayout layoutAntiSleep;
+  public final ConstraintLayout rootContainer;
 
   @NonNull
-  public final LinearLayout layoutHolidayActions;
+  public final TextView tvNavLaunch;
 
   @NonNull
-  public final LinearLayout layoutSource;
+  public final TextView tvNavSync;
 
   @NonNull
-  public final RecyclerView recycler;
-
-  @NonNull
-  public final Spinner spinnerSource;
-
-  @NonNull
-  public final SwitchCompat swAntiSleep;
-
-  @NonNull
-  public final TextView tvAntiSleep;
-
-  @NonNull
-  public final LinearLayout tvEmpty;
-
-  @NonNull
-  public final TextView tvEmptyText;
-
-  @NonNull
-  public final TextView tvTitle;
+  public final ViewPager2 viewPager;
 
   private ActivityMainBinding(@NonNull ConstraintLayout rootView,
-      @NonNull MaterialButton btnManageHolidays, @NonNull MaterialButton btnManageSources,
-      @NonNull MaterialButton btnSyncHolidays, @NonNull MaterialCardView cardOperations,
-      @NonNull FloatingActionButton fabAdd, @NonNull ImageView ivEmptyIcon,
-      @NonNull LinearLayout layoutAntiSleep, @NonNull LinearLayout layoutHolidayActions,
-      @NonNull LinearLayout layoutSource, @NonNull RecyclerView recycler,
-      @NonNull Spinner spinnerSource, @NonNull SwitchCompat swAntiSleep,
-      @NonNull TextView tvAntiSleep, @NonNull LinearLayout tvEmpty, @NonNull TextView tvEmptyText,
-      @NonNull TextView tvTitle) {
+      @NonNull View bottomGradientShadow, @NonNull LinearLayout bottomNavLaunch,
+      @NonNull LinearLayout bottomNavSync, @NonNull LinearLayout floatingBottomBar,
+      @NonNull ImageView ivNavLaunch, @NonNull ImageView ivNavSync,
+      @NonNull ConstraintLayout rootContainer, @NonNull TextView tvNavLaunch,
+      @NonNull TextView tvNavSync, @NonNull ViewPager2 viewPager) {
     this.rootView = rootView;
-    this.btnManageHolidays = btnManageHolidays;
-    this.btnManageSources = btnManageSources;
-    this.btnSyncHolidays = btnSyncHolidays;
-    this.cardOperations = cardOperations;
-    this.fabAdd = fabAdd;
-    this.ivEmptyIcon = ivEmptyIcon;
-    this.layoutAntiSleep = layoutAntiSleep;
-    this.layoutHolidayActions = layoutHolidayActions;
-    this.layoutSource = layoutSource;
-    this.recycler = recycler;
-    this.spinnerSource = spinnerSource;
-    this.swAntiSleep = swAntiSleep;
-    this.tvAntiSleep = tvAntiSleep;
-    this.tvEmpty = tvEmpty;
-    this.tvEmptyText = tvEmptyText;
-    this.tvTitle = tvTitle;
+    this.bottomGradientShadow = bottomGradientShadow;
+    this.bottomNavLaunch = bottomNavLaunch;
+    this.bottomNavSync = bottomNavSync;
+    this.floatingBottomBar = floatingBottomBar;
+    this.ivNavLaunch = ivNavLaunch;
+    this.ivNavSync = ivNavSync;
+    this.rootContainer = rootContainer;
+    this.tvNavLaunch = tvNavLaunch;
+    this.tvNavSync = tvNavSync;
+    this.viewPager = viewPager;
   }
 
   @Override
@@ -130,106 +98,65 @@ public final class ActivityMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.btnManageHolidays;
-      MaterialButton btnManageHolidays = ViewBindings.findChildViewById(rootView, id);
-      if (btnManageHolidays == null) {
+      id = R.id.bottomGradientShadow;
+      View bottomGradientShadow = ViewBindings.findChildViewById(rootView, id);
+      if (bottomGradientShadow == null) {
         break missingId;
       }
 
-      id = R.id.btnManageSources;
-      MaterialButton btnManageSources = ViewBindings.findChildViewById(rootView, id);
-      if (btnManageSources == null) {
+      id = R.id.bottomNavLaunch;
+      LinearLayout bottomNavLaunch = ViewBindings.findChildViewById(rootView, id);
+      if (bottomNavLaunch == null) {
         break missingId;
       }
 
-      id = R.id.btnSyncHolidays;
-      MaterialButton btnSyncHolidays = ViewBindings.findChildViewById(rootView, id);
-      if (btnSyncHolidays == null) {
+      id = R.id.bottomNavSync;
+      LinearLayout bottomNavSync = ViewBindings.findChildViewById(rootView, id);
+      if (bottomNavSync == null) {
         break missingId;
       }
 
-      id = R.id.cardOperations;
-      MaterialCardView cardOperations = ViewBindings.findChildViewById(rootView, id);
-      if (cardOperations == null) {
+      id = R.id.floatingBottomBar;
+      LinearLayout floatingBottomBar = ViewBindings.findChildViewById(rootView, id);
+      if (floatingBottomBar == null) {
         break missingId;
       }
 
-      id = R.id.fabAdd;
-      FloatingActionButton fabAdd = ViewBindings.findChildViewById(rootView, id);
-      if (fabAdd == null) {
+      id = R.id.ivNavLaunch;
+      ImageView ivNavLaunch = ViewBindings.findChildViewById(rootView, id);
+      if (ivNavLaunch == null) {
         break missingId;
       }
 
-      id = R.id.ivEmptyIcon;
-      ImageView ivEmptyIcon = ViewBindings.findChildViewById(rootView, id);
-      if (ivEmptyIcon == null) {
+      id = R.id.ivNavSync;
+      ImageView ivNavSync = ViewBindings.findChildViewById(rootView, id);
+      if (ivNavSync == null) {
         break missingId;
       }
 
-      id = R.id.layoutAntiSleep;
-      LinearLayout layoutAntiSleep = ViewBindings.findChildViewById(rootView, id);
-      if (layoutAntiSleep == null) {
+      ConstraintLayout rootContainer = (ConstraintLayout) rootView;
+
+      id = R.id.tvNavLaunch;
+      TextView tvNavLaunch = ViewBindings.findChildViewById(rootView, id);
+      if (tvNavLaunch == null) {
         break missingId;
       }
 
-      id = R.id.layoutHolidayActions;
-      LinearLayout layoutHolidayActions = ViewBindings.findChildViewById(rootView, id);
-      if (layoutHolidayActions == null) {
+      id = R.id.tvNavSync;
+      TextView tvNavSync = ViewBindings.findChildViewById(rootView, id);
+      if (tvNavSync == null) {
         break missingId;
       }
 
-      id = R.id.layoutSource;
-      LinearLayout layoutSource = ViewBindings.findChildViewById(rootView, id);
-      if (layoutSource == null) {
+      id = R.id.viewPager;
+      ViewPager2 viewPager = ViewBindings.findChildViewById(rootView, id);
+      if (viewPager == null) {
         break missingId;
       }
 
-      id = R.id.recycler;
-      RecyclerView recycler = ViewBindings.findChildViewById(rootView, id);
-      if (recycler == null) {
-        break missingId;
-      }
-
-      id = R.id.spinnerSource;
-      Spinner spinnerSource = ViewBindings.findChildViewById(rootView, id);
-      if (spinnerSource == null) {
-        break missingId;
-      }
-
-      id = R.id.swAntiSleep;
-      SwitchCompat swAntiSleep = ViewBindings.findChildViewById(rootView, id);
-      if (swAntiSleep == null) {
-        break missingId;
-      }
-
-      id = R.id.tvAntiSleep;
-      TextView tvAntiSleep = ViewBindings.findChildViewById(rootView, id);
-      if (tvAntiSleep == null) {
-        break missingId;
-      }
-
-      id = R.id.tvEmpty;
-      LinearLayout tvEmpty = ViewBindings.findChildViewById(rootView, id);
-      if (tvEmpty == null) {
-        break missingId;
-      }
-
-      id = R.id.tvEmptyText;
-      TextView tvEmptyText = ViewBindings.findChildViewById(rootView, id);
-      if (tvEmptyText == null) {
-        break missingId;
-      }
-
-      id = R.id.tvTitle;
-      TextView tvTitle = ViewBindings.findChildViewById(rootView, id);
-      if (tvTitle == null) {
-        break missingId;
-      }
-
-      return new ActivityMainBinding((ConstraintLayout) rootView, btnManageHolidays,
-          btnManageSources, btnSyncHolidays, cardOperations, fabAdd, ivEmptyIcon, layoutAntiSleep,
-          layoutHolidayActions, layoutSource, recycler, spinnerSource, swAntiSleep, tvAntiSleep,
-          tvEmpty, tvEmptyText, tvTitle);
+      return new ActivityMainBinding((ConstraintLayout) rootView, bottomGradientShadow,
+          bottomNavLaunch, bottomNavSync, floatingBottomBar, ivNavLaunch, ivNavSync, rootContainer,
+          tvNavLaunch, tvNavSync, viewPager);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

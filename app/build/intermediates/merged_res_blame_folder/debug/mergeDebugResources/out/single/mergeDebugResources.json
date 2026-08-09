@@ -1,94 +1,322 @@
 [
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_ic_empty_state.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\ic_empty_state.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_empty_state.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_empty_state.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_status_dot_on.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\status_dot_on.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_card_dark.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_card_dark.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_ic_launcher.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\ic_launcher.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_dialog_app_picker_bottom_sheet.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/dialog_app_picker_bottom_sheet.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_color_swatch_classic.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\color_swatch_classic.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_ios26_wallpaper.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_ios26_wallpaper.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_ic_launcher_background.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\ic_launcher_background.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_activity_create.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_create.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\mipmap-anydpi_ic_launcher_round.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\mipmap-anydpi\\ic_launcher_round.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_view_sync.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/view_sync.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_color_swatch_mint.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\color_swatch_mint.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_bottom_gradient.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_bottom_gradient.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\mipmap-anydpi-v26\\ic_launcher.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_trigger_grid_item_selected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_trigger_grid_item_selected.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_activity_source_manage.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_source_manage.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_launcher.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_launcher.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_activity_main.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_main.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_segment_unselected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_segment_unselected.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_ic_launcher_foreground.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\ic_launcher_foreground.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_app_select.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_app_select.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_item_holiday.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\item_holiday.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_holiday.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_holiday.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_color_swatch_lavender.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\color_swatch_lavender.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_liquid_glass.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_liquid_glass.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\mipmap-anydpi_ic_launcher.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\mipmap-anydpi\\ic_launcher.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_activity_theme_settings.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_theme_settings.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_item_source.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\item_source.xml"
-    },
-    {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\drawable_status_dot_off.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\drawable\\status_dot_off.xml"
-    },
-    {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_activity_create.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_create.xml"
-    },
-    {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_activity_holiday_manage.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_holiday_manage.xml"
-    },
-    {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_item_automation.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\item_automation.xml"
-    },
-    {
-        "merged": "com.workbuddy.quicklaunch.app-debug-41:/mipmap-anydpi_ic_launcher.xml.flat",
-        "source": "com.workbuddy.quicklaunch.app-main-43:/mipmap-anydpi/ic_launcher.xml"
-    },
-    {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\layout_activity_theme_settings.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\layout\\activity_theme_settings.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_segment_selected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_segment_selected.xml"
     },
     {
         "merged": "com.workbuddy.quicklaunch.app-debug-41:/mipmap-anydpi_ic_launcher_round.xml.flat",
         "source": "com.workbuddy.quicklaunch.app-main-43:/mipmap-anydpi/ic_launcher_round.xml"
     },
     {
-        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-debug-41:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.11.1\\com.workbuddy.quicklaunch.app-main-43:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_automation.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_automation.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_segment_track.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_segment_track.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_bottom_nav_glass.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_bottom_nav_glass.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_root.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dark_root.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_nav_capsule_selected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_nav_capsule_selected.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_activity_main_ios.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_main_ios.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_activity_holiday_manage.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_holiday_manage.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_nav_capsule_inactive.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_nav_capsule_inactive.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_rule_item_inactive.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_rule_item_inactive.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_card_secondary.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dark_card_secondary.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_cb_glass_checked.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/cb_glass_checked.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_trigger_time.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_trigger_time.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_dock_app.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_dock_app.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_activity_main.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_notification_stat.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_notification_stat.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_item_inactive.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_item_inactive.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_status_dot_off.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/status_dot_off.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_capsule_selected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dark_capsule_selected.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_trigger_wifi.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_trigger_wifi.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_dialog_dark_wheel_time_picker.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/dialog_dark_wheel_time_picker.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_wheel.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_wheel.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_card_elegant.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_card_elegant.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_tab_launch.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_tab_launch.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_floating_bottom_bar.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_floating_bottom_bar.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_mic_ios.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_mic_ios.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_app.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_app.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_color_swatch_lavender.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/color_swatch_lavender.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_color_swatch_lavender_pro.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/color_swatch_lavender_pro.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dialog_scrim.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dialog_scrim.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_input.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dark_input.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_trigger_grid_item.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_trigger_grid_item.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_color_swatch_classic.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/color_swatch_classic.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_check_small.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_check_small.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_icon_squircle.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_icon_squircle.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_cb_glass.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/cb_glass.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_rule_item_active.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_rule_item_active.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_color_swatch_mint.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/color_swatch_mint.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_nav_icon_circle.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_nav_icon_circle.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_view_launch.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/view_launch.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/mipmap-anydpi_ic_launcher.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/mipmap-anydpi/ic_launcher.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_trigger_charging.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_trigger_charging.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_status_dot_on.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/status_dot_on.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_activity_source_manage.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/activity_source_manage.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_progress_battery.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_progress_battery.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_search_ios.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_search_ios.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_item_active.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_item_active.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_cb_glass_unchecked.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/cb_glass_unchecked.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/menu_menu_app_context.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/menu/menu_app_context.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_btn_primary.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_btn_primary.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/layout_item_source.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/layout/item_source.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_bottom_nav_indicator.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_bottom_nav_indicator.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_tab_sync.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_tab_sync.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_nav_item_selected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_nav_item_selected.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_search_liquid.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_search_liquid.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_capsule_unselected.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dark_capsule_unselected.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_dark_card_primary.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_dark_card_primary.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_add_ios.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_add_ios.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_bg_search_pill.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/bg_search_pill.xml"
+    },
+    {
+        "merged": "com.workbuddy.quicklaunch.app-debug-41:/drawable_ic_trigger_bluetooth.xml.flat",
+        "source": "com.workbuddy.quicklaunch.app-main-43:/drawable/ic_trigger_bluetooth.xml"
     }
 ]

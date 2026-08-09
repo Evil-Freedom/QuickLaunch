@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  iOS 26 Liquid Glass 主界面
+  结构：悬浮搜索栏 + 网格应用列表 + 底部 Dock 栏
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_ios26_wallpaper">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         顶部：iOS 26 悬浮胶囊搜索栏
+         ═══════════════════════════════════════════════════════════════ -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSearch"
+        style="@style/Widget.QuickLaunch.Search.Pill"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/ios_search_height"
+        android:layout_marginStart="@dimen/ios_space_lg"
+        android:layout_marginTop="@dimen/ios_space_3xl"
+        android:layout_marginEnd="@dimen/ios_space_lg"
+        app:cardBackgroundColor="@color/ios_glass_search_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/ios_space_lg"
+            android:paddingEnd="@dimen/ios_space_lg">
+
+            <!-- 搜索图标 -->
+            <ImageView
+                android:layout_width="@dimen/ios_icon_md"
+                android:layout_height="@dimen/ios_icon_md"
+                android:contentDescription="搜索"
+                android:src="@drawable/ic_search_ios"
+                app:tint="@color/ios_text_secondary" />
+
+            <!-- 搜索输入框 -->
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/ios_space_sm"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="搜索应用"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:textColor="@color/ios_text_primary"
+                android:textColorHint="@color/ios_text_tertiary"
+                android:textSize="@dimen/ios_text_body" />
+
+            <!-- 语音按钮 -->
+            <ImageButton
+                android:id="@+id/btnVoice"
+                android:layout_width="@dimen/ios_icon_lg"
+                android:layout_height="@dimen/ios_icon_lg"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="语音搜索"
+                android:src="@drawable/ic_mic_ios"
+                app:tint="@color/ios_text_secondary" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         中部：应用网格列表（自适应列数）
+         ═══════════════════════════════════════════════════════════════ -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerApps"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/ios_space_md"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingStart="@dimen/ios_space_sm"
+        android:paddingEnd="@dimen/ios_space_sm"
+        android:paddingBottom="@dimen/ios_dock_height"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardSearch" />
+
+    <!-- 空状态 -->
+    <LinearLayout
+        android:id="@+id/layoutEmpty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/dockCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardSearch">
+
+        <ImageView
+            android:layout_width="@dimen/ios_icon_xl"
+            android:layout_height="@dimen/ios_icon_xl"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_empty_state"
+            app:tint="@color/ios_text_tertiary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ios_space_md"
+            android:text="未找到应用"
+            android:textColor="@color/ios_text_secondary"
+            android:textSize="@dimen/ios_text_body" />
+    </LinearLayout>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         底部：iOS 26 常驻 Dock 栏
+         ═══════════════════════════════════════════════════════════════ -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/dockCard"
+        style="@style/Widget.QuickLaunch.Glass.Dock"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/ios_dock_height"
+        android:layout_marginStart="@dimen/ios_space_lg"
+        android:layout_marginEnd="@dimen/ios_space_lg"
+        android:layout_marginBottom="@dimen/ios_space_xl"
+        app:cardBackgroundColor="@color/ios_glass_dock_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerDock"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/ios_space_md"
+            android:paddingEnd="@dimen/ios_space_md"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 悬浮操作按钮（iOS 风格圆形） -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="@dimen/ios_fab_size"
+        android:layout_height="@dimen/ios_fab_size"
+        android:layout_marginEnd="@dimen/ios_space_xl"
+        android:layout_marginBottom="@dimen/ios_space_3xl"
+        android:contentDescription="新建"
+        android:src="@drawable/ic_add_ios"
+        app:backgroundTint="@color/ios_blue"
+        app:layout_constraintBottom_toTopOf="@id/dockCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/white" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

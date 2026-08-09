@@ -4,14 +4,13 @@ package com.workbuddy.quicklaunch.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
-import com.google.android.material.card.MaterialCardView;
 import com.workbuddy.quicklaunch.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -19,10 +18,10 @@ import java.lang.String;
 
 public final class ItemAutomationBinding implements ViewBinding {
   @NonNull
-  private final MaterialCardView rootView;
+  private final LinearLayout rootView;
 
   @NonNull
-  public final Button btnDelete;
+  public final TextView btnDelete;
 
   @NonNull
   public final SwitchCompat switchEnabled;
@@ -36,7 +35,7 @@ public final class ItemAutomationBinding implements ViewBinding {
   @NonNull
   public final View vStatusDot;
 
-  private ItemAutomationBinding(@NonNull MaterialCardView rootView, @NonNull Button btnDelete,
+  private ItemAutomationBinding(@NonNull LinearLayout rootView, @NonNull TextView btnDelete,
       @NonNull SwitchCompat switchEnabled, @NonNull TextView tvDesc, @NonNull TextView tvName,
       @NonNull View vStatusDot) {
     this.rootView = rootView;
@@ -49,7 +48,7 @@ public final class ItemAutomationBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public MaterialCardView getRoot() {
+  public LinearLayout getRoot() {
     return rootView;
   }
 
@@ -75,7 +74,7 @@ public final class ItemAutomationBinding implements ViewBinding {
     int id;
     missingId: {
       id = R.id.btnDelete;
-      Button btnDelete = ViewBindings.findChildViewById(rootView, id);
+      TextView btnDelete = ViewBindings.findChildViewById(rootView, id);
       if (btnDelete == null) {
         break missingId;
       }
@@ -104,8 +103,8 @@ public final class ItemAutomationBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemAutomationBinding((MaterialCardView) rootView, btnDelete, switchEnabled,
-          tvDesc, tvName, vStatusDot);
+      return new ItemAutomationBinding((LinearLayout) rootView, btnDelete, switchEnabled, tvDesc,
+          tvName, vStatusDot);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

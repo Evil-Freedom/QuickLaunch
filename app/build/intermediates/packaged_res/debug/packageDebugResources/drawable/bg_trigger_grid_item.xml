@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 触发网格未选中态：仅低透明灰白底，无描边 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/item_inactive_bg" />
+    <corners android:radius="@dimen/dark_radius_pill" />
+</shape>
