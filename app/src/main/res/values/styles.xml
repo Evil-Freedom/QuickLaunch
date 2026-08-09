@@ -117,17 +117,16 @@
         <item name="android:focusable">true</item>
     </style>
 
-    <!-- 车机 4 联排触发条件网格卡片 -->
+    <!-- 触发条件 4 联排网格卡片：高密度瘦身 -->
     <style name="Widget.QuickLaunch.Dark.GridChip" parent="">
         <item name="android:background">@drawable/bg_trigger_grid_item</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
         <item name="android:textColor">@color/dark_text_secondary</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:drawableTint">@color/dark_text_secondary</item>
-        <item name="android:drawablePadding">8dp</item>
+        <item name="android:drawablePadding">4dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
@@ -135,13 +134,12 @@
     <style name="Widget.QuickLaunch.Dark.GridChip.Selected" parent="">
         <item name="android:background">@drawable/bg_trigger_grid_item_selected</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
         <item name="android:textColor">@color/item_active_text</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:drawableTint">@color/item_active_text</item>
-        <item name="android:drawablePadding">8dp</item>
+        <item name="android:drawablePadding">4dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>

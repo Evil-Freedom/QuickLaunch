@@ -32,13 +32,16 @@
             android:textColor="@color/text_white"
             android:textSize="28sp" />
 
-        <!-- 仪表盘：双栏大卡片 -->
+        <!-- 仪表盘：双栏大卡片（高密度瘦身） -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card_dark"
             android:orientation="horizontal"
-            android:padding="14dp">
+            android:paddingStart="14dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="12dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -52,18 +55,18 @@
                     android:fontFamily="sans-serif-light"
                     android:text="已启用规则"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/tvDashboardEnabled"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="4dp"
                     android:fontFamily="sans-serif"
                     android:text="0"
                     android:textColor="@color/text_white"
                     android:textFontWeight="600"
-                    android:textSize="34sp" />
+                    android:textSize="22sp" />
             </LinearLayout>
 
             <View
@@ -84,18 +87,18 @@
                     android:fontFamily="sans-serif-light"
                     android:text="下次触发"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/tvDashboardNext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="4dp"
                     android:fontFamily="sans-serif"
                     android:text="--:--"
                     android:textColor="@color/text_white"
                     android:textFontWeight="600"
-                    android:textSize="28sp" />
+                    android:textSize="22sp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -126,19 +129,17 @@
                     android:id="@+id/chipTrigger0"
                     style="@style/Widget.QuickLaunch.Dark.GridChip.Selected"
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="@dimen/trigger_grid_item_height"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_trigger_time"
                     android:text="定时" />
 
                 <TextView
                     android:id="@+id/chipTrigger1"
                     style="@style/Widget.QuickLaunch.Dark.GridChip"
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="@dimen/trigger_grid_item_height"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_trigger_charging"
                     android:text="充电" />
             </LinearLayout>
 
@@ -152,19 +153,17 @@
                     android:id="@+id/chipTrigger2"
                     style="@style/Widget.QuickLaunch.Dark.GridChip"
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="@dimen/trigger_grid_item_height"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_trigger_wifi"
                     android:text="WiFi" />
 
                 <TextView
                     android:id="@+id/chipTrigger3"
                     style="@style/Widget.QuickLaunch.Dark.GridChip"
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="@dimen/trigger_grid_item_height"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_trigger_bluetooth"
                     android:text="蓝牙" />
             </LinearLayout>
         </LinearLayout>

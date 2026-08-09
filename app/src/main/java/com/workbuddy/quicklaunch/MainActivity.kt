@@ -23,6 +23,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.Insets
@@ -101,6 +102,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSaveRule: MaterialButton
 
     private val triggerChips = mutableListOf<TextView>()
+    private val triggerIcons = listOf(
+        R.drawable.ic_trigger_time,
+        R.drawable.ic_trigger_charging,
+        R.drawable.ic_trigger_wifi,
+        R.drawable.ic_trigger_bluetooth
+    )
     private val repeatChips = mutableListOf<TextView>()
     private val dayViews = mutableListOf<TextView>()
     private var selectedTriggerIndex = 0
@@ -342,11 +349,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupTriggerChips() {
+        val iconSize = resources.getDimensionPixelSize(R.dimen.trigger_grid_icon_size)
         triggerChips.forEachIndexed { index, textView ->
             textView.setOnClickListener {
                 selectedTriggerIndex = index
                 updateTriggerUi()
             }
+            // XML 层 drawableTint 已移除，改由代码强制 20dp 并动态着色
+            val drawable = AppCompatResources.getDrawable(this, triggerIcons[index])?.mutate()
+            drawable?.setBounds(0, 0, iconSize, iconSize)
+            textView.setCompoundDrawables(null, drawable, null, null)
         }
         selectedTriggerIndex = 0
     }
@@ -390,6 +402,13 @@ class MainActivity : AppCompatActivity() {
             textView.setTextColor(resources.getColor(R.color.item_inactive_text, null))
             textView.setTypeface(null, android.graphics.Typeface.NORMAL)
         }
+        // 同步刷新顶部图标颜色（代码层强制 20dp 尺寸）
+        textView.compoundDrawables[1]?.setTint(
+            resources.getColor(
+                if (selected) R.color.item_active_text else R.color.item_inactive_text,
+                null
+            )
+        )
     }
 
     private fun refreshRepeatChip(textView: TextView, selected: Boolean) {
