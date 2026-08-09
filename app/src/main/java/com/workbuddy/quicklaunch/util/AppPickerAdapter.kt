@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
+import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -29,7 +30,8 @@ class AppPickerAdapter(
 
     private val executor = QuickLaunchExecutors.io
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val iconCache = mutableMapOf<String, Drawable>()
+    // LRU 缓存：上限 50 条目（约 7MB），避免数百应用图标堆积内存峰值
+    private val iconCache = object : LruCache<String, Drawable>(50) {}
 
     class VH(
         val root: android.view.View,
@@ -58,7 +60,7 @@ class AppPickerAdapter(
             if (pos in 0 until itemCount) onItemClick(getItem(pos))
         }
 
-        val cached = iconCache[app.packageName]
+        val cached = iconCache.get(app.packageName)
         if (cached != null) {
             holder.ivIcon.setImageDrawable(cached)
             return
@@ -67,7 +69,7 @@ class AppPickerAdapter(
         executor.execute {
             val icon = runCatching { pm.getApplicationIcon(app.packageName) }.getOrNull()
                 ?: return@execute
-            iconCache[app.packageName] = icon
+            iconCache.put(app.packageName, icon)
             mainHandler.post {
                 if (holder.bindingAdapterPosition == position) {
                     holder.ivIcon.setImageDrawable(icon)

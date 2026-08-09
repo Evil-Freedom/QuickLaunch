@@ -94,6 +94,10 @@
     <color name="dark_switch_track">@color/stroke_hairline</color>
     <color name="dark_destructive">@color/destructive</color>
 
+    <!-- 底部渐变遮罩（消除硬编码） -->
+    <color name="bottom_gradient_solid">#0F0F0F</color>
+    <color name="bottom_gradient_transparent">#000F0F0F</color>
+
     <!-- 白色/黑色（仅供系统控件兜底，业务禁用） -->
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>

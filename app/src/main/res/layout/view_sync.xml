@@ -1,54 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Tab 2：同步源（纯白 + 半透灰白磨砂玻璃风格）
-  - 法定节假日同步、数据源选择、手动管理、自定义源管理
+  - 扁平化重构：最大嵌套深度 ≤4 层（原 6 层）
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/syncScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_dark_root"
     android:clipToPadding="false"
     android:fillViewport="true"
     android:paddingBottom="@dimen/dark_scroll_bottom_gap">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="12dp">
 
         <!-- 页面标题 -->
         <TextView
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="12dp"
             android:fontFamily="sans-serif-light"
             android:text="同步源"
             android:textColor="@color/text_white"
-            android:textSize="28sp" />
+            android:textSize="28sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 防外屏息屏开关 -->
-        <LinearLayout
+        <!-- 防外屏息屏卡片（深度 3） -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutAntiSleep"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:background="@drawable/bg_card_dark"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="12dp">
+            android:padding="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
             <TextView
                 android:id="@+id/tvAntiSleep"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:text="防外屏息屏"
                 android:textColor="@color/text_white"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/swAntiSleep"
+                app:layout_constraintEnd_toStartOf="@id/swAntiSleep"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/swAntiSleep" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/swAntiSleep"
@@ -56,20 +61,25 @@
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:thumbTint="@color/dark_switch_thumb"
-                android:trackTint="@color/dark_switch_track" />
-        </LinearLayout>
+                android:trackTint="@color/dark_switch_track"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- 节假日同步卡片 -->
-        <LinearLayout
+        <!-- 节假日同步卡片（深度 4 max） -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutHolidayCard"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@drawable/bg_card_dark"
-            android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutAntiSleep">
 
             <TextView
+                android:id="@+id/tvHolidayTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
@@ -77,73 +87,76 @@
                 android:text="法定节假日数据"
                 android:textAllCaps="true"
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- 数据源选择行 -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- 数据源选择行（深度 4） -->
+            <TextView
+                android:id="@+id/tvSourceLabel"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:fontFamily="sans-serif-light"
+                android:text="数据源"
+                android:textColor="@color/text_white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/spinnerSource"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/spinnerSource" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:text="数据源"
-                    android:textColor="@color/text_white"
-                    android:textSize="16sp" />
-
-                <Spinner
-                    android:id="@+id/spinnerSource"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/text_white" />
-            </LinearLayout>
+            <Spinner
+                android:id="@+id/spinnerSource"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@color/text_white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvSourceLabel"
+                app:layout_constraintTop_toBottomOf="@id/tvHolidayTitle" />
 
             <!-- 同步按钮 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSyncHolidays"
                 style="@style/Widget.QuickLaunch.Dark.Button.Primary"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/dark_button_height"
                 android:layout_marginTop="10dp"
-                android:text="同步法定节假日" />
+                android:text="同步法定节假日"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/spinnerSource" />
 
-            <!-- 管理按钮组 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="8dp">
+            <!-- 管理按钮组（扁平化到深度 4） -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnManageHolidays"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dark_button_height"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:text="手动管理节假日"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnSyncHolidays" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnManageHolidays"
-                    style="@style/Widget.QuickLaunch.Dark.Button.Action"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/dark_button_height"
-                    android:layout_marginBottom="8dp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:paddingHorizontal="16dp"
-                    android:text="手动管理节假日"
-                    android:textSize="14sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnManageSources"
-                    style="@style/Widget.QuickLaunch.Dark.Button.Action"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/dark_button_height"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:paddingHorizontal="16dp"
-                    android:text="管理数据源"
-                    android:textSize="14sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-    </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnManageSources"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dark_button_height"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:text="管理数据源"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnManageHolidays" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
