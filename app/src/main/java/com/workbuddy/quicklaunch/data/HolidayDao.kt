@@ -25,8 +25,19 @@ interface HolidayDao {
     @Query("SELECT date FROM holidays")
     fun getAllDates(): List<String>
 
+    /** 仅休息日（isWorkday = 0），用于「跳过节假日不触发」。 */
+    @Query("SELECT date FROM holidays WHERE isWorkday = 0")
+    fun getRestDates(): List<String>
+
+    /** 仅调休上班日（isWorkday = 1），用于「遇到调休自动运行」。 */
+    @Query("SELECT date FROM holidays WHERE isWorkday = 1")
+    fun getWorkdayDates(): List<String>
+
     @Query("SELECT * FROM holidays ORDER BY date")
     fun getAll(): List<Holiday>
+
+    @Query("SELECT * FROM holidays WHERE date = :date LIMIT 1")
+    fun getByDate(date: String): Holiday?
 
     @Query("SELECT COUNT(*) FROM holidays")
     fun count(): Int

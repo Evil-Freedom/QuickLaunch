@@ -77,7 +77,8 @@ object HolidaySync {
                 acc
             }.getOrDefault(emptyList())
 
-            // 同一天可能被两年的数据重复给出，落库前按日期去重，防止数据库表变得过大
+            // 同一天可能被两年的数据重复给出，落库前按日期去重，防止数据库表变得过大。
+            // 两份数据若冲突（同一天一份说休息、一份说上班），保留已有项，避免抖动。
             val distinctHolidays = holidays.distinctBy { it.date }
             if (distinctHolidays.isNotEmpty()) {
                 val writeSuccess = runCatching { dao.replaceAll(distinctHolidays) }.isSuccess

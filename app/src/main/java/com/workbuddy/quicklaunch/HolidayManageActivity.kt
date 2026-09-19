@@ -42,6 +42,7 @@ class HolidayManageActivity : AppCompatActivity() {
             val holiday = items[position]
             holder.date.text = holiday.date
             holder.name.text = holiday.name
+            holder.tag.text = if (holiday.isWorkday) "调休上班" else "休息"
             holder.delete.setOnClickListener { removeHoliday(holiday.date) }
         }
     }
@@ -83,7 +84,7 @@ class HolidayManageActivity : AppCompatActivity() {
         }
     }
 
-    /** 用 DatePicker 选日期，再可选填名称，写入 holidays 表。 */
+    /** 用 DatePicker 选日期，再选类型并可选填名称，写入 holidays 表。 */
     private fun addHoliday() {
         val cal = Calendar.getInstance()
         DatePickerDialog(
@@ -92,10 +93,10 @@ class HolidayManageActivity : AppCompatActivity() {
                 // 必须固定 Locale.US：阿拉伯/波斯等 locale 默认会输出非 ASCII 数字，
                 // 生成的 key 与 HolidayChecker.dateKey 永远匹配不上，跳过节假日会静默失效。
                 val date = String.format(Locale.US, "%04d-%02d-%02d", y, m + 1, d)
-                // 已存在则沿用原名称，不重复插入（date 为主键，insert 走 REPLACE）
+                // 已存在则沿用原名称与类型，不重复插入（date 为主键，insert 走 REPLACE）
                 runIo {
-                    val name = db.holidayDao().getAll().firstOrNull { it.date == date }?.name ?: ""
-                    postUi { askName(date, name) }
+                    val existing = db.holidayDao().getByDate(date)
+                    postUi { askType(date, existing) }
                 }
             },
             cal.get(Calendar.YEAR),
@@ -104,7 +105,21 @@ class HolidayManageActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun askName(date: String, current: String) {
+    /** 先选日期类型：法定休息日（跳过）还是调休上班日（强制触发）。 */
+    private fun askType(date: String, existing: Holiday?) {
+        val labels = arrayOf("休息日（跳过不触发）", "调休上班日（自动运行）")
+        val checked = if (existing?.isWorkday == true) 1 else 0
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.holiday_add, date))
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                dialog.dismiss()
+                askName(date, existing?.name.orEmpty(), isWorkday = which == 1)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun askName(date: String, current: String, isWorkday: Boolean) {
         val input = EditText(this).apply {
             setText(current)
             hint = getString(R.string.holiday_name_hint)
@@ -116,7 +131,9 @@ class HolidayManageActivity : AppCompatActivity() {
                 val name = input.text.toString().trim()
                 val app = applicationContext
                 runIo {
-                    db.holidayDao().insertAll(listOf(Holiday(date = date, name = name)))
+                    db.holidayDao().insertAll(
+                        listOf(Holiday(date = date, name = name, isWorkday = isWorkday))
+                    )
                     Scheduler.rescheduleAll(app)
                     load()
                 }
@@ -144,6 +161,7 @@ class HolidayManageActivity : AppCompatActivity() {
         androidx.recyclerview.widget.RecyclerView.ViewHolder(v) {
         val date = v.findViewById<android.widget.TextView>(R.id.tvDate)
         val name = v.findViewById<android.widget.TextView>(R.id.tvName)
+        val tag = v.findViewById<android.widget.TextView>(R.id.tvTag)
         val delete = v.findViewById<android.widget.Button>(R.id.btnDelete)
     }
 }

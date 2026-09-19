@@ -1,12 +1,16 @@
 package com.workbuddy.quicklaunch.util
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,13 +26,8 @@ import com.workbuddy.quicklaunch.adapter.DevicePickerAdapter
  * 全屏暗色底 + 吸顶搜索框 + 列表项带图标 + 设备名。
  * 支持蓝牙设备 / WiFi 网络两种模式。
  *
- * 用法：
- *   DevicePickerBottomSheet.newInstance(
- *       mode = DevicePickerBottomSheet.MODE_BLUETOOTH,  // or MODE_WIFI
- *       devices = listOf("Device A", "Device B"),
- *       selectedName = currentlySelected
- *   ).setOnSelectedListener { name -> ... }
- *    .show(supportFragmentManager, "device_picker")
+ * WiFi 模式下，底部显示「手动输入 WiFi 名称」选项，
+ * 点击后直接在底部弹出输入框，用户输入后按确定即可。
  */
 class DevicePickerBottomSheet : BottomSheetDialogFragment() {
 
@@ -41,6 +40,13 @@ class DevicePickerBottomSheet : BottomSheetDialogFragment() {
     private lateinit var adapter: DevicePickerAdapter
     private lateinit var tvEmpty: TextView
     private lateinit var tvAnyDevice: TextView
+    private lateinit var tvManualInput: TextView
+    private lateinit var layoutManualInput: LinearLayout
+    private lateinit var etManualWifiName: EditText
+    private lateinit var tvManualConfirm: TextView
+    private lateinit var tvCurrentSsid: TextView
+
+    private var isManualInputMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,20 +80,52 @@ class DevicePickerBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val titleView = view.findViewById<TextView>(R.id.tvTitle)
-        val subtitleHint = view.findViewById<EditText>(R.id.etSearch)
+        val etSearch = view.findViewById<EditText>(R.id.etSearch)
         tvEmpty = view.findViewById(R.id.tvEmpty)
         tvAnyDevice = view.findViewById(R.id.tvAnyDevice)
+        tvManualInput = view.findViewById(R.id.tvManualInput)
+        layoutManualInput = view.findViewById(R.id.layoutManualInput)
+        etManualWifiName = view.findViewById(R.id.etManualWifiName)
+        tvManualConfirm = view.findViewById(R.id.tvManualConfirm)
+        tvCurrentSsid = view.findViewById(R.id.tvCurrentSsid)
 
         if (mode == MODE_BLUETOOTH) {
             titleView.text = "选择蓝牙设备"
-            subtitleHint.hint = "搜索蓝牙设备..."
+            etSearch.hint = "搜索蓝牙设备..."
             tvEmpty.text = "没有已配对的蓝牙设备"
             tvAnyDevice.text = "任意蓝牙设备（不限制）"
+            tvManualInput.visibility = View.GONE
+            layoutManualInput.visibility = View.GONE
+            tvCurrentSsid.visibility = View.GONE
         } else {
             titleView.text = "选择 WiFi 网络"
-            subtitleHint.hint = "搜索 WiFi 网络..."
+            etSearch.hint = "搜索 WiFi 网络..."
             tvEmpty.text = "没有保存的 WiFi 网络"
             tvAnyDevice.text = "任意 WiFi 网络（不限制）"
+
+            // WiFi 模式下始终显示手动输入选项
+            tvManualInput.visibility = View.VISIBLE
+            tvManualInput.setOnClickListener {
+                showManualInput()
+            }
+
+            // 显示当前 SSID
+            val currentSsid = WifiNetworks.getCurrentSsid(requireContext())
+            if (currentSsid != null) {
+                tvCurrentSsid.text = "当前: $currentSsid"
+                tvCurrentSsid.visibility = View.VISIBLE
+            }
+
+            // 手动输入确认
+            tvManualConfirm.setOnClickListener {
+                confirmManualInput()
+            }
+            etManualWifiName.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    confirmManualInput()
+                    true
+                } else false
+            }
         }
 
         rvDevices = view.findViewById(R.id.rvDevices)
@@ -115,7 +153,6 @@ class DevicePickerBottomSheet : BottomSheetDialogFragment() {
         }
 
         // 搜索过滤
-        val etSearch = view.findViewById<EditText>(R.id.etSearch)
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) =
@@ -124,7 +161,32 @@ class DevicePickerBottomSheet : BottomSheetDialogFragment() {
         })
     }
 
+    private fun showManualInput() {
+        if (mode != MODE_WIFI) return
+        isManualInputMode = true
+        tvManualInput.visibility = View.GONE
+        layoutManualInput.visibility = View.VISIBLE
+        etManualWifiName.requestFocus()
+        // 显示键盘
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.showSoftInput(etManualWifiName, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun confirmManualInput() {
+        val name = etManualWifiName.text.toString().trim()
+        if (name.isNotEmpty()) {
+            onSelected?.invoke(name)
+            dismiss()
+        } else {
+            // 空值视为「任意 WiFi」
+            onSelected?.invoke(null)
+            dismiss()
+        }
+    }
+
     private fun filter(query: String) {
+        // 手动输入模式下不搜索
+        if (isManualInputMode) return
         val q = query.trim().lowercase()
         val result = if (q.isEmpty()) {
             devices

@@ -104,4 +104,77 @@
         android:textSize="14sp"
         android:visibility="gone" />
 
+    <!-- WiFi 手动输入选项（仅 WiFi 模式显示，点击后展开输入区域） -->
+    <TextView
+        android:id="@+id/tvManualInput"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_dark_capsule_unselected"
+        android:fontFamily="sans-serif"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:text="手动输入 WiFi 名称"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <!-- WiFi 手动输入区域（点击 tvManualInput 后显示） -->
+    <LinearLayout
+        android:id="@+id/layoutManualInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_search_pill"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/etManualWifiName"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:fontFamily="sans-serif"
+            android:hint="WiFi 名称（SSID）"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColor="@color/dark_text_primary"
+            android:textColorHint="@color/dark_text_tertiary"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvManualConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:text="确定"
+            android:textColor="@color/dark_text_primary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 当前 SSID 提示（仅 WiFi 模式且有当前网络时显示） -->
+    <TextView
+        android:id="@+id/tvCurrentSsid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:textColor="@color/text_tertiary"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
 </LinearLayout>

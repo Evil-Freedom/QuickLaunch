@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Automation::class, Holiday::class], version = 4, exportSchema = false)
+@Database(entities = [Automation::class, Holiday::class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun automationDao(): AutomationDao
     abstract fun holidayDao(): HolidayDao
@@ -43,6 +43,14 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // 升级到 version 5：holidays 表新增 isWorkday 列，用于区分「休息日」与「调休上班日」。
+        // 存量数据全是休息日（旧版解析器丢弃了调休日），默认 0 正好正确，无需回填。
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE holidays ADD COLUMN isWorkday INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun get(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -50,7 +58,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "quicklaunch.db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     // 装回旧版本 APK 时若不允许降级重建，Room 会直接抛 IllegalStateException，
                     // 表现为「一打开就闪退」且用户无法自救。宁可丢缓存也不要崩溃循环。
                     .fallbackToDestructiveMigrationOnDowngrade(true)

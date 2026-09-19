@@ -194,7 +194,9 @@ private fun validDateOrNull(s: String?): String? {
 /**
  * 解析 timor.tech 返回的 JSON 数据。
  *
- * 判断规则：当 code 字段等于 0 时，holiday 对象里 holiday 等于 true 的项就是休息日。
+ * 判断规则：当 code 字段等于 0 时，holiday 对象里每一项都是一个放假日期的安排：
+ * - holiday = true  → 休息日（isWorkday = false），用于跳过节假日
+ * - holiday = false → 调休上班日（isWorkday = true），用于遇到调休强制触发
  *
  * 注意：真实接口里的键通常是 "01-01"（月-日），完整日期在值对象的 date 字段里；
  * 少数镜像会把键写成完整的 yyyy-MM-dd，所以两种格式都兼容。
@@ -218,10 +220,10 @@ private fun parseTimor(json: String): List<Holiday> {
     while (keys.hasNext()) {
         val dateKey = keys.next()  // 如 "01-01" 或 "2026-01-01"
         val dayInfo = holiday.optJSONObject(dateKey) ?: continue
-        if (!dayInfo.optBoolean("holiday", false)) continue
+        val isOffDay = dayInfo.optBoolean("holiday", false)
         // 优先使用对象内的 date 字段（完整日期），否则用键的值（兼容两种格式）
         val date = validDateOrNull(dayInfo.optString("date", "")) ?: validDateOrNull(dateKey) ?: continue
-        out.add(Holiday(date = date, name = dayInfo.optString("name", "")))
+        out.add(Holiday(date = date, name = dayInfo.optString("name", ""), isWorkday = !isOffDay))
     }
     return out
 }
@@ -229,7 +231,9 @@ private fun parseTimor(json: String): List<Holiday> {
 /**
  * 解析 NateScarlet/holiday-cn 返回的 JSON 数据。
  *
- * 判断规则：days 数组里 isOffDay 等于 true 的日期就是休息日。
+ * 判断规则：days 数组里每一项都是一天的安排：
+ * - isOffDay = true  → 休息日（isWorkday = false），用于跳过节假日
+ * - isOffDay = false → 调休上班日（isWorkday = true），用于遇到调休强制触发
  *
  * 接口返回示例（JSON 对象，里面有个 days 数组）：
  * {
@@ -245,9 +249,9 @@ private fun parseNateScarlet(json: String): List<Holiday> {
     val out = mutableListOf<Holiday>()
     for (i in 0 until days.length()) {
         val dayInfo = days.optJSONObject(i) ?: continue  // 单个日期信息
-        if (!dayInfo.optBoolean("isOffDay", false)) continue
         val date = validDateOrNull(dayInfo.optString("date", "")) ?: continue
-        out.add(Holiday(date = date, name = dayInfo.optString("name", "")))
+        val isOffDay = dayInfo.optBoolean("isOffDay", false)
+        out.add(Holiday(date = date, name = dayInfo.optString("name", ""), isWorkday = !isOffDay))
     }
     return out
 }

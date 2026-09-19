@@ -79,7 +79,7 @@ class HolidaySourcesTest {
     }
 
     @Test
-    fun `timor解析器剔除调休补班日与非法日期`() {
+    fun `timor解析器区分休息日与调休补班日`() {
         val src = CustomSource("a", "a", "https://x/{year}.json", ParserType.TIMOR).toHolidaySource()
         val json = """
             {"code":0,"holiday":{
@@ -90,13 +90,16 @@ class HolidaySourcesTest {
             }}
         """.trimIndent()
         val out = src.parse(json)
-        // 补班日剔除；非法日期剔除；键非完整日期且无 date 字段的剔除
-        assertEquals(1, out.size)
-        assertEquals("2026-01-01", out[0].date)
+        // 补班日保留但标为 isWorkday；非法日期剔除；键非完整日期且无 date 字段的剔除
+        assertEquals(2, out.size)
+        val rest = out.first { it.date == "2026-01-01" }
+        assertEquals("休息日不应被标为上班", false, rest.isWorkday)
+        val work = out.first { it.date == "2026-01-04" }
+        assertEquals("补班日应被标为上班", true, work.isWorkday)
     }
 
     @Test
-    fun `holidaycn解析器剔除空日期与补班日`() {
+    fun `holidaycn解析器区分休息日与补班日并剔除空日期`() {
         val src = CustomSource("b", "b", "https://x/{year}.json", ParserType.NATE_SCARLET).toHolidaySource()
         val json = """
             {"days":[
@@ -106,8 +109,9 @@ class HolidaySourcesTest {
             ]}
         """.trimIndent()
         val out = src.parse(json)
-        assertEquals(1, out.size)
-        assertEquals("2026-10-01", out[0].date)
+        assertEquals(2, out.size)
+        assertEquals(false, out.first { it.date == "2026-10-01" }.isWorkday)
+        assertEquals(true, out.first { it.date == "2026-10-11" }.isWorkday)
     }
 
     @Test

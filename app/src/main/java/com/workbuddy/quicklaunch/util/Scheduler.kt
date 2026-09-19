@@ -36,7 +36,11 @@ object Scheduler {
         runCatching {
             val am = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
             val pi = pendingIntent(context, a)
-            val triggerAt = nextTriggerTime(a, skipPredicate(context, a, holidays))
+            val triggerAt = nextTriggerTime(
+                a,
+                shouldSkip = skipPredicate(context, a, holidays),
+                forceRun = forceRunPredicate(context, holidays)
+            )
 
             val exactAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
                 runCatching { am.canScheduleExactAlarms() }.getOrDefault(false)
@@ -66,6 +70,24 @@ object Scheduler {
         return { cal -> checker.isHoliday(cal) }
     }
 
+    /**
+     * 构造「该天是否强制触发」的判定：命中调休上班日时返回 true，无视星期规则与跳过规则。
+     *
+     * 这是「哪怕没勾选跳过节假日，遇到调休也自动运行」的实现点：
+     * 调休上班日必然落在周末，而周末常被 repeatMode=WEEKDAYS 排除、也可能被 skipHolidays 跳过。
+     * 只要节假日数据里标了 isWorkday，就把这天当作正常工作日强制放行。
+     *
+     * [preloaded] 由批量场景（[rescheduleAll]）传入，避免每条规则都全表扫描一次 holidays（N+1）。
+     */
+    private fun forceRunPredicate(
+        context: Context,
+        preloaded: HolidayChecker?
+    ): (Calendar) -> Boolean {
+        val checker = preloaded ?: HolidayChecker.fromDb(context)
+        if (checker.isEmpty()) return { false }   // 没有节假日数据时跳过 dateKey 字符串开销
+        return { cal -> checker.isMakeupWorkday(cal) }
+    }
+
     fun cancel(context: Context, a: Automation) {
         runCatching {
             val pi = pendingIntent(context, a)
@@ -76,15 +98,16 @@ object Scheduler {
     /**
      * 重新排程所有已启用的「定时」自动化，使最新的节假日/星期设置立即生效。
      * 节假日集合只加载一次并复用，规则再多也只查一次库。
+     *
+     * 必须无条件加载节假日：调休自动运行不依赖 skipHolidays 开关，
+     * 所以哪怕所有规则都没勾选「跳过节假日」，也要读表拿调休上班日。
      */
     fun rescheduleAll(context: Context) {
         val list = runCatching {
             AppDatabase.get(context).automationDao().getEnabledByType(TriggerType.TIME)
         }.getOrDefault(emptyList())
         if (list.isEmpty()) return
-        // 只要有一条开了跳过节假日，就加载一次；都没开则完全不查库
-        val holidays = if (list.any { it.skipHolidays }) HolidayChecker.fromDb(context)
-        else HolidayChecker.EMPTY
+        val holidays = HolidayChecker.fromDb(context)
         list.forEach { schedule(context, it, holidays) }
     }
 
@@ -107,16 +130,42 @@ object Scheduler {
      * - 随机窗口（randomWindow=true）：在 [windowStartMin, windowEndMin] 当天分钟区间里随机取一个时刻，
      *   重复任务每次重排都重新随机，实现「每天不固定的触发时刻」。
      */
-    /** 公开入口：不感知节假日（供测试与兼容使用），等价于 shouldSkip 恒为 false。 */
-    fun nextTriggerTime(a: Automation): Long = nextTriggerTime(a) { false }
+    /** 公开入口：不感知节假日（供测试与兼容使用），等价于 shouldSkip / forceRun 恒为 false。 */
+    fun nextTriggerTime(a: Automation): Long =
+        nextTriggerTime(a, shouldSkip = { false }, forceRun = { false })
+
+    /**
+     * 与 [nextTriggerTime] 同逻辑，但可指定「现在」的起点时刻。
+     *
+     * 供测试模拟「重复任务一天天重排」的过程：把起点设在调休日当天，
+     * 即可直接验证当天是否被放行，不必空转几百次等它自然走到。
+     */
+    internal fun nextTriggerTimeFrom(
+        a: Automation,
+        startFrom: Calendar,
+        shouldSkip: (Calendar) -> Boolean,
+        forceRun: (Calendar) -> Boolean = { false }
+    ): Long = nextTriggerTimeInternal(a, startFrom.timeInMillis, shouldSkip, forceRun)
 
     /**
      * 计算下一次触发时间（毫秒）。
      * @param shouldSkip 返回 true 表示该天应被跳过（如命中法定节假日）。仅对重复模式生效，
      *                   一次性(once)不受节假日影响。
+     * @param forceRun  返回 true 表示该天是调休上班日，不被星期规则过滤、也不被跳过规则吃掉。
+     *                  同样仅对重复模式生效，once 保持原有语义。
      */
-    internal fun nextTriggerTime(a: Automation, shouldSkip: (Calendar) -> Boolean): Long {
-        val now = System.currentTimeMillis()
+    internal fun nextTriggerTime(
+        a: Automation,
+        shouldSkip: (Calendar) -> Boolean,
+        forceRun: (Calendar) -> Boolean = { false }
+    ): Long = nextTriggerTimeInternal(a, System.currentTimeMillis(), shouldSkip, forceRun)
+
+    private fun nextTriggerTimeInternal(
+        a: Automation,
+        now: Long,
+        shouldSkip: (Calendar) -> Boolean,
+        forceRun: (Calendar) -> Boolean
+    ): Long {
         val cal = Calendar.getInstance()
 
         if (a.randomWindow) {
@@ -129,9 +178,10 @@ object Scheduler {
             cal.set(Calendar.MINUTE, start % 60)
             cal.set(Calendar.SECOND, 0)
             cal.set(Calendar.MILLISECOND, 0)
-            // 先落到本周期内第一个有效日，再逐日推进保证始终是未来且符合 repeatMode / 跳过规则
-            advanceToValidDay(cal, a)
-            advanceUntilValid(cal, a, now, shouldSkip)
+            // 先落到本周期内第一个有效日，再逐日推进保证始终是未来且符合 repeatMode / 跳过规则。
+            // 传入 forceRun，使推进过程中遇到调休上班日立即停住，不被星期规则越过
+            advanceToValidDay(cal, a, forceRun)
+            advanceUntilValid(cal, a, now, shouldSkip, forceRun)
 
             val span = (end - start).coerceAtLeast(0)
             val picked = start + random.nextInt(span + 1)
@@ -142,8 +192,8 @@ object Scheduler {
             // 随机取到的时刻可能落在“现在”之前（今天窗口已过大半），推到下一个有效日
             if (cal.timeInMillis <= now) {
                 cal.add(Calendar.DAY_OF_YEAR, 1)
-                advanceToValidDay(cal, a)
-                advanceUntilValid(cal, a, now, shouldSkip)
+                advanceToValidDay(cal, a, forceRun)
+                advanceUntilValid(cal, a, now, shouldSkip, forceRun)
             }
             return cal.timeInMillis
         }
@@ -161,13 +211,18 @@ object Scheduler {
 
         // 重复任务：先今天对齐到有效日（以防今天就是无效日但时刻还没到），
         // 再逐日推进保证是未来且每个候选日都满足 repeatMode 约束与跳过规则
-        advanceToValidDay(cal, a)
-        advanceUntilValid(cal, a, now, shouldSkip)
+        advanceToValidDay(cal, a, forceRun)
+        advanceUntilValid(cal, a, now, shouldSkip, forceRun)
         return cal.timeInMillis
     }
 
     /**
      * 逐日推进到「未来 且 不被跳过」的一天，**带硬上限**。
+     *
+     * 关键顺序：每天先问 [forceRun]（调休上班日），命中就直接认下这一天，
+     * 不再走 advanceToValidDay 的星期过滤 ——
+     * 调休上班日必然落在周末，而周末正是 repeatMode=WEEKDAYS 要排除的对象，
+     * 若先做星期过滤就会把它推走，永远选不到。
      *
      * 上限用尽说明输入数据病态（例如节假日表把未来两年全标成休息日），
      * 此时回退到「第一个未来的有效日、忽略 shouldSkip」——
@@ -177,25 +232,28 @@ object Scheduler {
         cal: Calendar,
         a: Automation,
         now: Long,
-        shouldSkip: (Calendar) -> Boolean
+        shouldSkip: (Calendar) -> Boolean,
+        forceRun: (Calendar) -> Boolean
     ) {
-        // 阶段一：先落到未来的有效日（不考虑跳过规则），正常最多 8 天内完成
+        // 阶段一：落到「未来」的候选日。
+        // 关键：每次只 +1 天，然后才做星期对齐 —— 不能反过来「先对齐再判是否未来」，
+        // 否则对齐步骤会一次跨过多天，把中间的调休上班日（必然是周末）整个越过去。
         var i = 0
         while (cal.timeInMillis <= now && i++ < MAX_DAY_ADVANCE) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
-            advanceToValidDay(cal, a)
+            advanceToValidDay(cal, a, forceRun)
         }
         val firstFuture = cal.timeInMillis
 
-        // 阶段二：再跳过命中跳过规则的日子，带硬上限
+        // 阶段二：跳过命中跳过规则的日子，带硬上限。调休日优先于跳过规则
         var guard = 0
-        while (safeSkip(shouldSkip, cal)) {
+        while (safeSkip(shouldSkip, cal) && !safeForceRun(forceRun, cal)) {
             if (guard++ >= MAX_DAY_ADVANCE) {
                 cal.timeInMillis = firstFuture
                 return
             }
             cal.add(Calendar.DAY_OF_YEAR, 1)
-            advanceToValidDay(cal, a)
+            advanceToValidDay(cal, a, forceRun)
         }
     }
 
@@ -203,28 +261,46 @@ object Scheduler {
     private fun safeSkip(shouldSkip: (Calendar) -> Boolean, cal: Calendar): Boolean =
         runCatching { shouldSkip(cal) }.getOrDefault(false)
 
+    /** forceRun 由外部注入，抛异常时按「非调休日」处理，退化为原有排程行为。 */
+    private fun safeForceRun(forceRun: (Calendar) -> Boolean, cal: Calendar): Boolean =
+        runCatching { forceRun(cal) }.getOrDefault(false)
+
     /**
      * 把日期推进到满足 repeatMode 约束的下一天（含当天）。
      * daily/once 无约束；weekdays/weekend 按周末过滤；custom 按 repeatDays 位图过滤。
      * 每个分支的推进都限定在 7 天内 —— 一周内必然能找到满足条件的日子，
      * 找不到就说明数据非法（如位图落在 1..7 之外），此时直接放行而不是死循环。
+     *
+     * 推进过程中一旦落在调休上班日就立即停止，不再继续按星期/位图过滤。
+     * 只靠调用方在进函数前判一次是不够的：本函数的 while 循环会一次跨过多天，
+     * 可能把中间的调休周六直接越过（weekdays 规则：周六→周日→周一），
+     * 之后再也没有机会把它挑回来。
      */
-    private fun advanceToValidDay(cal: Calendar, a: Automation) {
+    private fun advanceToValidDay(cal: Calendar, a: Automation, forceRun: (Calendar) -> Boolean = { false }) {
         when (a.repeatMode) {
             RepeatMode.WEEKDAYS -> {
                 var i = 0
-                while (isWeekend(cal) && i++ < 7) cal.add(Calendar.DAY_OF_YEAR, 1)
+                while (isWeekend(cal) && i++ < 7) {
+                    if (safeForceRun(forceRun, cal)) return
+                    cal.add(Calendar.DAY_OF_YEAR, 1)
+                }
             }
             RepeatMode.WEEKEND -> {
                 var i = 0
-                while (!isWeekend(cal) && i++ < 7) cal.add(Calendar.DAY_OF_YEAR, 1)
+                while (!isWeekend(cal) && i++ < 7) {
+                    if (safeForceRun(forceRun, cal)) return
+                    cal.add(Calendar.DAY_OF_YEAR, 1)
+                }
             }
             RepeatMode.CUSTOM -> {
                 // 只保留 bit0..bit6（周日~周六）；清洗后为 0 视为数据异常，退化为「任意一天」
                 val mask = a.repeatDays and 0x7F
                 if (mask != 0) {
                     var i = 0
-                    while (!isSelectedDay(cal, mask) && i++ < 7) cal.add(Calendar.DAY_OF_YEAR, 1)
+                    while (!isSelectedDay(cal, mask) && i++ < 7) {
+                        if (safeForceRun(forceRun, cal)) return
+                        cal.add(Calendar.DAY_OF_YEAR, 1)
+                    }
                 }
             }
         }

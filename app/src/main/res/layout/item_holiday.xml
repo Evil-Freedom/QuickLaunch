@@ -37,6 +37,19 @@
         android:textAppearance="@style/TextAppearance.QuickLaunch.Body"
         android:textColor="@color/text_secondary" />
 
+    <!-- 日期类型标记：休息日 / 调休上班 -->
+    <TextView
+        android:id="@+id/tvTag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/bg_dark_capsule_unselected"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp"
+        android:text="休息"
+        android:textColor="@color/text_secondary"
+        android:textSize="11sp" />
+
     <Button
         android:id="@+id/btnDelete"
         style="@style/Widget.Material3.Button.TextButton"

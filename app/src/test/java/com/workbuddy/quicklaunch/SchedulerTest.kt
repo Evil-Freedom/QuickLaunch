@@ -194,4 +194,125 @@ class SchedulerTest {
         assertTrue("随机窗口落到了被跳过的节假日 $ds", ds != key)
         assertTrue("算出了过去时间", t > System.currentTimeMillis())
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 调休上班日：哪怕没勾选跳过节假日，也要自动运行
+    // ═══════════════════════════════════════════════════════════════
+
+    /** 构造「某天是调休上班日」的判定函数。 */
+    private fun forceRunOn(target: Calendar): (Calendar) -> Boolean {
+        val key = dateKeyOf(target)
+        return { c -> dateKeyOf(c) == key }
+    }
+
+    private fun dateKeyOf(c: Calendar): String = "%04d-%02d-%02d".format(
+        c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH)
+    )
+
+    /** 找到「下一个周六」。用于模拟调休上班日。 */
+    private fun nextSaturdayFar(weeks: Int = 8): Calendar = Calendar.getInstance().apply {
+        add(Calendar.WEEK_OF_YEAR, weeks)
+        while (get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) add(Calendar.DAY_OF_YEAR, 1)
+    }
+
+    /** 把起点设在目标日**当天更早**的时刻，模拟「排程在调休日当天、触发时刻尚未到」。 */
+    private fun startAt(target: Calendar, hour: Int = 7): Calendar =
+        (target.clone() as Calendar).apply {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+    @Test
+    fun `调休上班日不被仅工作日规则过滤掉`() {
+        // 规则限定「仅工作日」，而周六本是排除项；这天若是调休上班日则必须放行，不能被推到下周一
+        val sat = nextSaturdayFar()
+        val t = Scheduler.nextTriggerTimeFrom(
+            rule("weekdays"),
+            startFrom = startAt(sat),
+            shouldSkip = { false },
+            forceRun = forceRunOn(sat)
+        )
+        val c = calOf(t)
+        assertEquals("调休日被星期规则推走了", dateKeyOf(sat), dateKeyOf(c))
+        assertEquals("调休日未落在周六", Calendar.SATURDAY, c.get(Calendar.DAY_OF_WEEK))
+        assertTrue("算出了过去时间", t > startAt(sat).timeInMillis)
+    }
+
+    @Test
+    fun `调休上班日优先于跳过节假日`() {
+        // 同一天既是调休上班日又被标成休息日（数据冲突），forceRun 必须赢
+        val sat = nextSaturdayFar()
+        val key = dateKeyOf(sat)
+        val shouldSkip: (Calendar) -> Boolean = { c -> dateKeyOf(c) == key }
+        val t = Scheduler.nextTriggerTimeFrom(
+            rule("daily"),
+            startFrom = startAt(sat),
+            shouldSkip = shouldSkip,
+            forceRun = forceRunOn(sat)
+        )
+        assertEquals("调休日被跳过规则吃掉了", key, dateKeyOf(calOf(t)))
+    }
+
+    @Test
+    fun `无调休数据时行为与旧版一致`() {
+        // forceRun 恒 false 时，仅工作日规则仍然只落在周一到周五
+        val t = Scheduler.nextTriggerTime(
+            rule("weekdays"),
+            shouldSkip = { false },
+            forceRun = { false }
+        )
+        val d = calOf(t).get(Calendar.DAY_OF_WEEK)
+        assertTrue("落到了周末 $d", d != Calendar.SATURDAY && d != Calendar.SUNDAY)
+    }
+
+    @Test
+    fun `随机窗口规则同样尊重调休日`() {
+        // 随机窗口下，走到调休上班日时必须选中它，不能被推进到下一个工作日
+        val sat = nextSaturdayFar()
+        val ws = 8 * 60 + 30
+        val we = 8 * 60 + 50
+        val t = Scheduler.nextTriggerTimeFrom(
+            randomRule("weekdays", ws, we),
+            startFrom = startAt(sat),
+            shouldSkip = { false },
+            forceRun = forceRunOn(sat)
+        )
+        val c = calOf(t)
+        assertEquals("随机窗口调休日未落在周六", Calendar.SATURDAY, c.get(Calendar.DAY_OF_WEEK))
+        assertEquals("随机窗口未选中调休上班日", dateKeyOf(sat), dateKeyOf(c))
+        val mins = c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE)
+        assertTrue("时刻 $mins 不在窗口 [$ws,$we]", mins in ws..we)
+    }
+
+    @Test
+    fun `休息日仍被跳过规则正常跳过`() {
+        // 反向验证：非调休日时 shouldSkip 依然生效，没被 forceRun 顺带放开
+        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+        val key = dateKeyOf(tomorrow)
+        val t = Scheduler.nextTriggerTime(
+            rule("daily"),
+            shouldSkip = { c -> dateKeyOf(c) == key },
+            forceRun = { false }
+        )
+        assertTrue("休息日没有跳过", dateKeyOf(calOf(t)) != key)
+    }
+
+    @Test
+    fun `调休日当天也已过时刻时顺延到次日而非跳过整周`() {
+        // 边界：起点是调休周六、但规则时刻已经过了 → 只能顺延。
+        // 此时下一天是周日，weekdays 会推到周一 —— 这是正确的（今天确实已经没法触发）
+        val sat = nextSaturdayFar()
+        val t = Scheduler.nextTriggerTimeFrom(
+            rule("weekdays"),
+            startFrom = startAt(sat, hour = 23),
+            shouldSkip = { false },
+            forceRun = forceRunOn(sat)
+        )
+        val c = calOf(t)
+        assertTrue("算出了过去时间", t > startAt(sat, hour = 23).timeInMillis)
+        val d = c.get(Calendar.DAY_OF_WEEK)
+        assertTrue("顺延后落到周末 $d", d != Calendar.SATURDAY && d != Calendar.SUNDAY)
+    }
 }
