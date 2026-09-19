@@ -8,3 +8,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+# 每个模块的构建产物（原规则 /build 只匹配仓库根级，导致 app/build 被误跟踪）
+build/
+.kotlin/
