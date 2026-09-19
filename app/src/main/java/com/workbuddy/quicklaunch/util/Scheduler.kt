@@ -166,7 +166,11 @@ object Scheduler {
         shouldSkip: (Calendar) -> Boolean,
         forceRun: (Calendar) -> Boolean
     ): Long {
-        val cal = Calendar.getInstance()
+        // 起点日必须由 now 决定，不能用 Calendar.getInstance()（那永远是真实当前日期）。
+        // 生产调用传的就是 System.currentTimeMillis()，两者等价；
+        // 但 nextTriggerTimeFrom 需要把「现在」设成任意时刻，此时起点日必须跟着变，
+        // 否则起点日仍是今天，测试结果会全部落到「今天之后的第一个调休日」而看不出差异。
+        val cal = Calendar.getInstance().apply { timeInMillis = now }
 
         if (a.randomWindow) {
             // 窗口分钟数来自持久化数据，可能因旧版本/手工改库越界，先夹紧到合法区间
