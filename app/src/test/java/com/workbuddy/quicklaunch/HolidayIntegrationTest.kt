@@ -9,6 +9,7 @@ import com.workbuddy.quicklaunch.util.HolidaySources
 import com.workbuddy.quicklaunch.util.Scheduler
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Calendar
@@ -356,5 +357,80 @@ class HolidayIntegrationTest {
             forceRun = { cal -> c.isMakeupWorkday(cal) }
         )
         assertEquals("普通周末没被星期位图过滤掉", "2026-09-15", dateKeyOf(calOf(t)))
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // 第三层：自定义勾选的星期撞上「法定休息日」——由跳过开关决定
+    // ══════════════════════════════════════════════════════════════════
+
+    private val sundayOnly = 1 shl (Calendar.SUNDAY - 1)
+    private val monToFri = (Calendar.MONDAY..Calendar.FRIDAY).fold(0) { acc, d -> acc or (1 shl (d - 1)) }
+
+    private fun dayRule(mask: Int, skipHolidays: Boolean) = Automation(
+        name = "t", targetPackage = "p", targetAppName = "n",
+        triggerType = TriggerType.TIME, timeHour = 7, timeMinute = 0,
+        repeatMode = RepeatMode.CUSTOM, repeatDays = mask, skipHolidays = skipHolidays
+    )
+
+    /** 与生产一致：只在 skipHolidays 打开时才查节假日表。 */
+    private fun nextOf(a: Automation, from: String): String {
+        val c = checker()
+        return dateKeyOf(
+            calOf(
+                Scheduler.nextTriggerTimeFrom(
+                    a, startFrom = calAt(from, hour = 6),
+                    shouldSkip = { cal -> a.skipHolidays && c.isHoliday(cal) },
+                    forceRun = { cal -> c.isMakeupWorkday(cal) }
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `勾选的星期撞上法定休息日时由跳过开关决定`() {
+        // 勾了「周日」，而 2026-10-04 正好是国庆休息日（同为周日）
+        // 勾了跳过 → 那天不启动，被推到 10-10（周六·调休，见下一条测试）
+        assertEquals(
+            "勾了跳过却仍在国庆休息日启动",
+            "2026-10-10", nextOf(dayRule(sundayOnly, skipHolidays = true), "2026-10-04")
+        )
+        // 没勾跳过 → 星期勾了就照常启动
+        assertEquals(
+            "没勾跳过却被跳过了",
+            "2026-10-04", nextOf(dayRule(sundayOnly, skipHolidays = false), "2026-10-04")
+        )
+    }
+
+    @Test
+    fun `勾一~五时整段国庆假期被跳过并顺延到节后`() {
+        // 起点 10-01（周四·国庆休息）：10-01~10-07 全休息，10-08 是节后第一个周四
+        assertEquals(
+            "国庆假期没被整段跳过",
+            "2026-10-08", nextOf(dayRule(monToFri, skipHolidays = true), "2026-10-01")
+        )
+        // 没勾跳过 → 国庆当天照常启动
+        assertEquals(
+            "没勾跳过却被跳过了",
+            "2026-10-01", nextOf(dayRule(monToFri, skipHolidays = false), "2026-10-01")
+        )
+    }
+
+    @Test
+    fun `跳过后的顺延会被路上的调休上班日截住`() {
+        // 🔴 反直觉但正确：只勾「周日」的规则，起点 09-27（周日·中秋休息）被跳过，
+        // 顺延路上先撞上 10-10（周六·调休）→ 调休优先放行，**不会**走到下一个周日 10-11。
+        // 语义上说得通（调休=上班日，本就该启动），但落点与「星期设置」不符，必须固化下来。
+        val landed = nextOf(dayRule(sundayOnly, skipHolidays = true), "2026-09-27")
+        assertEquals("调休上班日没有截住顺延", "2026-10-10", landed)
+        assertNotEquals("落到了下一个周日，说明调休日没能抢先", "2026-10-11", landed)
+    }
+
+    @Test
+    fun `普通周日不在节假日表里就不受影响`() {
+        // 10-11 是普通周日（既非休息日也非调休日）→ 勾了就正常启动
+        assertEquals(
+            "普通周日被误跳过",
+            "2026-10-11", nextOf(dayRule(sundayOnly, skipHolidays = true), "2026-10-11")
+        )
     }
 }
