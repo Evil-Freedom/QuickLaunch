@@ -123,12 +123,17 @@
             android:name=".receiver.WifiReceiver"
             android:exported="false" />
 
-        <!-- 开机完成：重新注册定时任务与网络回调 -->
+        <!-- 开机完成 / 应用被覆盖更新：重新注册定时任务与网络回调。
+             ⚠️ MY_PACKAGE_REPLACED 必须留着：覆盖安装会连应用进程一起换掉，
+             已注册的 AlarmManager 闹钟与网络回调全部丢失。没有这一条时，
+             每次升级 App 都会让**所有排程静默失效**，直到手机重启或
+             用户去动一次节假日设置才恢复（真机已复现）。 -->
         <receiver
             android:name=".receiver.BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 
