@@ -20,6 +20,14 @@ jobs:
 
       - name: 安装 Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # ⚠️ 必须显式覆盖，别删。
+          # @v3 的默认值是 `tools platform-tools`，而 Google 已从 SDK 仓库下架了
+          # 独立的 legacy `tools` 包 —— 默认值会去装 `tools`，sdkmanager 16.0 报
+          # "Failed to find package 'tools'" 并以 exit 1 结束，导致整个 job 在
+          # 「安装 Android SDK」这步就挂掉，后面测试与打包全部 skipped。
+          # （2026-09-19 起必挂：runner 镜像换了 cmdline-tools 16.0 后才暴露）
+          packages: 'platform-tools'
 
       - name: 安装 Android 16 编译所需 SDK 包
         run: |
