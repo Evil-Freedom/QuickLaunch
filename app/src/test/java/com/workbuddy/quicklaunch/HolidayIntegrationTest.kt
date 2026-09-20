@@ -2,6 +2,7 @@ package com.workbuddy.quicklaunch
 
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.Holiday
+import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.HolidaySources
@@ -314,5 +315,46 @@ class HolidayIntegrationTest {
             forceRun = { cal -> c.isMakeupWorkday(cal) }
         )
         assertEquals("被远方的调休日抢占了", "2026-09-18", dateKeyOf(calOf(t)))
+    }
+
+    /** 二三四五（周二~周五）位图，与设备上真实规则 [2]「飞书 18:00」一致。 */
+    private val tueToFri = (1 shl (Calendar.TUESDAY - 1)) or
+            (1 shl (Calendar.WEDNESDAY - 1)) or
+            (1 shl (Calendar.THURSDAY - 1)) or
+            (1 shl (Calendar.FRIDAY - 1))
+
+    private fun customRule() = Automation(
+        name = "t", targetPackage = "p", targetAppName = "n",
+        triggerType = TriggerType.TIME, timeHour = 7, timeMinute = 0,
+        repeatMode = RepeatMode.CUSTOM, repeatDays = tueToFri
+    )
+
+    @Test
+    fun `自定义星期没勾调休日也会被放行`() {
+        // 设备实测同条件：规则「飞书 18:00 二三四五」在 2026-09-20（周日·调休）当天
+        // 确实被排进了 AlarmManager（dumpsys 读到 origWhen=09-20 18:00）——
+        // 而周日并不在该规则的位图里，说明**调休日优先于自定义星期过滤**，不只是优先于 weekdays。
+        val c = checker()
+        val t = Scheduler.nextTriggerTimeFrom(
+            customRule(),
+            startFrom = calAt("2026-09-20", hour = 6),
+            shouldSkip = { cal -> c.isHoliday(cal) },
+            forceRun = { cal -> c.isMakeupWorkday(cal) }
+        )
+        assertEquals("调休日被自定义星期过滤掉了", "2026-09-20", dateKeyOf(calOf(t)))
+    }
+
+    @Test
+    fun `自定义星期在非调休周末依然被过滤`() {
+        // 对照组：同一个位图落在普通周末（9-12 周六，既非调休也非节假日）→ 必须推到下周二。
+        // 没有这一条，就可能把「无脑放行一切周末」的回归当成「调休功能生效」而放过去。
+        val c = checker()
+        val t = Scheduler.nextTriggerTimeFrom(
+            customRule(),
+            startFrom = calAt("2026-09-12", hour = 6),
+            shouldSkip = { cal -> c.isHoliday(cal) },
+            forceRun = { cal -> c.isMakeupWorkday(cal) }
+        )
+        assertEquals("普通周末没被星期位图过滤掉", "2026-09-15", dateKeyOf(calOf(t)))
     }
 }
