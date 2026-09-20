@@ -30,6 +30,17 @@
     <string name="main_cancel">取消</string>
     <string name="main_undo">撤销</string>
     <string name="main_rule_deleted">已删除「%1$s」</string>
+    <!-- 编辑 / 修改既有规则 -->
+    <string name="main_edit">编辑</string>
+    <string name="main_rule_edited">已保存「%1$s」的修改</string>
+    <string name="main_edit_undo">撤销修改</string>
+    <!-- 追加到 Snackbar 正文后面的动作提示。
+         不用 Snackbar.setAction 的原因见 util/SnackbarActionExt.kt 的注释：
+         本主题下动作按钮完全不绘制内容，放在正文里才看得见。 -->
+    <string name="main_tap_to_undo">点此撤销</string>
+    <string name="main_anti_sleep_tap_to_auth">点此去授权</string>
+    <string name="main_edit_undone">已还原「%1$s」到修改前</string>
+    <string name="main_edit_undo_gone">这条规则没有可还原的修改记录了</string>
     <string name="main_source_auto">自动（推荐）</string>
     <string name="main_source_custom">%1$s（自定义）</string>
     <string name="main_syncing">同步中…</string>
@@ -60,6 +71,10 @@
     <string name="create_pick_day">请至少选择一天</string>
     <string name="create_saved">已保存</string>
     <string name="create_save_failed">保存失败，请重试</string>
+    <!-- 编辑模式（复用同一个页面） -->
+    <string name="create_save_update">保存修改</string>
+    <string name="create_updated">已保存修改</string>
+    <string name="create_rule_missing">这条规则已不存在，已切换为新建</string>
 
     <!-- ═══════════════════════════════════════════════════════════════
          HolidayManageActivity — 手动管理节假日

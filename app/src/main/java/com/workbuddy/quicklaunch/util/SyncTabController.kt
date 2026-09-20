@@ -217,9 +217,11 @@ class SyncTabController(
         swAntiSleep.setOnCheckedChangeListener { view, checked ->
             if (checked && !ScreenOnOverlay.canDraw(context)) {
                 resetAntiSleepSwitch(false)
-                Snackbar.make(callbacks.snackbarRoot, context.getString(R.string.main_anti_sleep_need_overlay), Snackbar.LENGTH_LONG)
-                    .setAction(context.getString(R.string.main_anti_sleep_go_auth)) { callbacks.requestOverlayPermission() }
-                    .show()
+                tappableSnackbar(
+                    callbacks.snackbarRoot,
+                    context.getString(R.string.main_anti_sleep_need_overlay),
+                    context.getString(R.string.main_anti_sleep_tap_to_auth)
+                ) { callbacks.requestOverlayPermission() }.show()
                 return@setOnCheckedChangeListener
             }
             view.isEnabled = false

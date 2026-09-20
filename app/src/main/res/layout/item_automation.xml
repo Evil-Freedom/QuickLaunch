@@ -134,21 +134,43 @@
                 android:textColor="@color/text_tertiary"
                 android:textSize="12sp" />
 
-            <!-- 删除按钮 -->
-            <TextView
-                android:id="@+id/btnDelete"
+            <!-- 操作行：编辑 + 删除 -->
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/glass_permission_btn_height"
+                android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/bg_card_dark"
-                android:fontFamily="sans-serif"
-                android:gravity="center"
-                android:minWidth="48dp"
-                android:paddingHorizontal="14dp"
-                android:text="删除"
-                android:textColor="@color/destructive"
-                android:textSize="12sp" />
+                android:orientation="horizontal">
+
+                <!-- 编辑按钮 -->
+                <TextView
+                    android:id="@+id/btnEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/glass_permission_btn_height"
+                    android:background="@drawable/bg_card_dark"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:minWidth="48dp"
+                    android:paddingHorizontal="14dp"
+                    android:text="编辑"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
+                <!-- 删除按钮 -->
+                <TextView
+                    android:id="@+id/btnDelete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/glass_permission_btn_height"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_card_dark"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:minWidth="48dp"
+                    android:paddingHorizontal="14dp"
+                    android:text="删除"
+                    android:textColor="@color/destructive"
+                    android:textSize="12sp" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

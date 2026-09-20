@@ -102,26 +102,56 @@ class AutomationFormController(
     var wifiName: String = ""
 
     // ── 状态查询 ─────────────────────────────────────────────────
-    fun currentTriggerType(): String = when (selectedTriggerIndex) {
-        0 -> TriggerType.TIME
-        1 -> TriggerType.CHARGING
-        2 -> TriggerType.WIFI
-        else -> TriggerType.BLUETOOTH
-    }
+    // 映射逻辑统一委托给 RuleFormMapper（纯函数、可单测），
+    // 避免「下标→字符串」和「字符串→下标」两个方向各写一遍而走偏。
+    fun currentTriggerType(): String = RuleFormMapper.triggerTypeOf(selectedTriggerIndex)
 
-    fun currentRepeatKey(): String = when (selectedRepeatIndex) {
-        0 -> "daily"
-        1 -> "weekdays"
-        2 -> "weekend"
-        3 -> "custom"
-        4 -> "once"
-        else -> "daily"
-    }
+    fun currentRepeatKey(): String = RuleFormMapper.repeatKeyOf(selectedRepeatIndex)
 
-    fun repeatDaysMask(): Int {
-        var mask = 0
-        for (i in 0..6) if (selectedDays[i]) mask = mask or (1 shl i)
-        return mask
+    fun repeatDaysMask(): Int = RuleFormMapper.daysMaskOf(selectedDays)
+
+    /**
+     * 当前正在编辑的规则 id；为 null 表示处于「新建」模式。
+     * 保存分支、返回结果、留档都以此为准，不必额外传参。
+     */
+    var editingId: Long? = null
+        private set
+
+    /** 进入编辑模式：把已有规则回填到表单。必须在 [setup] 之后调用。 */
+    fun loadForEdit(a: Automation) {
+        editingId = a.id
+
+        selectedPackage = a.targetPackage
+        selectedAppName = a.targetAppName
+        selectedTriggerIndex = RuleFormMapper.triggerIndexOf(a.triggerType)
+        selectedRepeatIndex = RuleFormMapper.repeatIndexOf(a.repeatMode)
+
+        val days = RuleFormMapper.daysOf(a.repeatDays)
+        for (i in 0..6) selectedDays[i] = days[i]
+
+        hour = a.timeHour.coerceIn(0, 23)
+        minute = a.timeMinute.coerceIn(0, 59)
+        winStartHour = (a.windowStartMin / 60).coerceIn(0, 23)
+        winStartMinute = (a.windowStartMin % 60).coerceIn(0, 59)
+        winEndHour = (a.windowEndMin / 60).coerceIn(0, 23)
+        winEndMinute = (a.windowEndMin % 60).coerceIn(0, 59)
+        bluetoothName = a.bluetoothName
+        wifiName = a.wifiName
+
+        // 先写字段再同步勾选态：isChecked 只在值变化时才触发监听器，
+        // 光靠 setOnCheckedChangeListener 回填是不可靠的（初始就是 false 时不会触发）。
+        randomWindow = a.randomWindow
+        skipHolidays = a.skipHolidays
+        views.cbRandom.isChecked = a.randomWindow
+        views.cbSkipHolidays.isChecked = a.skipHolidays
+        views.layoutRandom.visibility = if (a.randomWindow) View.VISIBLE else View.GONE
+        views.btnTime.visibility = if (a.randomWindow) View.GONE else View.VISIBLE
+
+        updateTimeLabel()
+        updateWindowLabels()
+        // 让宿主刷新「已选择：xxx」按钮文案
+        callbacks.onAppPicked(a.targetAppName.ifEmpty { a.name })
+        callbacks.onStateUiUpdate()
     }
 
     fun timeLabel(): String = String.format(Locale.US, "%02d:%02d", hour, minute)
@@ -293,11 +323,46 @@ class AutomationFormController(
 
         views.btnSave.isEnabled = false
         val app = context.applicationContext
+        val editing = editingId
         QuickLaunchExecutors.save.execute {
             val ok = runCatching {
-                val id = db.automationDao().insert(automation)
-                if (automation.triggerType == TriggerType.TIME) {
-                    Scheduler.schedule(app, automation.copy(id = id))
+                if (editing == null) {
+                    // ── 新建 ──
+                    val id = db.automationDao().insert(automation)
+                    if (automation.triggerType == TriggerType.TIME) {
+                        Scheduler.schedule(app, automation.copy(id = id))
+                    }
+                } else {
+                    // ── 修改 ──
+                    val old = db.automationDao().getById(editing)
+                    if (old == null) {
+                        // 规则已被别处删除（列表与编辑页不同步的竞态）。
+                        // 退化成新建，保住用户刚填的内容，而不是丢进黑洞。
+                        val id = db.automationDao().insert(automation)
+                        if (automation.triggerType == TriggerType.TIME) {
+                            Scheduler.schedule(app, automation.copy(id = id))
+                        }
+                    } else {
+                        // 修改前留档，供「撤销」把旧值原样写回
+                        RuleBackupStore.save(app, old)
+
+                        // ⚠️ enabled 与 createdAt 必须沿用旧值，不能取 Automation 的默认值：
+                        //   enabled 默认 true  → 编辑一条已停用的规则会把它悄悄重新启用
+                        //   createdAt 默认 now → 列表按 createdAt DESC 排序，编辑后规则会跳到最上面
+                        val merged = automation.copy(
+                            id = editing,
+                            enabled = old.enabled,
+                            createdAt = old.createdAt
+                        )
+                        db.automationDao().update(merged)
+
+                        // 旧闹钟先撤再排：触发条件从「定时」改成 WiFi/蓝牙时，
+                        // 原 PendingIntent 的 requestCode 只认 id，不撤会留下一个幽灵闹钟。
+                        Scheduler.cancel(app, merged)
+                        if (merged.enabled && merged.triggerType == TriggerType.TIME) {
+                            Scheduler.schedule(app, merged)
+                        }
+                    }
                 }
             }.isSuccess
             val activity = context as? FragmentActivity
@@ -315,6 +380,7 @@ class AutomationFormController(
 
     // ── 重置 ─────────────────────────────────────────────────────
     fun reset() {
+        editingId = null
         selectedPackage = null
         selectedAppName = null
         selectedTriggerIndex = 0

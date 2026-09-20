@@ -20,14 +20,18 @@ import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import java.util.Locale
 
 /**
- * 主界面列表适配器：展示每条自动化，支持启用开关与删除。
+ * 主界面列表适配器：展示每条自动化，支持启用开关、编辑与删除。
  *
  * 性能优化：使用 ListAdapter + DiffUtil 做增量刷新，
  * 避免规则数增长后 notifyDataSetChanged 导致全量重绘。
+ *
+ * 编辑入口有两个：整张卡片可点（隐藏手势，顺手），以及显式的「编辑」按钮（保证可发现性）。
+ * 开关与删除按钮会自行消费点击事件，不会误触发卡片点击。
  */
 class AutomationAdapter(
     private val onToggle: (Automation, Boolean) -> Unit,
-    private val onDelete: (Automation) -> Unit
+    private val onDelete: (Automation) -> Unit,
+    private val onEdit: (Automation) -> Unit
 ) : ListAdapter<Automation, AutomationAdapter.VH>(DIFF_CALLBACK) {
 
     inner class VH(val b: ItemAutomationBinding) : RecyclerView.ViewHolder(b.root)
@@ -76,6 +80,13 @@ class AutomationAdapter(
         holder.b.switchEnabled.isChecked = a.enabled
         holder.b.switchEnabled.setOnCheckedChangeListener { _, checked -> onToggle(a, checked) }
         holder.b.btnDelete.setOnClickListener { onDelete(a) }
+        holder.b.btnEdit.setOnClickListener { onEdit(a) }
+
+        // 整张卡片可点即进入编辑。MaterialCardView 在 XML 里是 clickable=false，
+        // 用 ripple 给一点按反馈，否则用户看不出这里能点。
+        holder.b.root.isClickable = true
+        holder.b.root.isFocusable = true
+        holder.b.root.setOnClickListener { onEdit(a) }
     }
 
     /** 状态色点资源：启用薰衣草紫 / 停用灰。 */

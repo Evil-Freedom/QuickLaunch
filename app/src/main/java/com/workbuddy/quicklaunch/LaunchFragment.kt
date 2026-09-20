@@ -28,8 +28,10 @@ import com.workbuddy.quicklaunch.util.AutomationFormController
 import com.workbuddy.quicklaunch.util.BluetoothDevices
 import com.workbuddy.quicklaunch.util.DevicePickerBottomSheet
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
+import com.workbuddy.quicklaunch.util.RuleBackupStore
 import com.workbuddy.quicklaunch.util.Scheduler
 import com.workbuddy.quicklaunch.util.WifiNetworks
+import com.workbuddy.quicklaunch.util.tappableSnackbar
 import java.util.Calendar
 import java.util.Locale
 
@@ -46,7 +48,29 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
     private val binding get() = _binding!!
 
     private lateinit var db: AppDatabase
-    private val ruleAdapter = AutomationAdapter(::onToggle, ::onDelete)
+    private val ruleAdapter = AutomationAdapter(::onToggle, ::onDelete, ::onEdit)
+
+    /**
+     * 编辑页返回：保存成功时把旧值写回去（读取编辑前的留档）。
+     * 留档存在 SharedPreferences，所以即使用户过了几秒才点「撤销」、甚至期间进程被回收，旧值都还在。
+     */
+    private val editLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != android.app.Activity.RESULT_OK) return@registerForActivityResult
+        val editedId = result.data?.getLongExtra(
+            CreateAutomationActivity.EXTRA_EDITED_ID, -1L
+        ) ?: -1L
+        if (editedId <= 0L) return@registerForActivityResult
+
+        refreshRules()
+        val name = ruleAdapter.currentList.firstOrNull { it.id == editedId }?.name.orEmpty()
+        tappableSnackbar(
+            binding.root,
+            getString(R.string.main_rule_edited, name),
+            getString(R.string.main_tap_to_undo)
+        ) { undoEdit(editedId) }.show()
+    }
 
     // ── 表单 View 引用 ──
     private lateinit var btnPickApp: MaterialButton
@@ -326,6 +350,59 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
         }
     }
 
+    /** 打开编辑页。带上规则 id，由 CreateAutomationActivity 自行读库回填。 */
+    private fun onEdit(automation: Automation) {
+        runCatching {
+            editLauncher.launch(
+                CreateAutomationActivity.editIntent(requireContext(), automation.id)
+            )
+        }
+    }
+
+    /**
+     * 撤销上一次修改：把留档的旧值原样写回，并重排闹钟。
+     *
+     * 留档是「读取即消费」（take 会清掉），所以撤销只能生效一次 ——
+     * 避免用户连点两次后把中间态又还原回去、越撤越乱。
+     */
+    private fun undoEdit(ruleId: Long) {
+        val ctx = context ?: return
+        val app = requireContext().applicationContext
+        QuickLaunchExecutors.io.execute {
+            val snapshot = RuleBackupStore.take(ctx, ruleId)
+            if (snapshot == null) {
+                activity?.runOnUiThread {
+                    if (_binding == null) return@runOnUiThread
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.main_edit_undo_gone),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+                return@execute
+            }
+            runCatching {
+                db.automationDao().update(snapshot)
+                Scheduler.cancel(app, snapshot)
+                if (snapshot.enabled && snapshot.triggerType == TriggerType.TIME) {
+                    Scheduler.schedule(app, snapshot)
+                }
+            }
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            activity?.runOnUiThread {
+                if (_binding == null) return@runOnUiThread
+                ruleAdapter.submitList(automations)
+                layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                updateDashboard(automations)
+                Snackbar.make(
+                    binding.root,
+                    getString(R.string.main_edit_undone, snapshot.name),
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     private fun onDelete(automation: Automation) {
         runCatching {
             androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -347,11 +424,11 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
                 if (_binding == null) return@runOnUiThread
                 ruleAdapter.submitList(automations)
                 layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
-                Snackbar.make(
+                tappableSnackbar(
                     binding.root,
                     getString(R.string.main_rule_deleted, automation.name),
-                    Snackbar.LENGTH_LONG
-                ).setAction(R.string.main_undo) { undoDelete(automation) }.show()
+                    getString(R.string.main_tap_to_undo)
+                ) { undoDelete(automation) }.show()
             }
         }
     }
@@ -402,12 +479,12 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
         cbRandom.visibility = if (isTime) View.VISIBLE else View.GONE
         cbSkipHolidays.visibility = if (isTime) View.VISIBLE else View.GONE
         if (!isTime) {
+            // 只收起「定时」专属的界面元素，**不动**用户已选的开关值。
+            // 曾经这里会把 randomWindow / skipHolidays 直接置为 false，
+            // 导致用户从「定时」切到「充电」再切回来时这两个设置被静默清空。
+            // 它们只在 triggerType=TIME 时被 Scheduler 读取，留着不影响其它触发方式。
             layoutRandom.visibility = View.GONE
             btnTime.visibility = View.VISIBLE
-            cbRandom.isChecked = false
-            cbSkipHolidays.isChecked = false
-            formController.randomWindow = false
-            formController.skipHolidays = false
         }
         repeatChips.forEachIndexed { index, textView ->
             refreshRepeatChip(textView, index == formController.selectedRepeatIndex)

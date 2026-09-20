@@ -1,6 +1,7 @@
 package com.workbuddy.quicklaunch
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -165,6 +166,36 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
             callbacks = this
         )
         formController.setup()
+        loadExistingRuleIfEditing()
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // 编辑模式
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * 带 [EXTRA_EDIT_ID] 启动时进入编辑模式：读出规则回填表单。
+     *
+     * 必须等 [AutomationFormController.setup] 跑完再回填 —— setup 会把时间重置为「现在」，
+     * 顺序反了就会把用户规则里的时间覆盖掉。
+     */
+    private fun loadExistingRuleIfEditing() {
+        val editId = intent.getLongExtra(EXTRA_EDIT_ID, NO_ID)
+        if (editId == NO_ID) return
+
+        QuickLaunchExecutors.io.execute {
+            val rule = runCatching { db.automationDao().getById(editId) }.getOrNull()
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (rule == null) {
+                    // 规则在别处被删掉了：留在页面上按新建处理，总比直接退出丢掉用户操作好
+                    toast(getString(R.string.create_rule_missing))
+                    return@runOnUiThread
+                }
+                formController.loadForEdit(rule)
+                binding.btnSave.text = getString(R.string.create_save_update)
+            }
+        }
     }
 
     private fun showBluetoothDevicePicker() {
@@ -233,12 +264,12 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
         binding.cbRandom.visibility = if (isTime) View.VISIBLE else View.GONE
         binding.cbSkipHolidays.visibility = if (isTime) View.VISIBLE else View.GONE
         if (!isTime) {
+            // 只收起「定时」专属的界面元素，**不动**用户已选的开关值。
+            // 曾经这里会把 randomWindow / skipHolidays 直接置为 false，
+            // 导致用户从「定时」切到「充电」再切回来时，这两个设置被静默清空。
+            // 这两个标记只在 triggerType=TIME 时被 Scheduler 读取，留着不影响其它触发方式。
             binding.layoutRandom.visibility = View.GONE
             binding.btnTime.visibility = View.VISIBLE
-            binding.cbRandom.isChecked = false
-            binding.cbSkipHolidays.isChecked = false
-            formController.randomWindow = false
-            formController.skipHolidays = false
         }
         repeatChips.forEachIndexed { index, textView ->
             refreshChip(textView, index == formController.selectedRepeatIndex)
@@ -265,7 +296,17 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
     }
 
     override fun onSaveSuccess() {
-        toast(getString(R.string.create_saved))
+        val editedId = formController.editingId
+        if (editedId != null) {
+            // 把被改的规则 id 回给列表页，由它弹「撤销」并把旧值写回去
+            setResult(
+                RESULT_OK,
+                Intent().putExtra(EXTRA_EDITED_ID, editedId)
+            )
+            toast(getString(R.string.create_updated))
+        } else {
+            toast(getString(R.string.create_saved))
+        }
         finish()
     }
 
@@ -292,5 +333,24 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
             textView.setTextColor(resources.getColor(R.color.dark_text_secondary, null))
             textView.setTypeface(null, android.graphics.Typeface.NORMAL)
         }
+    }
+
+    companion object {
+        /** 传入要编辑的规则 id；不传则等价于「新建」。 */
+        const val EXTRA_EDIT_ID = "com.workbuddy.quicklaunch.extra.EDIT_ID"
+
+        /** 保存成功后回传给列表页：被修改的规则 id。 */
+        const val EXTRA_EDITED_ID = "com.workbuddy.quicklaunch.extra.EDITED_ID"
+
+        private const val NO_ID = -1L
+
+        /** 编辑既有规则。 */
+        fun editIntent(context: android.content.Context, ruleId: Long): Intent =
+            Intent(context, CreateAutomationActivity::class.java)
+                .putExtra(EXTRA_EDIT_ID, ruleId)
+
+        /** 新建规则（保留原入口语义，方便将来加「从列表页新建」的跳转）。 */
+        fun createIntent(context: android.content.Context): Intent =
+            Intent(context, CreateAutomationActivity::class.java)
     }
 }

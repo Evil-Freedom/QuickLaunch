@@ -462,6 +462,16 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 保存按钮：46dp 纯白大胶囊 -->
+        <!--
+            约束必须挂在 @id/layoutOptions（选项分组卡片）上，不能挂在 @id/layoutTime 上。
+            layoutTime 只包到「选择星期」为止；「跳过法定节假日 / 随机时间」两个开关在
+            后面的 layoutOptions 卡片里。早期这里误引 layoutTime，导致按钮被排在开关卡片
+            的中间、把「跳过中国法定节假日」那行文字压掉一半。
+
+            同时不能保留 layout_constraintBottom_toBottomOf="parent"：
+            本 ConstraintLayout 是 wrap_content，按钮高度又是固定值，上下双约束会形成
+            循环依赖，ConstraintLayout 退回按垂直 bias(0.5) 摆位 —— 同样会落到页面中部。
+        -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"
             style="@style/Widget.QuickLaunch.Dark.Button.Primary"
@@ -470,9 +480,8 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"
             android:text="保存"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutTime" />
+            app:layout_constraintTop_toBottomOf="@id/layoutOptions" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
