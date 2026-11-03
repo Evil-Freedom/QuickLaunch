@@ -17,6 +17,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
+import android.view.Display
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -128,6 +129,22 @@ class KeepAliveService : Service() {
         handler.postDelayed(syncTask, 300)
     }
 
+    /**
+     * 是否有屏幕处于点亮状态。
+     *
+     * 锁屏后所有 display 都会变成 STATE_OFF —— 这时 [ScreenOnOverlay.sync] 会主动摘掉
+     * 常亮窗（它只给亮着的屏挂窗），若此时仍持有 SCREEN_BRIGHT_WAKE_LOCK 就会出现
+     * 「窗口已撤、锁还挂着」的错配：亮不起来、也睡不踏实（ON_AFTER_RELEASE 还会让
+     * 屏幕在「黑—微亮—黑」之间多晃一次），最后表现为锁屏后黑屏且耗电。
+     *
+     * razr 外屏（displayId=1）在合盖态可能不被 getDisplays() 枚举，需单独补查。
+     */
+    private fun anyDisplayLit(): Boolean = runCatching {
+        val dm = getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager ?: return@runCatching false
+        dm.displays.any { it.state == Display.STATE_ON } ||
+            dm.getDisplay(1)?.state == Display.STATE_ON
+    }.getOrDefault(false)
+
     private val syncTask = Runnable {
         // 后台即防息屏：服务在跑 + 有悬浮窗权限 + 用户没手动关 → 自动挂常亮窗 + 持锁。
         // 不再依赖显式开关，开关仅作为「手动关闭」覆盖项。
@@ -135,10 +152,12 @@ class KeepAliveService : Service() {
         runCatching {
             val disabled = AntiSleep.isDisabled(this)
             val can = ScreenOnOverlay.canDraw(this)
-            if (BuildConfig.DEBUG) Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can")
+            val lit = anyDisplayLit()
+            if (BuildConfig.DEBUG) Log.i("QL-AntiSleep", "syncTask 触发, 用户关闭=$disabled, 可悬浮窗=$can, 有亮屏=$lit")
             if (can && !disabled) {
                 ScreenOnOverlay.sync(this)
-                acquireWakeLock()
+                // 只在真正有屏亮着时才持锁；锁屏（全部 STATE_OFF）时必须释放
+                if (lit) acquireWakeLock() else releaseWakeLock()
             } else {
                 ScreenOnOverlay.clear(this)
                 releaseWakeLock()
