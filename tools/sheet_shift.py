@@ -154,8 +154,14 @@ def is_month_header(cells):
 
 
 def parse_sheet(rows, start=(2025, 6)):
-    """返回 ({(y,m,d): set(names)}, warnings)。"""
+    """返回 ({(y,m,d): set(names)}, {(y,m,d): note}, warnings)。
+
+    note 是日期格里括号里的备注（在家班 / 公司班 / 休 …）。
+    它不影响班次时刻，但决定**这天要不要触发** —— 「家里上班可以外勤打卡」，
+    在家班不必按点启动，所以必须保留而不是丢掉。
+    """
     shifts = {}
+    notes = {}
     warnings = []
 
     year, month = start
@@ -247,12 +253,10 @@ def parse_sheet(rows, start=(2025, 6)):
             if names:
                 shifts[dt] = names
                 if note:
-                    # 日期格里的备注（在家班 / 公司班 / 休）不影响班次时刻，
-                    # 但记下来便于排查「那天到底算不算上班」
-                    pass
+                    notes[dt] = note
         i += 2
 
-    return shifts, warnings
+    return shifts, notes, warnings
 
 
 def load_shifts(spreadsheet, sheet, start, rng="A1:J260"):
@@ -263,8 +267,29 @@ def load_shifts(spreadsheet, sheet, start, rng="A1:J260"):
 
 
 # ── 命令 ────────────────────────────────────────────────────────────
+def skip_reason(d, note, who):
+    """这天要不要触发规则。返回跳过原因，None 表示需要触发。
+
+    用户口径（2026-11-03）：
+    - 「周末不用启动」→ 周六、周日一律不排，即使表上有班
+    - 「家里上班可以外勤打卡」→ 备注为在家班的日子不排（不用赶点打卡）
+    公司班与未标注的普通工作日照常触发。
+
+    备注里另有「休 / 公司休」（日期格写 `4（休）`）表示当天休息，
+    虽然姓名格里仍有人名，同样不该触发；「年会」「班」按上班处理。
+    """
+    if d.weekday() >= 5:  # Mon=0 … Sat=5, Sun=6
+        return WEEK_NAMES[(d.weekday() + 1) % 7]
+    if note:
+        if "在家" in note:
+            return "在家班"
+        if "休" in note:
+            return "休息日"
+    return None
+
+
 def cmd_show(args):
-    shifts, warns = load_shifts(args.spreadsheet, args.sheet, _start(args))
+    shifts, notes, warns = load_shifts(args.spreadsheet, args.sheet, _start(args))
     if not shifts:
         raise SystemExit("没解析出任何日期，检查表格结构是否变化")
 
@@ -282,6 +307,12 @@ def cmd_show(args):
     mine = [d for d in dates if args.who in shifts[d]]
     print(f"\n{'=' * 46}")
     print(f"{args.who} 值班：{len(mine)} 天 / 共 {len(dates)} 天")
+    today = date.today()
+    upcoming = [d for d in mine if d >= today]
+    fire = [d for d in upcoming if skip_reason(d, notes.get(d), args.who) is None]
+    print(f"今天起 {len(upcoming)} 天，其中会触发规则：{len(fire)} 天"
+          f"（跳过周末 {sum(1 for d in upcoming if d.weekday() >= 5)} 天，"
+          f"在家班 {sum(1 for d in upcoming if d.weekday() < 5 and '在家' in (notes.get(d) or ''))} 天）")
     print(f"{'=' * 46}")
 
     # 按月分组打印
@@ -292,8 +323,12 @@ def cmd_show(args):
             print(f"\n{cur[0]} 年 {cur[1]:02d} 月：")
         partner = shifts[d] - {args.who}
         tag = f"  与 {'、'.join(sorted(partner))} 同行" if partner else ""
-        mark = "  ← 今天" if d == date.today() else ""
-        print(f"  {d} {WEEK_NAMES[(d.weekday() + 1) % 7]}  09:00-18:00{tag}{mark}")
+        note = notes.get(d) or ""
+        note_s = f"  [{note}]" if note else ""
+        mark = "  ← 今天" if d == today else ""
+        skip = skip_reason(d, note, args.who)
+        state = f"  ✗ 不触发（{skip}）" if skip else ""
+        print(f"  {d} {WEEK_NAMES[(d.weekday() + 1) % 7]}  09:00-18:00{note_s}{tag}{state}{mark}")
     return 0
 
 
@@ -304,7 +339,7 @@ def _start(args):
     return DEFAULT_START
 
 
-def build_payload(shifts, who, d_from, d_to):
+def build_payload(shifts, notes, who, d_from, d_to):
     out = []
     for d in sorted(shifts):
         if d_from and d < d_from:
@@ -312,6 +347,8 @@ def build_payload(shifts, who, d_from, d_to):
         if d_to and d > d_to:
             continue
         if who not in shifts[d]:
+            continue
+        if skip_reason(d, notes.get(d), who):
             continue
         out.append({
             "date": d.isoformat(),
@@ -366,21 +403,34 @@ def _runs(days):
 
 
 def cmd_push(args):
-    shifts, warns = load_shifts(args.spreadsheet, args.sheet, _start(args))
+    shifts, notes, warns = load_shifts(args.spreadsheet, args.sheet, _start(args))
     d_from = date.fromisoformat(args.date_from) if args.date_from else date.today()
     d_to = date.fromisoformat(args.date_to) if args.date_to else None
 
-    payload = build_payload(shifts, args.who, d_from, d_to)
+    payload = build_payload(shifts, notes, args.who, d_from, d_to)
     if not payload:
         raise SystemExit("选定区间内没有可下发的值班日，检查 --who / --from / --to")
 
     if warns:
         print(f"⚠️  {len(warns)} 条校验提示，已跳过对应日期")
 
+    # 说明被排除的日子：值班表上有班，但用户口径是「不启动」
+    all_days = [d for d in shifts
+                if args.who in shifts[d]
+                and (not d_from or d >= d_from) and (not d_to or d <= d_to)]
+    excl = [(d, skip_reason(d, notes.get(d), args.who)) for d in sorted(all_days)]
+    excl = [(d, r) for d, r in excl if r]
+
     want = {date.fromisoformat(x["date"]) for x in payload}
     print(f"下发范围：{payload[0]['date']} ~ {payload[-1]['date']}（{len(payload)} 天）")
     print(f"班次时刻：{SHIFT_IN_MIN // 60:02d}:{SHIFT_IN_MIN % 60:02d}"
           f"-{SHIFT_OUT_MIN // 60:02d}:{SHIFT_OUT_MIN % 60:02d}")
+    if excl:
+        wk = sum(1 for _, r in excl if r in ("周六", "周日"))
+        hm = sum(1 for _, r in excl if r == "在家班")
+        print(f"已排除 {len(excl)} 天：周末 {wk} 天、在家班 {hm} 天（这些日子不排班，规则不启动）")
+        print("  排除清单：" + "、".join(f"{d:%m-%d}{r}" for d, r in excl[:12])
+              + (" …" if len(excl) > 12 else ""))
 
     # 严格镜像：表上没有的未来日必须从手机里摘掉。
     # 否则上一版同步（比如来自考勤接口）留下的「表上已取消的班」会一直生效，
@@ -399,7 +449,7 @@ def cmd_push(args):
         have = set()
 
     if extra:
-        print(f"\n需清理 {len(extra)} 天（手机有、表上没有）：")
+        print(f"\n需清理 {len(extra)} 天（手机里有、但按规则不该触发）：")
         for a, b in _runs(extra):
             print(f"  - {a}" + ("" if a == b else f" ~ {b}"))
     elif ok_have:
@@ -432,20 +482,23 @@ def cmd_push(args):
 
 def cmd_check(args):
     """对照值班表与班次数据库，找出差异日。"""
-    shifts, _ = load_shifts(args.spreadsheet, args.sheet, _start(args))
+    shifts, notes, _ = load_shifts(args.spreadsheet, args.sheet, _start(args))
     d = _call_client("shifts", "get")
     have = {s["date"] for s in d.get("shifts", [])}
 
     today = date.today()
-    want = {dt.isoformat() for dt in shifts if args.who in shifts[dt] and dt >= today}
+    # 只有「该触发」的日子才应该出现在手机里：周末与在家班按口径排除
+    want = {dt.isoformat() for dt in shifts
+            if args.who in shifts[dt] and dt >= today
+            and skip_reason(dt, notes.get(dt), args.who) is None}
     missing = sorted(want - have)
     extra = sorted(have - want)
-    print(f"表上未来值班日：{len(want)} 天 | 手机已有：{len(have)} 天")
-    print(f"缺失（表上有、手机没有）：{len(missing)} 天")
+    print(f"应触发日：{len(want)} 天 | 手机已有：{len(have)} 天")
+    print(f"缺失（该有、手机没有）：{len(missing)} 天")
     for x in missing[:15]:
         print("  -", x)
     if extra:
-        print(f"多余（手机有、表上没有）：{len(extra)} 天")
+        print(f"多余（手机有、不该触发）：{len(extra)} 天")
         for x in extra[:15]:
             print("  +", x)
     if not missing and not extra:
