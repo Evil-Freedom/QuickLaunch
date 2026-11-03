@@ -29,17 +29,42 @@ object Scheduler {
     /** 共享 Random，避免每次排程都 new 一个（并减少同一毫秒内种子相同的概率）。 */
     private val random = java.util.Random()
 
+    /**
+     * 「恒不跳过」的共享谓词。
+     * 复用同一个实例而不是每次 lambda，是因为 [skipPredicate] / [exemptPredicate]
+     * 会在每条规则排程时被调用一次，规则多时能省掉一堆短命闭包。
+     */
+    private val NEVER: (Calendar) -> Boolean = { false }
+
+    /**
+     * 读取某条规则的单日豁免日期集合（yyyy-MM-dd）。
+     * 读库失败一律返回空集：豁免只是「少启动一次」，读不出来顶多照常启动，
+     * 绝不能让排程链路因为一张附加表而整体失败。
+     */
+    fun loadExceptionDates(context: Context, ruleId: Long): Set<String> = runCatching {
+        AppDatabase.get(context).ruleExceptionDao().getDatesByRule(ruleId).toSet()
+    }.getOrDefault(emptySet())
+
     @JvmOverloads
-    fun schedule(context: Context, a: Automation, holidays: HolidayChecker? = null) {
+    fun schedule(
+        context: Context,
+        a: Automation,
+        holidays: HolidayChecker? = null,
+        exceptions: Set<String>? = null
+    ) {
         if (a.triggerType != TriggerType.TIME) return
         // 任何一步异常都不应让「保存规则 / 开机重排」整体失败
         runCatching {
             val am = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
             val pi = pendingIntent(context, a)
+            // null 表示调用方没预加载（单条排程场景），此时才去查一次库；
+            // 批量场景（rescheduleAll）传入预加载结果，避免 N+1。
+            val exempt = exceptions ?: loadExceptionDates(context, a.id)
             val triggerAt = nextTriggerTime(
                 a,
-                shouldSkip = skipPredicate(context, a, holidays),
-                forceRun = forceRunPredicate(context, holidays)
+                shouldSkip = skipPredicate(context, a, holidays, exempt),
+                forceRun = forceRunPredicate(context, holidays, exempt),
+                exceptions = exempt
             )
 
             val exactAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
@@ -56,36 +81,79 @@ object Scheduler {
     }
 
     /**
-     * 构造「是否应跳过该天」的判定：仅在开启 skipHolidays 时查本地节假日表，否则恒不跳过。
-     * [preloaded] 由批量场景（[rescheduleAll]）传入，避免每条规则都全表扫描一次 holidays（N+1）。
+     * 构造「该天是否被用户单日豁免」的判定。
+     * 豁免是一次性的、用户显式表达「这一天不要启动」，因此优先级最高 ——
+     * 它必须能压过调休上班日的强制放行，否则「请假当天照常启动」就成了功能缺陷。
      */
-    private fun skipPredicate(
-        context: Context,
-        a: Automation,
-        preloaded: HolidayChecker?
-    ): (Calendar) -> Boolean {
-        if (!a.skipHolidays) return { false }
-        val checker = preloaded ?: HolidayChecker.fromDb(context)
-        if (checker.isEmpty()) return { false }   // 没有节假日数据时跳过 dateKey 字符串开销
-        return { cal -> checker.isHoliday(cal) }
+    private fun exemptPredicate(exceptions: Set<String>): (Calendar) -> Boolean {
+        if (exceptions.isEmpty()) return NEVER
+        return { cal -> exceptions.contains(HolidayChecker.dateKey(cal)) }
     }
 
     /**
-     * 构造「该天是否强制触发」的判定：命中调休上班日时返回 true，无视星期规则与跳过规则。
+     * 「是否应跳过该天」的**纯逻辑**实现（不查库，全部依赖注入）。
+     *
+     * 抽成独立函数是为了让单测直接验证生产代码，而不是在测试里另写一份等价判定 ——
+     * 后者只能证明「测试里的逻辑对」，证明不了线上跑的那份对。
+     *
+     * 判定由两部分取或：
+     * 1. 单日豁免 —— **不受 skipHolidays 开关影响**，用户明确点名了这一天就跳过；
+     * 2. 法定休息日 —— 仅在开启 skipHolidays 且本地有节假日数据时生效。
+     */
+    internal fun buildSkipPredicate(
+        a: Automation,
+        checker: HolidayChecker,
+        exceptions: Set<String>
+    ): (Calendar) -> Boolean {
+        val exempt = exemptPredicate(exceptions)
+        // 没勾「跳过节假日」时仍要保留豁免判定，所以不能像旧实现那样直接 return { false }
+        if (!a.skipHolidays || checker.isEmpty()) return exempt
+        return { cal -> exempt(cal) || checker.isHoliday(cal) }
+    }
+
+    /**
+     * 「该天是否强制触发」的**纯逻辑**实现：命中调休上班日时返回 true，无视星期规则与跳过规则。
      *
      * 这是「哪怕没勾选跳过节假日，遇到调休也自动运行」的实现点：
      * 调休上班日必然落在周末，而周末常被 repeatMode=WEEKDAYS 排除、也可能被 skipHolidays 跳过。
      * 只要节假日数据里标了 isWorkday，就把这天当作正常工作日强制放行。
      *
-     * [preloaded] 由批量场景（[rescheduleAll]）传入，避免每条规则都全表扫描一次 holidays（N+1）。
+     * ⚠️ 用户单日豁免（请假）必须压过调休：命中豁免时这里返回 false，
+     * 使该日退化为「普通日」再被 skipPredicate 判掉。
+     * 这样做的另一个好处是 [advanceToValidDay] 内部对 forceRun 的早退分支
+     * 不需要任何改动就自动尊重豁免 —— 它本来就会在安全阀里调这个谓词。
      */
+    internal fun buildForceRunPredicate(
+        checker: HolidayChecker,
+        exceptions: Set<String>
+    ): (Calendar) -> Boolean {
+        if (checker.isEmpty()) return NEVER   // 没有节假日数据时跳过 dateKey 字符串开销
+        val exempt = exemptPredicate(exceptions)
+        return { cal -> !exempt(cal) && checker.isMakeupWorkday(cal) }
+    }
+
+    /**
+     * 批量场景（[rescheduleAll]）会传入预加载的 [preloaded]，
+     * 避免每条规则都全表扫描一次 holidays（N+1）。
+     */
+    private fun skipPredicate(
+        context: Context,
+        a: Automation,
+        preloaded: HolidayChecker?,
+        exceptions: Set<String>
+    ): (Calendar) -> Boolean {
+        // 只有需要查库时才建 checker：没勾跳过且无豁免时直接走纯逻辑短路
+        if (!a.skipHolidays && exceptions.isEmpty()) return NEVER
+        return buildSkipPredicate(a, preloaded ?: HolidayChecker.fromDb(context), exceptions)
+    }
+
     private fun forceRunPredicate(
         context: Context,
-        preloaded: HolidayChecker?
+        preloaded: HolidayChecker?,
+        exceptions: Set<String>
     ): (Calendar) -> Boolean {
         val checker = preloaded ?: HolidayChecker.fromDb(context)
-        if (checker.isEmpty()) return { false }   // 没有节假日数据时跳过 dateKey 字符串开销
-        return { cal -> checker.isMakeupWorkday(cal) }
+        return buildForceRunPredicate(checker, exceptions)
     }
 
     fun cancel(context: Context, a: Automation) {
@@ -97,18 +165,30 @@ object Scheduler {
 
     /**
      * 重新排程所有已启用的「定时」自动化，使最新的节假日/星期设置立即生效。
-     * 节假日集合只加载一次并复用，规则再多也只查一次库。
+     * 节假日集合与单日豁免都只加载一次并复用，规则再多也只查两次库。
      *
      * 必须无条件加载节假日：调休自动运行不依赖 skipHolidays 开关，
      * 所以哪怕所有规则都没勾选「跳过节假日」，也要读表拿调休上班日。
      */
     fun rescheduleAll(context: Context) {
+        val db = runCatching { AppDatabase.get(context) }.getOrNull() ?: return
         val list = runCatching {
-            AppDatabase.get(context).automationDao().getEnabledByType(TriggerType.TIME)
+            db.automationDao().getEnabledByType(TriggerType.TIME)
         }.getOrDefault(emptyList())
         if (list.isEmpty()) return
+
+        // 低频顺手清理：规则被删除后遗留的豁免。失败无所谓，下次还会清。
+        runCatching { db.ruleExceptionDao().deleteOrphans() }
+
         val holidays = HolidayChecker.fromDb(context)
-        list.forEach { schedule(context, it, holidays) }
+        val exemptByRule = runCatching {
+            // 一次全表读入再分组，避免「每条规则查一次」的 N+1
+            db.ruleExceptionDao().getAll()
+                .groupBy({ it.ruleId }, { it.date })
+                .mapValues { (_, dates) -> dates.toSet() }
+        }.getOrDefault(emptyMap())
+
+        list.forEach { schedule(context, it, holidays, exemptByRule[it.id] ?: emptySet()) }
     }
 
     private fun pendingIntent(context: Context, a: Automation): PendingIntent {
@@ -130,9 +210,34 @@ object Scheduler {
      * - 随机窗口（randomWindow=true）：在 [windowStartMin, windowEndMin] 当天分钟区间里随机取一个时刻，
      *   重复任务每次重排都重新随机，实现「每天不固定的触发时刻」。
      */
-    /** 公开入口：不感知节假日（供测试与兼容使用），等价于 shouldSkip / forceRun 恒为 false。 */
-    fun nextTriggerTime(a: Automation): Long =
-        nextTriggerTime(a, shouldSkip = { false }, forceRun = { false })
+    /** 公开入口：不感知节假日与豁免（供测试与兼容使用），等价于 shouldSkip / forceRun 恒为 false。 */
+    fun nextTriggerTime(a: Automation, exceptions: Set<String> = emptySet()): Long =
+        nextTriggerTime(a, shouldSkip = { false }, forceRun = { false }, exceptions = exceptions)
+
+    /**
+     * 只算「下次触发时刻」，不真正排闹钟 —— 界面展示专用。
+     *
+     * 存在的理由：界面上的「下次触发」必须与 AlarmManager 里的真实落点一致。
+     * 若界面另写一套算法（只按固定时刻取最早），就会出现「卡片写着今天 12:19、
+     * 实际因为请假被推到明天」这种自相矛盾的状态。这里复用 [schedule] 用的同一组谓词，
+     * 从根上避免第二份实现漂移。
+     *
+     * @param holidays 预加载的节假日表。传 null 时**不查库**（只保留豁免判定）——
+     *                 本函数会被界面在主线程调用，绝不能在这里触发 Room 的主线程查询。
+     */
+    fun peekNextTriggerAt(
+        a: Automation,
+        holidays: HolidayChecker?,
+        exceptions: Set<String>
+    ): Long {
+        val shouldSkip = if (holidays != null) {
+            buildSkipPredicate(a, holidays, exceptions)
+        } else {
+            exemptPredicate(exceptions)
+        }
+        val forceRun = if (holidays != null) buildForceRunPredicate(holidays, exceptions) else NEVER
+        return nextTriggerTime(a, shouldSkip, forceRun, exceptions)
+    }
 
     /**
      * 与 [nextTriggerTime] 同逻辑，但可指定「现在」的起点时刻。
@@ -144,27 +249,32 @@ object Scheduler {
         a: Automation,
         startFrom: Calendar,
         shouldSkip: (Calendar) -> Boolean,
-        forceRun: (Calendar) -> Boolean = { false }
-    ): Long = nextTriggerTimeInternal(a, startFrom.timeInMillis, shouldSkip, forceRun)
+        forceRun: (Calendar) -> Boolean = { false },
+        exceptions: Set<String> = emptySet()
+    ): Long = nextTriggerTimeInternal(a, startFrom.timeInMillis, shouldSkip, forceRun, exceptions)
 
     /**
      * 计算下一次触发时间（毫秒）。
-     * @param shouldSkip 返回 true 表示该天应被跳过（如命中法定节假日）。仅对重复模式生效，
-     *                   一次性(once)不受节假日影响。
+     * @param shouldSkip 返回 true 表示该天应被跳过（如命中法定节假日、或用户单日豁免）。
+     *                   仅对重复模式生效，一次性(once)只看 [exceptions]。
      * @param forceRun  返回 true 表示该天是调休上班日，不被星期规则过滤、也不被跳过规则吃掉。
      *                  同样仅对重复模式生效，once 保持原有语义。
+     * @param exceptions 该规则的单日豁免日期集合（yyyy-MM-dd）。一次性任务命中豁免时顺延，
+     *                   保证「这一天不启动」对 once 与重复规则表现一致。
      */
     internal fun nextTriggerTime(
         a: Automation,
         shouldSkip: (Calendar) -> Boolean,
-        forceRun: (Calendar) -> Boolean = { false }
-    ): Long = nextTriggerTimeInternal(a, System.currentTimeMillis(), shouldSkip, forceRun)
+        forceRun: (Calendar) -> Boolean = { false },
+        exceptions: Set<String> = emptySet()
+    ): Long = nextTriggerTimeInternal(a, System.currentTimeMillis(), shouldSkip, forceRun, exceptions)
 
     private fun nextTriggerTimeInternal(
         a: Automation,
         now: Long,
         shouldSkip: (Calendar) -> Boolean,
-        forceRun: (Calendar) -> Boolean
+        forceRun: (Calendar) -> Boolean,
+        exceptions: Set<String> = emptySet()
     ): Long {
         // 起点日必须由 now 决定，不能用 Calendar.getInstance()（那永远是真实当前日期）。
         // 生产调用传的就是 System.currentTimeMillis()，两者等价；
@@ -210,6 +320,13 @@ object Scheduler {
 
         if (a.repeatMode == RepeatMode.ONCE) {
             if (cal.timeInMillis <= now) cal.add(Calendar.DAY_OF_YEAR, 1)
+            // 一次性任务同样尊重「该日豁免」：用户请假那天不该被一次性任务叫醒。
+            // 这里只顺延、不看节假日 —— once 不受 skipHolidays 影响的既有语义保持不变。
+            val exempt = exemptPredicate(exceptions)
+            var guard = 0
+            while (safeSkip(exempt, cal) && guard++ < MAX_DAY_ADVANCE) {
+                cal.add(Calendar.DAY_OF_YEAR, 1)
+            }
             return cal.timeInMillis
         }
 

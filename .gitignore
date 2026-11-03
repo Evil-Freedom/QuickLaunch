@@ -11,3 +11,12 @@ local.properties
 # 每个模块的构建产物（原规则 /build 只匹配仓库根级，导致 app/build 被误跟踪）
 build/
 .kotlin/
+
+# 公网中继的队列落盘文件（含待执行指令，不该进版本库）
+ql_relay_state*.json
+
+# 第二套签名：密钥与口令绝不入库
+signing/
+
+# 局域网控制端的 keyId/secret（配对后自动写入，等价于密码）
+ql_client.json

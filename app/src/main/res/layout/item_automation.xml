@@ -119,6 +119,18 @@
                     android:id="@+id/tagTrigger"
                     style="@style/Widget.QuickLaunch.Glass.Tag"
                     android:text="定时 08:00" />
+
+                <!-- 请假标签：仅当该规则存在「尚未过去」的豁免日期时显示。
+                     可点 → 打开请假日期列表，让用户能在手机上直接撤销远程下发的请假。 -->
+                <TextView
+                    android:id="@+id/tagException"
+                    style="@style/Widget.QuickLaunch.Glass.Tag"
+                    android:layout_marginEnd="0dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="请假 11-04"
+                    android:textColor="@color/text_secondary"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <!-- 描述行 -->

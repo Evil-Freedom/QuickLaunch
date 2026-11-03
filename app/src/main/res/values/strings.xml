@@ -127,4 +127,54 @@
     <string name="wifi_manual_input_confirm">确定</string>
     <string name="wifi_manual_input_use_any">任意 WiFi</string>
     <string name="wifi_manual_input_current">当前: %1$s</string>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         远程访问（局域网改启动日期）
+         ═══════════════════════════════════════════════════════════════ -->
+    <string name="remote_channel_name">远程访问</string>
+    <string name="remote_channel_desc">局域网内可查看与修改自动化规则的启动时间</string>
+    <string name="remote_notif_title">远程访问已开启</string>
+    <string name="remote_notif_starting">正在启动…</string>
+    <string name="remote_notif_running">监听 %1$s:%2$d</string>
+    <string name="remote_notif_failed">启动失败：端口被占用</string>
+    <string name="remote_need_wifi">请先连接 WiFi：远程访问需要一个局域网地址</string>
+    <string name="remote_need_enable_first">请先开启远程访问</string>
+    <string name="remote_status_off">未开启</string>
+    <string name="remote_status_on">运行中 · 同一 WiFi 下的设备可访问上面的地址</string>
+    <string name="remote_status_no_wifi">未连接 WiFi，远程访问不可用</string>
+    <string name="remote_status_relay_only">运行中 · 无局域网地址，仅备用通道可用</string>
+    <string name="remote_status_not_running">服务未运行（正在尝试自动重启）。若一直如此，请关掉开关再打开</string>
+    <string name="remote_pair_hint_idle">点下方按钮生成，10 分钟内有效</string>
+    <string name="remote_pair_expired">已过期，请重新生成</string>
+    <string name="remote_pair_generated">配对码已生成，10 分钟内有效</string>
+    <string name="remote_client_remove">移除</string>
+    <string name="remote_never_used">从未使用</string>
+    <string name="remote_audit_empty">暂无记录</string>
+
+    <!-- 备用通道（公网中继） -->
+    <string name="remote_notif_relay">备用通道已执行 %1$d 条指令（每 %2$d 秒轮询）</string>
+    <string name="relay_title">备用通道（公网中继）</string>
+    <string name="relay_hint">不在同一 WiFi 时使用。设备主动连到你在公司电脑上跑的中继，拉取密文指令。中继只转发，解不开也改不了内容。</string>
+    <string name="relay_url_hint">中继地址，如 https://xxx.trycloudflare.com</string>
+    <string name="relay_token_hint">中继令牌（可选，只用来减少噪声）</string>
+    <string name="relay_status_off">未启用</string>
+    <string name="relay_status_never">已启用 · 等待首次轮询</string>
+    <string name="relay_status_polling">已启用 · 每 %1$d 秒轮询</string>
+    <string name="relay_invalid_url">中继地址要以 http:// 或 https:// 开头</string>
+    <string name="relay_saved">已保存</string>
+    <string name="relay_need_clients">没有已配对设备：请先在局域网内完成配对，备用通道用配对密钥验签</string>
+
+    <!-- 单日请假（rule_exceptions）本地展示与撤销。
+         远程只负责写入，这几条保证用户在手机上看得到、也删得掉 —— 否则请假是个单向门。 -->
+    <string name="exc_tag_one">请假 %1$s</string>
+    <string name="exc_tag_more">请假 %1$s 等 %2$d 天</string>
+    <string name="exc_dialog_title">「%1$s」的请假日期</string>
+    <string name="exc_dialog_msg">这些天规则不会启动。点某一天可以取消该天的请假。</string>
+    <string name="exc_dialog_empty">没有请假记录</string>
+    <string name="exc_remove_confirm">%1$s 恢复启动？</string>
+    <string name="exc_remove_confirm_msg">取消这天的请假后，规则会在这一天照常启动。</string>
+    <string name="exc_remove_ok">取消请假</string>
+    <string name="exc_back">返回</string>
+    <string name="exc_removed">已取消 %1$s 的请假</string>
+    <string name="exc_reason_suffix">（%1$s）</string>
 </resources>

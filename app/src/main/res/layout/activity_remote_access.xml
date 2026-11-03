@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  远程访问配置页。
+  纯黑背景 + 深灰胶囊卡片，与 手动管理节假日 / 数据源 页面风格保持一致。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_dark_root"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="48dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="远程访问"
+            android:textColor="@color/dark_text_primary"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="sans-serif-light"
+            android:text="设备连上 WiFi 后，同一网络下的电脑或手机可以查看规则、临时取消某一天的启动。"
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="13sp" />
+
+        <!-- ═══ 开关 + 访问地址 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="启用远程访问"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="15sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/swRemote"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="monospace"
+                android:text="—"
+                android:textColor="@color/dark_text_secondary"
+                android:textIsSelectable="true"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="未开启"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- ═══ 配对码 ═══ -->
+        <LinearLayout
+            android:id="@+id/cardPair"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="配对码"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/tvPairCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:letterSpacing="0.18"
+                android:text="--------"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="34sp" />
+
+            <TextView
+                android:id="@+id/tvPairHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="点下方按钮生成，10 分钟内有效"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGenerate"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="12dp"
+                android:text="生成配对码"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- ═══ 已配对设备 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="已配对设备"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:id="@+id/containerClients"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tvClientsEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="还没有设备完成配对"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- ═══ 备用通道（公网中继） ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/relay_title"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="15sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/swRelay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/relay_hint"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/etRelayUrl"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_dark_input"
+                android:fontFamily="sans-serif"
+                android:hint="@string/relay_url_hint"
+                android:imeOptions="actionNext"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/dark_text_primary"
+                android:textColorHint="@color/dark_text_tertiary"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/etRelayToken"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_dark_input"
+                android:fontFamily="sans-serif"
+                android:hint="@string/relay_token_hint"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/dark_text_primary"
+                android:textColorHint="@color/dark_text_tertiary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvRelayStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/relay_status_off"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRelaySave"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="10dp"
+                android:text="保存并连接"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- ═══ 最近操作 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="最近操作"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/tvAudit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:text="暂无记录"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearAudit"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="10dp"
+                android:text="清空记录"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- ═══ 安全说明 ═══ -->
+        <TextView
+            android:id="@+id/tvSecurityNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:lineSpacingExtra="3dp"
+            android:text="安全说明\n• 只接受同一局域网内设备的访问，公网地址会被拒绝。\n• 每个请求都要用配对时下发的密钥签名，密钥不匹配一律 401。\n• 远程只能修改启动时间与「某天不启动」，不能改要启动哪个 App。\n• 如果当前 WiFi 不可信（例如公共热点），请关闭此功能。"
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>

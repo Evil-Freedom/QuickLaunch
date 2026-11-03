@@ -3,7 +3,9 @@ package com.workbuddy.quicklaunch.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.workbuddy.quicklaunch.remote.RemoteConfig
 import com.workbuddy.quicklaunch.service.KeepAliveService
+import com.workbuddy.quicklaunch.service.RemoteService
 import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.Scheduler
 
@@ -33,6 +35,13 @@ class BootReceiver : BroadcastReceiver() {
         // 保活服务必须在主线程同步拉起：BOOT_COMPLETED 期间系统允许启动前台服务，
         // 切到后台线程再启动有可能错过这个窗口。
         runCatching { KeepAliveService.start(app) }
+        // 远程访问服务同理：它是「用户显式开过就应当一直活着」的东西。
+        // 漏了这一条时，覆盖安装/重启后界面开关仍是「已启用」，但 8765 端口根本没人监听，
+        // 表现是「显示开着、怎么也连不上」—— 和当初闹钟静默失效是同一类故障。
+        // BOOT_COMPLETED 与 MY_PACKAGE_REPLACED 都在前台服务后台启动的豁免清单里。
+        runCatching {
+            if (RemoteConfig.isEnabled(app)) RemoteService.start(app)
+        }
         runCatching { WifiReceiver.register(app) }
 
         // 其余都是耗时操作（全表扫描 + 逐条排程 + root 授权等待），

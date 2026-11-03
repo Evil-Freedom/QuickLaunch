@@ -4,6 +4,16 @@ plugins {
     id 'com.google.devtools.ksp'
 }
 
+// 备用签名凭据（signing/ 目录整体不进版本库）。
+// 文件不存在时 hasSig2 为 false，下面的 sig2 配置不注入任何值，
+// 原 release 变体的行为一字不变 —— 这是「新签名不影响现有发布线」的保证。
+def sig2Props = new Properties()
+def sig2PropsFile = rootProject.file("signing/keystore.properties")
+if (sig2PropsFile.exists()) {
+    sig2PropsFile.withInputStream { sig2Props.load(it) }
+}
+def hasSig2 = sig2PropsFile.exists() && sig2Props.getProperty("storePassword")
+
 android {
     namespace 'com.workbuddy.quicklaunch'
     compileSdk 36
@@ -12,8 +22,10 @@ android {
         applicationId "com.workbuddy.quicklaunch"
         minSdk 24
         targetSdk 36          // Android 16
-        versionCode 18
-        versionName "1.3.14"
+        versionCode 19
+        versionName "1.3.15"
+        // 桌面名称用占位符注入，让 sig2 包能和正式版区分开
+        manifestPlaceholders = [appLabel: "@string/app_name"]
     }
 
     signingConfigs {
@@ -23,6 +35,16 @@ android {
             keyAlias System.getenv("QL_KEY_ALIAS") ?: "quicklaunch"
             keyPassword System.getenv("QL_KEY_PASSWORD") ?: "quicklaunch"
         }
+        // 第二套签名：独立 keystore + 强口令，与 release 互不干扰。
+        // 仅在 signing/keystore.properties 存在时生效，缺失则本配置为空（构建 sig2 会因无签名而失败，属预期）。
+        sig2 {
+            if (hasSig2) {
+                storeFile rootProject.file("signing/quicklaunch-sig2.jks")
+                storePassword sig2Props.getProperty("storePassword")
+                keyAlias sig2Props.getProperty("keyAlias")
+                keyPassword sig2Props.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -31,6 +53,15 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+        }
+        // 新签名的验证包：包名加 .sig2 后缀，因此能与正式版同机共存、数据互不可见。
+        // 换签名后同包名必然无法覆盖安装（Android 平台限制），加后缀是唯一「不覆盖现有版本」的做法。
+        sig2 {
+            initWith release
+            signingConfig signingConfigs.sig2
+            applicationIdSuffix ".sig2"
+            versionNameSuffix "-sig2"
+            manifestPlaceholders = [appLabel: "快捷启动 S2"]
         }
     }
 

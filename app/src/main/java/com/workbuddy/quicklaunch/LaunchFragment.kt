@@ -27,6 +27,7 @@ import com.workbuddy.quicklaunch.util.AppListLoader
 import com.workbuddy.quicklaunch.util.AutomationFormController
 import com.workbuddy.quicklaunch.util.BluetoothDevices
 import com.workbuddy.quicklaunch.util.DevicePickerBottomSheet
+import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import com.workbuddy.quicklaunch.util.RuleBackupStore
 import com.workbuddy.quicklaunch.util.Scheduler
@@ -48,7 +49,7 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
     private val binding get() = _binding!!
 
     private lateinit var db: AppDatabase
-    private val ruleAdapter = AutomationAdapter(::onToggle, ::onDelete, ::onEdit)
+    private val ruleAdapter = AutomationAdapter(::onToggle, ::onDelete, ::onEdit, ::onExceptions)
 
     /**
      * 编辑页返回：保存成功时把旧值写回去（读取编辑前的留档）。
@@ -275,52 +276,93 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
         if (_binding == null) return
         QuickLaunchExecutors.io.execute {
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            val ui = loadRuleUiData()
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
-                ruleAdapter.submitList(automations)
+                ruleAdapter.submitRules(automations, ui.exceptions)
                 layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
-                updateDashboard(automations)
+                updateDashboard(automations, ui)
             }
         }
     }
 
-    private fun updateDashboard(automations: List<Automation>) {
+    /**
+     * 列表与仪表盘共同需要的附加数据（IO 线程调用，主线程只读）。
+     *
+     * 打包成一个对象是为了让「读豁免」和「读节假日」只走一次库，
+     * 且每个调用点都不会漏掉其中一个 —— 漏掉的后果是仪表盘按「没有请假」算，
+     * 显示的时间与实际闹钟对不上。
+     */
+    private class RuleUiData(
+        val exceptions: Map<Long, List<String>>,
+        val holidays: HolidayChecker?
+    )
+
+    private fun loadRuleUiData(): RuleUiData {
+        val exceptions = runCatching {
+            db.ruleExceptionDao().getAll().groupBy({ it.ruleId }, { it.date })
+        }.getOrDefault(emptyMap())
+        val holidays = runCatching {
+            HolidayChecker.fromDb(requireContext().applicationContext)
+        }.getOrNull()
+        return RuleUiData(exceptions, holidays)
+    }
+
+    private fun updateDashboard(automations: List<Automation>, ui: RuleUiData) {
         val enabled = automations.count { it.enabled }
         tvDashboardEnabled.text = "$enabled"
         val next = computeNextTriggerTime(
-            automations.filter { it.enabled && it.triggerType == TriggerType.TIME }
+            automations.filter { it.enabled && it.triggerType == TriggerType.TIME },
+            ui
         )
         tvDashboardNext.text = next ?: "--:--"
     }
 
-    private fun computeNextTriggerTime(rules: List<Automation>): String? {
+    /**
+     * 下一次触发时刻。**直接复用 Scheduler 的判定**，不另写一套算法。
+     *
+     * 旧实现只按「今天还剩哪条规则的固定时刻」取最早，完全不看请假与节假日，
+     * 于是出现了「卡片标签写着请假 11-04、仪表盘却显示今天 12:19」这种自相矛盾的状态。
+     *
+     * 随机窗口规则不参与精确计算：它每次重排都会重新随机，
+     * 若在这里参与比较，仪表盘会随每次刷新不停跳动，比不精确更糟。
+     */
+    private fun computeNextTriggerTime(rules: List<Automation>, ui: RuleUiData): String? {
         if (rules.isEmpty()) return null
+        var best = Long.MAX_VALUE
+        for (rule in rules) {
+            if (rule.randomWindow) continue
+            val ex = ui.exceptions[rule.id].orEmpty().toSet()
+            val fire = runCatching {
+                Scheduler.peekNextTriggerAt(rule, ui.holidays, ex)
+            }.getOrNull() ?: continue
+            if (fire in 1 until best) best = fire
+        }
+        if (best == Long.MAX_VALUE) return fallbackNextTriggerTime(rules)
+        return formatTriggerTime(best)
+    }
+
+    /** 把触发时刻格式化成「今天只显示 HH:mm，非今天带月日」。 */
+    private fun formatTriggerTime(fireAt: Long): String {
         val now = Calendar.getInstance()
-        val currentMin = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-        val currentDow = now.get(Calendar.DAY_OF_WEEK) - 1 // 0=周日
+        val c = Calendar.getInstance().apply { timeInMillis = fireAt }
+        val hhmm = String.format(
+            Locale.US, "%02d:%02d", c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE)
+        )
+        val sameDay = now.get(Calendar.YEAR) == c.get(Calendar.YEAR) &&
+            now.get(Calendar.DAY_OF_YEAR) == c.get(Calendar.DAY_OF_YEAR)
+        return if (sameDay) hhmm
+        else String.format(
+            Locale.US, "%02d-%02d %s",
+            c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH), hhmm
+        )
+    }
 
-        fun nextMinute(rule: Automation): Int? {
-            val targetMin = rule.timeHour * 60 + rule.timeMinute
-            return when (rule.repeatMode) {
-                "once" -> if (targetMin > currentMin) targetMin else null
-                "daily" -> targetMin
-                "weekdays" -> if (currentDow in 1..5) targetMin else null
-                "weekend" -> if (currentDow == 0 || currentDow == 6) targetMin else null
-                "custom" -> {
-                    val mask = rule.repeatDays
-                    if ((mask shr currentDow) and 1 == 1) targetMin else null
-                }
-                else -> targetMin
-            }
-        }
-
-        val todayCandidates = rules.mapNotNull { rule ->
-            nextMinute(rule)?.let { m -> if (m > currentMin) rule to m else null }
-        }
-        if (todayCandidates.isNotEmpty()) {
-            val (_, min) = todayCandidates.minByOrNull { it.second } ?: return null
-            return String.format(Locale.US, "%02d:%02d", min / 60, min % 60)
-        }
+    /**
+     * 兜底显示：全部规则都是随机窗口（或不含固定的定时规则）时的近似值。
+     * 取最早一条规则的时刻，保持与旧版展示一致，不显示「--:--」误导用户以为没有规则。
+     */
+    private fun fallbackNextTriggerTime(rules: List<Automation>): String? {
         val earliest = rules.minByOrNull { it.timeHour * 60 + it.timeMinute } ?: return null
         return String.format(Locale.US, "%02d:%02d", earliest.timeHour, earliest.timeMinute)
     }
@@ -359,6 +401,141 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
         }
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    // 单日请假（豁免日期）
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * 点请假标签 → 列出该规则所有「今天及以后」的请假日期，可逐条撤销。
+     *
+     * 远程通道能下发请假，如果本地既看不见也删不掉，请假就成了单向门：
+     * 用户只能改 repeatDays 位图来绕开，而那是**永久**取消所有该周的规则，代价远大于预期。
+     * 这个弹窗就是这条闭环的出口。
+     */
+    private fun onExceptions(automation: Automation) {
+        if (_binding == null) return
+        QuickLaunchExecutors.io.execute {
+            val rows = runCatching { db.ruleExceptionDao().getByRule(automation.id) }
+                .getOrDefault(emptyList())
+                .filter { it.date >= HolidayChecker.dateKey(Calendar.getInstance()) }
+            activity?.runOnUiThread {
+                if (_binding == null) return@runOnUiThread
+                if (rows.isEmpty()) {
+                    // 只有过去的请假（界面不该显示这种标签）→ 顺手刷新掉过期状态
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.exc_dialog_empty),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    refreshRules()
+                    return@runOnUiThread
+                }
+                showExceptionDialog(automation, rows.map { it.date to it.reason })
+            }
+        }
+    }
+
+    /**
+     * 请假日期列表弹窗。
+     *
+     * ⚠️ 不要用 `setMessage` + `setItems` 组合：AppCompat 的 AlertController
+     * 在 setupContent 里是二选一 —— 只要设了 message，列表控件根本不进内容区，
+     * 结果就是「弹窗只有说明文字、一个日期都看不到」，撤销入口等于不存在。
+     * 真机上已经踩过一次。这里用自定义视图把说明与可点日期行放在一起。
+     */
+    private fun showExceptionDialog(automation: Automation, rows: List<Pair<String, String>>) {
+        val ctx = requireContext()
+        val pad = (16 * resources.displayMetrics.density).toInt()
+
+        val box = android.widget.LinearLayout(ctx).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(pad, pad / 2, pad, 0)
+        }
+        box.addView(
+            TextView(ctx).apply {
+                text = getString(R.string.exc_dialog_msg)
+                textSize = 13f
+                setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
+                setPadding(0, 0, 0, pad / 2)
+            }
+        )
+
+        var dialog: androidx.appcompat.app.AlertDialog? = null
+        rows.forEach { (date, reason) ->
+            val day = monthDay(date)
+            val label = if (reason.isBlank()) day
+            else day + getString(R.string.exc_reason_suffix, reason)
+            box.addView(
+                TextView(ctx).apply {
+                    text = label
+                    textSize = 16f
+                    setTextColor(ContextCompat.getColor(ctx, R.color.text_white))
+                    setPadding(0, pad, 0, pad)
+                    isClickable = true
+                    setOnClickListener {
+                        dialog?.dismiss()
+                        confirmRemoveException(automation, date)
+                    }
+                }
+            )
+        }
+
+        dialog = MaterialAlertDialogBuilder(ctx)
+            .setTitle(getString(R.string.exc_dialog_title, automation.name))
+            .setView(box)
+            .setNegativeButton(R.string.main_cancel, null)
+            .create()
+        dialog?.show()
+    }
+
+    private fun confirmRemoveException(automation: Automation, date: String) {
+        runCatching {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.exc_remove_confirm, monthDay(date)))
+                .setMessage(R.string.exc_remove_confirm_msg)
+                // 正向按钮用「取消请假」而不是「删除」：这里删的是「这天不启动」这条豁免，
+                // 写成「删除」会被读成删除整条规则，语义完全相反。
+                .setPositiveButton(R.string.exc_remove_ok) { _, _ -> removeException(automation, date) }
+                .setNegativeButton(R.string.exc_back, null)
+                .show()
+        }
+    }
+
+    /**
+     * 撤销某天的请假。
+     *
+     * ⚠️ 必须 cancel 再 schedule：只删库不重排的话，系统里已排的闹钟照旧会响 ——
+     * 数据对、接口 200，但行为完全错。这和远程通道是同一条铁律。
+     */
+    private fun removeException(automation: Automation, date: String) {
+        val app = requireContext().applicationContext
+        QuickLaunchExecutors.io.execute {
+            runCatching { db.ruleExceptionDao().delete(automation.id, date) }
+            if (automation.triggerType == TriggerType.TIME) {
+                Scheduler.cancel(app, automation)
+                // schedule 默认自己从库里读豁免，此时刚删掉的那天已经不在集合里
+                if (automation.enabled) Scheduler.schedule(app, automation)
+            }
+            val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            val ui = loadRuleUiData()
+            activity?.runOnUiThread {
+                if (_binding == null) return@runOnUiThread
+                ruleAdapter.submitRules(automations, ui.exceptions)
+                layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
+                updateDashboard(automations, ui)
+                Snackbar.make(
+                    binding.root,
+                    getString(R.string.exc_removed, monthDay(date)),
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    /** yyyy-MM-dd → MM-dd，只用于展示。 */
+    private fun monthDay(date: String): String =
+        if (date.length >= 10) date.substring(5) else date
+
     /**
      * 撤销上一次修改：把留档的旧值原样写回，并重排闹钟。
      *
@@ -389,11 +566,12 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
                 }
             }
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            val ui = loadRuleUiData()
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
-                ruleAdapter.submitList(automations)
+                ruleAdapter.submitRules(automations, ui.exceptions)
                 layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
-                updateDashboard(automations)
+                updateDashboard(automations, ui)
                 Snackbar.make(
                     binding.root,
                     getString(R.string.main_edit_undone, snapshot.name),
@@ -420,9 +598,10 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
             if (automation.triggerType == TriggerType.TIME) Scheduler.cancel(app, automation)
             runCatching { db.automationDao().delete(automation) }
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            val ui = loadRuleUiData()
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
-                ruleAdapter.submitList(automations)
+                ruleAdapter.submitRules(automations, ui.exceptions)
                 layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
                 tappableSnackbar(
                     binding.root,
@@ -441,9 +620,10 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
                 Scheduler.schedule(app, automation)
             }
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
+            val ui = loadRuleUiData()
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
-                ruleAdapter.submitList(automations)
+                ruleAdapter.submitRules(automations, ui.exceptions)
                 layoutRulesEmpty.visibility = if (automations.isEmpty()) View.VISIBLE else View.GONE
             }
         }

@@ -7,10 +7,15 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Automation::class, Holiday::class], version = 5, exportSchema = false)
+@Database(
+    entities = [Automation::class, Holiday::class, RuleException::class],
+    version = 6,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun automationDao(): AutomationDao
     abstract fun holidayDao(): HolidayDao
+    abstract fun ruleExceptionDao(): RuleExceptionDao
 
     companion object {
         @Volatile
@@ -51,6 +56,22 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // 升级到 version 6：新增 rule_exceptions 表，支持「某一天临时不启动」。
+        // 独立建表而不是给 automations 加列：豁免是 (规则 × 日期) 的多对多关系，
+        // 塞进一个逗号分隔的字符串列会让「撤销某一天」「查未来 N 天」都要全表解析字符串。
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS rule_exceptions (" +
+                        "ruleId INTEGER NOT NULL, " +
+                        "date TEXT NOT NULL, " +
+                        "reason TEXT NOT NULL DEFAULT '', " +
+                        "createdAt INTEGER NOT NULL DEFAULT 0, " +
+                        "PRIMARY KEY(ruleId, date))"
+                )
+            }
+        }
+
         fun get(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -58,7 +79,9 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "quicklaunch.db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(
+                        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6
+                    )
                     // 装回旧版本 APK 时若不允许降级重建，Room 会直接抛 IllegalStateException，
                     // 表现为「一打开就闪退」且用户无法自救。宁可丢缓存也不要崩溃循环。
                     .fallbackToDestructiveMigrationOnDowngrade(true)

@@ -252,7 +252,23 @@
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnManageHolidays" />
+                    app:layout_constraintTop_toBottomOf="@id/btnManageHolidays" />
+
+            <!-- 远程访问入口：设备连上 WiFi 后，可从局域网内其它设备改启动日期 -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRemoteAccess"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:paddingHorizontal="16dp"
+                android:text="远程访问（局域网）"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnManageSources" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

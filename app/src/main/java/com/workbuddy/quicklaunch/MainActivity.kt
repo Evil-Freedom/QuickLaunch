@@ -3,8 +3,10 @@ package com.workbuddy.quicklaunch
 import android.Manifest
 import android.app.AlarmManager
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -17,6 +19,7 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -27,6 +30,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.databinding.ActivityMainBinding
 import com.workbuddy.quicklaunch.receiver.WifiReceiver
+import com.workbuddy.quicklaunch.remote.RemoteEvents
 import com.workbuddy.quicklaunch.service.KeepAliveService
 import com.workbuddy.quicklaunch.util.AntiSleep
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
@@ -59,6 +63,18 @@ class MainActivity : AppCompatActivity() {
     private var lastResumeRefresh = 0L
     private val RESUME_DEBOUNCE_MS = 500L
 
+    /**
+     * 远程改过规则后刷新列表。
+     *
+     * 只做「重新读库 + 提交列表」，不碰任何业务状态：远程写入本身已经完成了
+     * 留档、写库、取消旧闹钟、重排新闹钟，这里纯粹是让界面追上数据。
+     */
+    private val rulesChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(c: Context?, intent: Intent?) {
+            findLaunchFragment()?.refreshRules()
+        }
+    }
+
     private fun runIo(block: () -> Unit) {
         runCatching { QuickLaunchExecutors.io.execute { runCatching(block) } }
     }
@@ -83,6 +99,8 @@ class MainActivity : AppCompatActivity() {
         setupViewPager()
         setupFloatingBottomBar()
 
+        registerRulesChangedReceiver()
+
         KeepAliveService.start(this)
         checkPermissionsOnce()
 
@@ -90,6 +108,26 @@ class MainActivity : AppCompatActivity() {
         runIo {
             val empty = runCatching { db.holidayDao().count() == 0 }.getOrDefault(false)
             if (empty) postUi { findSyncFragment()?.onSyncPageSelected() }
+        }
+    }
+
+    override fun onDestroy() {
+        runCatching { unregisterReceiver(rulesChangedReceiver) }
+        super.onDestroy()
+    }
+
+    /**
+     * Android 14+ 动态注册非系统广播必须显式声明是否导出，否则抛 SecurityException。
+     * 这里用 NOT_EXPORTED：广播由本应用自己发出，没有理由让外部应用触发界面刷新。
+     */
+    private fun registerRulesChangedReceiver() {
+        runCatching {
+            ContextCompat.registerReceiver(
+                this,
+                rulesChangedReceiver,
+                IntentFilter(RemoteEvents.ACTION_RULES_CHANGED),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
         }
     }
 

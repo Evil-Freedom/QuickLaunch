@@ -64,6 +64,10 @@ class SyncFragment : Fragment(), SyncTabController.SyncCallbacks {
             )
         )
         syncController.setup(this)
+
+        binding.btnRemoteAccess.setOnClickListener {
+            runCatching { startActivity(Intent(requireContext(), RemoteAccessActivity::class.java)) }
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════

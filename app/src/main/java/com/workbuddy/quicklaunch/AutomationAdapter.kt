@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.LruCache
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
@@ -16,7 +17,9 @@ import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ItemAutomationBinding
+import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
+import java.util.Calendar
 import java.util.Locale
 
 /**
@@ -31,8 +34,18 @@ import java.util.Locale
 class AutomationAdapter(
     private val onToggle: (Automation, Boolean) -> Unit,
     private val onDelete: (Automation) -> Unit,
-    private val onEdit: (Automation) -> Unit
+    private val onEdit: (Automation) -> Unit,
+    private val onExceptions: (Automation) -> Unit
 ) : ListAdapter<Automation, AutomationAdapter.VH>(DIFF_CALLBACK) {
+
+    /**
+     * ruleId -> 该规则的豁免日期（yyyy-MM-dd）。
+     *
+     * 为什么不并进 [Automation]：豁免在 `rule_exceptions` 表里，是独立的 (规则 × 日期) 集合。
+     * 硬塞进实体会让 DAO 变成 join 查询，也会让 DiffUtil 的相等性判断依赖第二个表。
+     * 代价是 DiffUtil 看不到它的变化，所以改了这份 Map 之后必须走 [submitRules] 补一次重绑。
+     */
+    private var exceptionsByRule: Map<Long, List<String>> = emptyMap()
 
     inner class VH(val b: ItemAutomationBinding) : RecyclerView.ViewHolder(b.root)
 
@@ -42,6 +55,18 @@ class AutomationAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
         VH(ItemAutomationBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+
+    /**
+     * 更新规则列表 + 豁免日期，并在 diff 提交后补一次重绑。
+     *
+     * 补重绑的原因：DiffUtil 只比较 [Automation]，豁免日期变了而规则本身没变时，
+     * 它判定「内容相同」→ 不重绑 → 卡片上的请假标签停留在旧值。
+     * 规则量级是几十条，整表重绑的代价远小于「删了请假但界面还显示着」这种错误状态。
+     */
+    fun submitRules(rules: List<Automation>, exceptions: Map<Long, List<String>>) {
+        exceptionsByRule = exceptions
+        submitList(rules) { notifyDataSetChanged() }
+    }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val a = getItem(position)
@@ -71,6 +96,7 @@ class AutomationAdapter(
 
         // Glassmorphism 重构：语义化胶囊标签
         holder.b.tagTrigger.text = triggerLabel(a)
+        bindExceptionTag(holder.b.tagException, a, ctx)
 
         // 状态色点 + 光晕：启用 = 薰衣草紫光晕 + 实心点，停用 = 灰色无光晕
         holder.b.vStatusGlow.setBackgroundResource(statusGlowRes(a.enabled))
@@ -92,10 +118,33 @@ class AutomationAdapter(
     /** 状态色点资源：启用薰衣草紫 / 停用灰。 */
     private fun statusDotRes(enabled: Boolean): Int =
         if (enabled) R.drawable.status_dot_on else R.drawable.status_dot_off
-
     /** 状态光晕资源：启用薰衣草紫柔光 / 停用灰。 */
     private fun statusGlowRes(enabled: Boolean): Int =
         if (enabled) R.drawable.status_glow_on else R.drawable.status_glow_off
+
+    /**
+     * 渲染请假标签。只显示「今天及以后」的豁免 —— 过去的请假日期已经不起作用，
+     * 留在卡片上只会让人以为规则还在被抑制。
+     *
+     * 日期串是 yyyy-MM-dd，定长零填充，直接字符串比较等价于日期比较。
+     */
+    private fun bindExceptionTag(tag: TextView, a: Automation, ctx: android.content.Context) {
+        val today = HolidayChecker.dateKey(Calendar.getInstance())
+        val upcoming = exceptionsByRule[a.id].orEmpty().filter { it >= today }.sorted()
+        if (upcoming.isEmpty()) {
+            tag.visibility = View.GONE
+            tag.setOnClickListener(null)
+            return
+        }
+        tag.visibility = View.VISIBLE
+        val head = upcoming.first().takeLast(5) // yyyy-MM-dd -> MM-dd
+        tag.text = if (upcoming.size == 1) {
+            ctx.getString(R.string.exc_tag_one, head)
+        } else {
+            ctx.getString(R.string.exc_tag_more, head, upcoming.size)
+        }
+        tag.setOnClickListener { onExceptions(a) }
+    }
 
     private fun triggerLabel(a: Automation): String = when (a.triggerType) {
         TriggerType.TIME ->
