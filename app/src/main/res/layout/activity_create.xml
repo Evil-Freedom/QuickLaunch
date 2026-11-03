@@ -384,10 +384,74 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/layoutTime">
 
+            <!-- 跟随班表：勾选后触发时刻由当天班次决定，星期与节假日选项自动忽略 -->
+            <CheckBox
+                android:id="@+id/cbFollowShift"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/text_white"
+                android:fontFamily="sans-serif-light"
+                android:text="跟随班表触发（按当天班次，忽略星期与节假日）"
+                android:textColor="@color/text_white"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/layoutShiftOffset"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cbFollowShift">
+
+                <TextView
+                    android:id="@+id/btnShiftAnchor"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/glass_time_bubble_height"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_dark_input"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:text="上班"
+                    android:textColor="@color/text_white"
+                    android:textFontWeight="700"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="sans-serif-light"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="·"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/btnShiftOffset"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/glass_time_bubble_height"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_dark_input"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:text="提前 30 分钟"
+                    android:textColor="@color/text_white"
+                    android:textFontWeight="700"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
             <CheckBox
                 android:id="@+id/cbSkipHolidays"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:buttonTint="@color/text_white"
                 android:fontFamily="sans-serif-light"
                 android:text="跳过中国法定节假日（含调休休息日）不触发"
@@ -395,7 +459,7 @@
                 android:textSize="15sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/layoutShiftOffset" />
 
             <CheckBox
                 android:id="@+id/cbRandom"

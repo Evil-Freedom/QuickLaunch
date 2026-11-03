@@ -1,11 +1,14 @@
 package com.workbuddy.quicklaunch.remote
 
 import com.workbuddy.quicklaunch.data.Automation
+import com.workbuddy.quicklaunch.data.DailyShift
 import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.data.RuleException
+import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.Scheduler
+import com.workbuddy.quicklaunch.util.ShiftTable
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Calendar
@@ -39,6 +42,7 @@ class RemoteRuleApi(
     private val hook: ScheduleHook,
     private val backup: (Automation) -> Unit,
     private val holidays: () -> HolidayChecker,
+    private val shiftStore: ShiftStore? = null,
     private val now: () -> Long = { System.currentTimeMillis() }
 ) {
 
@@ -86,6 +90,9 @@ class RemoteRuleApi(
                 put("randomWindow", a.randomWindow)
                 put("windowStartMin", a.windowStartMin)
                 put("windowEndMin", a.windowEndMin)
+                put("shiftAnchor", a.shiftAnchor)
+                put("shiftOffsetMin", a.shiftOffsetMin)
+                put("shiftText", shiftText(a))
             })
             put("exceptions", JSONArray().apply {
                 store.exceptionsOf(a.id).sortedBy { it.date }.forEach {
@@ -122,6 +129,26 @@ class RemoteRuleApi(
             set(Calendar.MILLISECOND, 0)
         }
         val span = days.coerceIn(1, 60)
+
+        // 班表模式下星期位图与节假日都不参与判定，必须单独走一套，
+        // 否则预览会说「不在勾选的星期内」而实际班表模式根本不看星期。
+        if (a.shiftAnchor != ShiftAnchor.FIXED) {
+            val shifts = shiftsFor(a, start)
+            return (0 until span).map { offset ->
+                val cal = (start.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, offset) }
+                val date = HolidayChecker.dateKey(cal)
+                val shift = shifts?.of(date)
+                when {
+                    !a.enabled -> DayStatus(date, false, "DISABLED", "规则已停用")
+                    ex.contains(date) -> DayStatus(date, false, "EXCEPTED", "已设置当天不启动")
+                    shift == null -> DayStatus(date, false, "NO_SHIFT", "班表无这天的班次（休息或未排班）")
+                    else -> DayStatus(
+                        date, true, "SHIFT",
+                        "按班次启动（${shiftLabel(a, shift)}）"
+                    )
+                }
+            }
+        }
 
         return (0 until span).map { offset ->
             val cal = (start.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, offset) }
@@ -179,7 +206,8 @@ class RemoteRuleApi(
                 startFrom = cal,
                 shouldSkip = Scheduler.buildSkipPredicate(a, checker, ex),
                 forceRun = Scheduler.buildForceRunPredicate(checker, ex),
-                exceptions = ex
+                exceptions = ex,
+                shifts = shiftsFor(a, cal)
             )
         }.getOrNull()
     }
@@ -266,6 +294,152 @@ class RemoteRuleApi(
         return WriteResult.Ok(a, nextAt(a, ex), ex)
     }
 
+    // ── 班表同步 ────────────────────────────────────────────────────
+
+    sealed class ShiftResult {
+        data class Ok(
+            val upserted: Int,
+            val pruned: Int,
+            val total: Int,
+            val latest: String?
+        ) : ShiftResult()
+
+        data class Err(val code: Int, val error: String, val detail: String) : ShiftResult()
+    }
+
+    /** 列出班表（[fromKey] 为 null 时全量）。 */
+    fun listShifts(fromKey: String?, limit: Int = 400): JSONArray {
+        val s = shiftStore ?: return JSONArray()
+        val list = runCatching {
+            if (fromKey.isNullOrBlank()) s.all() else s.from(fromKey)
+        }.getOrDefault(emptyList())
+        return JSONArray().apply {
+            list.take(limit.coerceIn(1, MAX_SHIFT_BATCH)).forEach { put(shiftJson(it)) }
+        }
+    }
+
+    fun shiftStats(): JSONObject {
+        val s = shiftStore
+        return JSONObject().apply {
+            put("enabled", s != null)
+            put("count", runCatching { s?.all()?.size ?: 0 }.getOrDefault(0))
+            put("latest", runCatching { s?.latest() }.getOrNull() ?: JSONObject.NULL)
+        }
+    }
+
+    /**
+     * 批量写入班表（同一天覆盖，幂等）。
+     *
+     * 校验刻意严格：date 必须是真实日期、inMin/outMin 必须是合法分钟数。
+     * 这些值直接决定闹钟落点，放进来一个 2026-02-30 或 inMin=-1，
+     * 排程侧就会静默算出一个不存在的时刻，比直接报错难查得多。
+     */
+    fun upsertShifts(body: JSONObject): ShiftResult {
+        val s = shiftStore ?: return ShiftResult.Err(
+            RemoteProtocol.E_CONFLICT, "E_SHIFTS_OFF", "当前版本不支持班表同步"
+        )
+        val arr = body.optJSONArray("shifts")
+            ?: return ShiftResult.Err(RemoteProtocol.E_BAD_REQUEST, "E_SHIFTS", "缺少 shifts 数组")
+        if (arr.length() == 0) {
+            return ShiftResult.Err(RemoteProtocol.E_BAD_REQUEST, "E_SHIFTS", "shifts 不能为空")
+        }
+        if (arr.length() > MAX_SHIFT_BATCH) {
+            return ShiftResult.Err(
+                RemoteProtocol.E_BODY_TOO_LARGE, "E_SHIFTS_TOO_MANY",
+                "单次最多 $MAX_SHIFT_BATCH 天"
+            )
+        }
+
+        val items = ArrayList<DailyShift>(arr.length())
+        for (i in 0 until arr.length()) {
+            val o = arr.optJSONObject(i)
+                ?: return ShiftResult.Err(RemoteProtocol.E_BAD_REQUEST, "E_SHIFTS", "第 ${i + 1} 条不是对象")
+            val date = RemoteProtocol.parseDate(o.optString("date"))
+                ?: return ShiftResult.Err(RemoteProtocol.E_BAD_REQUEST, "E_DATE", "第 ${i + 1} 条 date 必须是 yyyy-MM-dd")
+            val inMin = o.optInt("inMin", -1)
+            val outMin = o.optInt("outMin", -1)
+            if (inMin !in 0..1439) {
+                return ShiftResult.Err(
+                    RemoteProtocol.E_BAD_REQUEST, "E_RANGE",
+                    "第 ${i + 1} 条 inMin 必须是 0..1439（当天分钟数，09:00=540）"
+                )
+            }
+            // 上限 2879 = 次日 23:59，足够表达任何跨天班；等于 inMin 说明时长为 0
+            if (outMin !in 0..2879 || outMin == inMin) {
+                return ShiftResult.Err(
+                    RemoteProtocol.E_BAD_REQUEST, "E_RANGE",
+                    "第 ${i + 1} 条 outMin 必须是 0..2879 且不等于 inMin（次日 05:00 = 1740）"
+                )
+            }
+            items += DailyShift(
+                date = date,
+                inMin = inMin,
+                outMin = outMin,
+                source = o.optString("source").take(20),
+                updatedAt = now()
+            )
+        }
+
+        // pruneBefore：滚动同步时顺手裁掉过期历史，避免表无限增长。
+        // 非法日期必须报错而不是静默忽略 —— 静默忽略会让用户的清理意图悄悄失效。
+        var pruneBefore: String? = null
+        if (body.has("pruneBefore")) {
+            val raw = body.optString("pruneBefore")
+            if (raw.isNotBlank()) {
+                pruneBefore = RemoteProtocol.parseDate(raw) ?: return ShiftResult.Err(
+                    RemoteProtocol.E_BAD_REQUEST, "E_DATE", "pruneBefore 必须是 yyyy-MM-dd"
+                )
+            }
+        }
+
+        runCatching { s.upsertAll(items) }.onFailure {
+            return ShiftResult.Err(500, "E_DB", "写班表失败：${it.message}")
+        }
+        val pruned = pruneBefore?.let { runCatching { s.deleteBefore(it) }.getOrDefault(0) } ?: 0
+
+        // 🔴 写后必须整体重排：已经排进系统的那批闹钟不会因为库里班表变了就自己变。
+        // 漏掉这一步的表现是「接口 200、库里数据也对，但今天还是按旧时刻响」。
+        runCatching { hook.rescheduleAll() }
+
+        return ShiftResult.Ok(
+            upserted = items.size,
+            pruned = pruned,
+            total = runCatching { s.all().size }.getOrDefault(0),
+            latest = runCatching { s.latest() }.getOrNull()
+        )
+    }
+
+    fun deleteShifts(fromKey: String?, toKey: String?, clearAll: Boolean): ShiftResult {
+        val s = shiftStore
+            ?: return ShiftResult.Err(RemoteProtocol.E_CONFLICT, "E_SHIFTS_OFF", "当前版本不支持班表同步")
+        val removed = runCatching {
+            when {
+                clearAll -> s.clear()
+                fromKey != null && toKey != null -> s.deleteRange(fromKey, toKey)
+                fromKey != null -> s.deleteRange(fromKey, fromKey)
+                else -> 0
+            }
+        }.getOrElse {
+            return ShiftResult.Err(500, "E_DB", "删除班表失败：${it.message}")
+        }
+        if (removed > 0) runCatching { hook.rescheduleAll() }
+        return ShiftResult.Ok(
+            upserted = 0,
+            pruned = removed,
+            total = runCatching { s.all().size }.getOrDefault(0),
+            latest = runCatching { s.latest() }.getOrNull()
+        )
+    }
+
+    private fun shiftJson(s: DailyShift): JSONObject = JSONObject().apply {
+        put("date", s.date)
+        put("inMin", s.inMin)
+        put("outMin", s.outMin)
+        put("crossesDay", s.crossesDay())
+        put("source", s.source)
+        put("updatedAt", s.updatedAt)
+    }
+
     // ── 内部 ────────────────────────────────────────────────────────
 
     private fun exceptionSet(id: Long): Set<String> =
@@ -281,8 +455,23 @@ class RemoteRuleApi(
                 startFrom = cal,
                 shouldSkip = Scheduler.buildSkipPredicate(a, checker, ex),
                 forceRun = Scheduler.buildForceRunPredicate(checker, ex),
-                exceptions = ex
+                exceptions = ex,
+                shifts = shiftsFor(a, cal)
             )
+        }.getOrNull()
+    }
+
+    /**
+     * 班表模式下读一次班表（远程请求线程，允许查库）。
+     *
+     * 固定时刻规则直接返回 null：让 Scheduler 走老路径，
+     * 这样既有规则的排程结果与升级前逐字节一致。
+     */
+    private fun shiftsFor(a: Automation, day: Calendar): ShiftTable? {
+        if (a.shiftAnchor == ShiftAnchor.FIXED) return null
+        val s = shiftStore ?: return null
+        return runCatching {
+            ShiftTable.of(s.from(HolidayChecker.dateKey(day)))
         }.getOrNull()
     }
 
@@ -290,6 +479,28 @@ class RemoteRuleApi(
         WriteResult.Err(RemoteProtocol.E_NOT_FOUND, "E_RULE_NOT_FOUND", "规则 $id 不存在")
 
     companion object {
+
+        /** 单次最多下发多少天的班表。滚动同步一次通常几天到几周。 */
+        const val MAX_SHIFT_BATCH = 366
+
+        /** 「上班前 30 分钟」这样的人话，供界面与接口展示。 */
+        fun shiftText(a: Automation): String =
+            ShiftAnchor.describe(a.shiftAnchor, a.shiftOffsetMin)
+
+        /** 某天班次按锚点换算后的具体时钟，例如「08:30」或「05:10（次日）」。 */
+        fun shiftLabel(a: Automation, s: DailyShift): String {
+            val base = if (a.shiftAnchor == ShiftAnchor.CLOCK_OUT) s.outMin else s.inMin
+            var t = base + a.shiftOffsetMin
+            var day = 0
+            while (t < 0) { t += 1440; day -= 1 }
+            while (t >= 1440) { t -= 1440; day += 1 }
+            val hm = String.format(Locale.US, "%02d:%02d", t / 60, t % 60)
+            return when (day) {
+                0 -> hm
+                1 -> "$hm（次日）"
+                else -> "$hm（+${day}天）"
+            }
+        }
 
         /** 与 Scheduler.advanceToValidDay 的 repeatMode 过滤口径保持一致（位图为 0 时视为不限制）。 */
         internal fun matchesRepeat(a: Automation, cal: Calendar): Boolean {

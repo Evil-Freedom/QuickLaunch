@@ -41,6 +41,8 @@ object AutomationCodec {
         put("randomWindow", a.randomWindow)
         put("windowStartMin", a.windowStartMin)
         put("windowEndMin", a.windowEndMin)
+        put("shiftAnchor", a.shiftAnchor)
+        put("shiftOffsetMin", a.shiftOffsetMin)
     }.toString()
 
     /**
@@ -69,7 +71,10 @@ object AutomationCodec {
                 createdAt = o.optLong("createdAt", 0L),
                 randomWindow = o.optBoolean("randomWindow", false),
                 windowStartMin = o.optInt("windowStartMin", 0),
-                windowEndMin = o.optInt("windowEndMin", 0)
+                windowEndMin = o.optInt("windowEndMin", 0),
+                // 旧版本留档里没有这两个 key，opt 取默认值 = 固定时刻，正是升级前的行为
+                shiftAnchor = o.optInt("shiftAnchor", 0),
+                shiftOffsetMin = o.optInt("shiftOffsetMin", 0)
             )
         }.getOrNull()
     }

@@ -8,14 +8,15 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [Automation::class, Holiday::class, RuleException::class],
-    version = 6,
+    entities = [Automation::class, Holiday::class, RuleException::class, DailyShift::class],
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun automationDao(): AutomationDao
     abstract fun holidayDao(): HolidayDao
     abstract fun ruleExceptionDao(): RuleExceptionDao
+    abstract fun dailyShiftDao(): DailyShiftDao
 
     companion object {
         @Volatile
@@ -72,6 +73,25 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // 升级到 version 7：新增 daily_shifts 班表 + automations 两条锚定列。
+        // 班表单独建表而不是塞进 automations：班表是「共享事实」，同一天可能有多条规则
+        // 锚定同一个班次，存一份才能保证班表更新一次、所有跟随规则一起变。
+        // 两条新列默认 0 = 「固定时刻」= 旧行为，存量规则无需回填。
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE automations ADD COLUMN shiftAnchor INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE automations ADD COLUMN shiftOffsetMin INTEGER NOT NULL DEFAULT 0")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS daily_shifts (" +
+                        "date TEXT NOT NULL PRIMARY KEY, " +
+                        "inMin INTEGER NOT NULL, " +
+                        "outMin INTEGER NOT NULL, " +
+                        "source TEXT NOT NULL DEFAULT '', " +
+                        "updatedAt INTEGER NOT NULL DEFAULT 0)"
+                )
+            }
+        }
+
         fun get(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -80,7 +100,8 @@ abstract class AppDatabase : RoomDatabase() {
                     "quicklaunch.db"
                 )
                     .addMigrations(
-                        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6
+                        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6,
+                        MIGRATION_6_7
                     )
                     // 装回旧版本 APK 时若不允许降级重建，Room 会直接抛 IllegalStateException，
                     // 表现为「一打开就闪退」且用户无法自救。宁可丢缓存也不要崩溃循环。

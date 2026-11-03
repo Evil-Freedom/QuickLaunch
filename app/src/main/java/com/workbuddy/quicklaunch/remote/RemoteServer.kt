@@ -76,6 +76,7 @@ class RemoteServer(
             seg[2] == "ping" && req.method == "GET" -> handlePing()
             seg[2] == "pair" && req.method == "POST" -> handlePair(req, ip)
             seg[2] == "rules" -> handleRules(req, ip, seg)
+            seg[2] == "shifts" -> handleShifts(req, ip)
             else -> plain(404, "E_NOT_FOUND", "未知路径 ${req.path}")
         }
     }
@@ -231,6 +232,70 @@ class RemoteServer(
         }
 
         return plain(404, "E_NOT_FOUND", "未知路径 ${req.path}")
+    }
+
+    /**
+     * 班表同步，供外部脚本（飞书考勤拉取）批量下发。
+     *
+     * 与规则接口共用同一套鉴权 / 加密 / 审计，不额外开后门 ——
+     * 班表直接决定闹钟落点，安全等级与改期完全同级。
+     */
+    private fun handleShifts(
+        req: MiniHttpServer.Request,
+        ip: String
+    ): MiniHttpServer.Response {
+        val auth = authenticate(req, ip)
+            ?: return plain(401, "E_AUTH", "签名校验失败")
+        val api = runCatching { RemoteBindings.api(context) }.getOrNull()
+            ?: return enc(auth, RemoteProtocol.errorJson(500, "E_DB", "本机数据库不可用"), 500)
+
+        return when (req.method) {
+            // /api/v1/shifts?from=2026-11-01
+            "GET" -> enc(
+                auth,
+                JSONObject().put("ok", true)
+                    .put("shifts", api.listShifts(req.query["from"]))
+                    .put("stats", api.shiftStats())
+            )
+            "POST" -> {
+                val body = decodeBody(auth, req)
+                    ?: return enc(auth, RemoteProtocol.errorJson(400, "E_BODY", "报文解密失败"), 400)
+                finishShiftWrite(auth, ip, "SHIFTS_PUT", api.upsertShifts(body))
+            }
+            // /api/v1/shifts?all=1 或 ?from=..&to=..
+            "DELETE" -> finishShiftWrite(
+                auth, ip, "SHIFTS_DEL",
+                api.deleteShifts(req.query["from"], req.query["to"], req.query["all"] == "1")
+            )
+            else -> methodNotAllowed(auth)
+        }
+    }
+
+    /** 班表写操作收尾：审计 + 加密返回（与规则写一致）。 */
+    private fun finishShiftWrite(
+        auth: Auth,
+        ip: String,
+        action: String,
+        result: RemoteRuleApi.ShiftResult
+    ): MiniHttpServer.Response = when (result) {
+        is RemoteRuleApi.ShiftResult.Err -> {
+            audit(auth.client.name, ip, "${action}_FAIL", result.error)
+            enc(auth, RemoteProtocol.errorJson(result.code, result.error, result.detail), result.code)
+        }
+        is RemoteRuleApi.ShiftResult.Ok -> {
+            audit(
+                auth.client.name, ip, action,
+                "upserted=${result.upserted} pruned=${result.pruned} total=${result.total}"
+            )
+            notifyRulesChanged()
+            enc(auth, JSONObject().apply {
+                put("ok", true)
+                put("upserted", result.upserted)
+                put("pruned", result.pruned)
+                put("total", result.total)
+                put("latest", result.latest ?: JSONObject.NULL)
+            })
+        }
     }
 
     /** 写操作统一收尾：审计 + 加密返回。 */

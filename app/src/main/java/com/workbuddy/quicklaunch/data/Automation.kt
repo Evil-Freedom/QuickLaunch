@@ -33,5 +33,18 @@ data class Automation(
     /** 随机窗口起始，当天分钟数（例如 8:30 => 510） */
     val windowStartMin: Int = 0,
     /** 随机窗口结束，当天分钟数（例如 8:50 => 530） */
-    val windowEndMin: Int = 0
+    val windowEndMin: Int = 0,
+    /**
+     * 触发时刻的锚定方式，见 [ShiftAnchor]。
+     *
+     * 默认 [ShiftAnchor.FIXED] = 用 timeHour/timeMinute，与旧版本行为逐字节一致。
+     * 非 FIXED 时**完全忽略** timeHour/timeMinute、repeatMode、repeatDays、skipHolidays
+     * 和随机窗口 —— 触发由当天班表决定，见 [com.workbuddy.quicklaunch.util.Scheduler]。
+     */
+    val shiftAnchor: Int = ShiftAnchor.FIXED,
+    /**
+     * 相对班次时刻的偏移分钟数，负数=提前。
+     * 仅 [shiftAnchor] != FIXED 时生效；例如上班前 30 分钟 = -30。
+     */
+    val shiftOffsetMin: Int = 0
 )

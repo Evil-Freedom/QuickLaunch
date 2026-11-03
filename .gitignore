@@ -20,3 +20,6 @@ signing/
 
 # 局域网控制端的 keyId/secret（配对后自动写入，等价于密码）
 ql_client.json
+
+# 班表下发时生成的临时载荷（含具体班次，无密钥但无意义入库）
+tools/tmp_shifts.json

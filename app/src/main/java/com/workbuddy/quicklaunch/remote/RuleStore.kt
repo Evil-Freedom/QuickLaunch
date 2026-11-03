@@ -31,4 +31,14 @@ interface RuleStore {
 interface ScheduleHook {
     fun cancel(a: Automation)
     fun schedule(a: Automation, exceptions: Set<String>)
+
+    /**
+     * 整体重排所有已启用规则。
+     *
+     * 班表变更后必须走这里：已排进 AlarmManager 的闹钟**不会**因为数据库里的
+     * 班表变了就自己变，不重排的话用户会看到「班表更新了但今天还是按旧时刻响」。
+     * 给默认空实现是为了不破坏既有假实现 —— 只有生产实现才真正需要它，
+     * 而漏实现会退化成「班表写入成功但闹钟不动」，所以生产实现必须覆盖。
+     */
+    fun rescheduleAll() {}
 }

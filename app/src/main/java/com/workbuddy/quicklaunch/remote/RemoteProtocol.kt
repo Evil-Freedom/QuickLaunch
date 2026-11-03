@@ -2,6 +2,7 @@ package com.workbuddy.quicklaunch.remote
 
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.RepeatMode
+import com.workbuddy.quicklaunch.data.ShiftAnchor
 import org.json.JSONObject
 
 /**
@@ -35,7 +36,8 @@ object RemoteProtocol {
     /** 允许远程修改的字段。不在此集合内的一律 409。 */
     val EDITABLE_FIELDS = setOf(
         "timeHour", "timeMinute", "repeatMode", "repeatDays",
-        "skipHolidays", "randomWindow", "windowStartMin", "windowEndMin", "enabled"
+        "skipHolidays", "randomWindow", "windowStartMin", "windowEndMin", "enabled",
+        "shiftAnchor", "shiftOffsetMin"
     )
 
     /** `repeatMode` 的合法取值（全小写）。 */
@@ -129,6 +131,15 @@ object RemoteProtocol {
         val enabled = boolOf(body, "enabled", old.enabled)
             ?: return typeErr("enabled")
 
+        // 班表锚定：0=固定时刻 / 1=上班 / 2=下班。
+        // 偏移限制在 ±720 分钟（半天），再大就不像"提前/延后"而像换了一天。
+        val shiftAnchor = intOf(body, "shiftAnchor", old.shiftAnchor)
+            ?: return typeErr("shiftAnchor")
+        if (!ShiftAnchor.isValid(shiftAnchor)) return rangeErr("shiftAnchor", 0, 2)
+        val shiftOffsetMin = intOf(body, "shiftOffsetMin", old.shiftOffsetMin)
+            ?: return typeErr("shiftOffsetMin")
+        if (shiftOffsetMin !in -720..720) return rangeErr("shiftOffsetMin", -720, 720)
+
         return Result.Ok(
             old.copy(
                 timeHour = hour,
@@ -139,7 +150,9 @@ object RemoteProtocol {
                 randomWindow = randomWindow,
                 windowStartMin = start,
                 windowEndMin = end,
-                enabled = enabled
+                enabled = enabled,
+                shiftAnchor = shiftAnchor,
+                shiftOffsetMin = shiftOffsetMin
             )
         )
     }

@@ -7,6 +7,7 @@ import android.util.Log
 import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.RepeatMode
+import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.service.LaunchService
 import com.workbuddy.quicklaunch.util.Scheduler
 
@@ -33,7 +34,10 @@ class AlarmReceiver : BroadcastReceiver() {
         val a = runCatching { dao.getById(id) }.getOrNull() ?: return
         if (!a.enabled) return
 
-        if (a.repeatMode != RepeatMode.ONCE) {
+        // 班表模式本质是「按天重复」：即使 repeatMode 停在 once，也必须重排，
+        // 否则第一次触发后规则会被自动停用，表现为「只启动一次就再没动静」。
+        val repeating = a.shiftAnchor != ShiftAnchor.FIXED || a.repeatMode != RepeatMode.ONCE
+        if (repeating) {
             // 先把下一次排上：即使随后的拉起失败，重复链路也不会断
             runCatching { Scheduler.schedule(context, a) }
                 .onFailure { if (BuildConfig.DEBUG) Log.e(TAG, "reschedule failed id=$id", it) }

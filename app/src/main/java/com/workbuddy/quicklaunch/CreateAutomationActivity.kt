@@ -161,7 +161,11 @@ class CreateAutomationActivity : AppCompatActivity(), AutomationFormController.F
                 triggerChips = triggerChips,
                 repeatChips = repeatChips,
                 dayViews = dayViews,
-                triggerIcons = null
+                triggerIcons = null,
+                cbFollowShift = binding.cbFollowShift,
+                layoutShiftOffset = binding.layoutShiftOffset,
+                btnShiftAnchor = binding.btnShiftAnchor,
+                btnShiftOffset = binding.btnShiftOffset
             ),
             callbacks = this
         )

@@ -5,9 +5,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
+import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
+import com.workbuddy.quicklaunch.data.DailyShift
 import com.workbuddy.quicklaunch.data.RepeatMode
+import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.receiver.AlarmReceiver
 import java.util.Calendar
@@ -25,6 +29,15 @@ object Scheduler {
      * 直接把调用线程（含主线程 / BOOT_COMPLETED 广播线程）挂死并耗光 CPU。
      */
     private const val MAX_DAY_ADVANCE = 366 * 2
+
+    /**
+     * 班表模式的逐日扫描上限。
+     *
+     * 取 60 天而不是 366：公司排班通常只发布未来几天到几周，扫到 60 天还没有可用
+     * 班次就说明班表已经过期，此时**退化为固定时刻**比继续往后扫更有用 ——
+     * 扫到明年再触发，等于规则静默失效。
+     */
+    private const val MAX_SHIFT_DAY_SCAN = 60
 
     /** 共享 Random，避免每次排程都 new 一个（并减少同一毫秒内种子相同的概率）。 */
     private val random = java.util.Random()
@@ -50,7 +63,8 @@ object Scheduler {
         context: Context,
         a: Automation,
         holidays: HolidayChecker? = null,
-        exceptions: Set<String>? = null
+        exceptions: Set<String>? = null,
+        shifts: ShiftTable? = null
     ) {
         if (a.triggerType != TriggerType.TIME) return
         // 任何一步异常都不应让「保存规则 / 开机重排」整体失败
@@ -60,11 +74,18 @@ object Scheduler {
             // null 表示调用方没预加载（单条排程场景），此时才去查一次库；
             // 批量场景（rescheduleAll）传入预加载结果，避免 N+1。
             val exempt = exceptions ?: loadExceptionDates(context, a.id)
+            // 班表模式必须拿到班表才能算，这里兜底查库（只读 date >= 今天，量很小）
+            val shiftsOrNull = shifts ?: if (a.shiftAnchor != ShiftAnchor.FIXED) {
+                ShiftTable.fromDb(context, HolidayChecker.dateKey(Calendar.getInstance()))
+            } else {
+                null
+            }
             val triggerAt = nextTriggerTime(
                 a,
                 shouldSkip = skipPredicate(context, a, holidays, exempt),
                 forceRun = forceRunPredicate(context, holidays, exempt),
-                exceptions = exempt
+                exceptions = exempt,
+                shifts = shiftsOrNull
             )
 
             val exactAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
@@ -188,7 +209,15 @@ object Scheduler {
                 .mapValues { (_, dates) -> dates.toSet() }
         }.getOrDefault(emptyMap())
 
-        list.forEach { schedule(context, it, holidays, exemptByRule[it.id] ?: emptySet()) }
+        // 只有存在班表规则时才读班表：多数场景全是固定时刻规则，白读一次没意义。
+        // 读出来的是「今天起」的子集，量很小；历史班表对下次触发没有意义。
+        val shifts = if (list.any { it.shiftAnchor != ShiftAnchor.FIXED }) {
+            ShiftTable.fromDb(context, HolidayChecker.dateKey(Calendar.getInstance()))
+        } else {
+            null
+        }
+
+        list.forEach { schedule(context, it, holidays, exemptByRule[it.id] ?: emptySet(), shifts) }
     }
 
     private fun pendingIntent(context: Context, a: Automation): PendingIntent {
@@ -211,8 +240,13 @@ object Scheduler {
      *   重复任务每次重排都重新随机，实现「每天不固定的触发时刻」。
      */
     /** 公开入口：不感知节假日与豁免（供测试与兼容使用），等价于 shouldSkip / forceRun 恒为 false。 */
-    fun nextTriggerTime(a: Automation, exceptions: Set<String> = emptySet()): Long =
-        nextTriggerTime(a, shouldSkip = { false }, forceRun = { false }, exceptions = exceptions)
+    fun nextTriggerTime(
+        a: Automation,
+        exceptions: Set<String> = emptySet(),
+        shifts: ShiftTable? = null
+    ): Long = nextTriggerTime(
+        a, shouldSkip = { false }, forceRun = { false }, exceptions = exceptions, shifts = shifts
+    )
 
     /**
      * 只算「下次触发时刻」，不真正排闹钟 —— 界面展示专用。
@@ -224,11 +258,14 @@ object Scheduler {
      *
      * @param holidays 预加载的节假日表。传 null 时**不查库**（只保留豁免判定）——
      *                 本函数会被界面在主线程调用，绝不能在这里触发 Room 的主线程查询。
+     * @param shifts   预加载的班表。同样不能在主线程查库：班表模式下调用方必须传，
+     *                 传 null 时该规则会退化为固定时刻显示（仅影响展示，不影响真实排程）。
      */
     fun peekNextTriggerAt(
         a: Automation,
         holidays: HolidayChecker?,
-        exceptions: Set<String>
+        exceptions: Set<String>,
+        shifts: ShiftTable? = null
     ): Long {
         val shouldSkip = if (holidays != null) {
             buildSkipPredicate(a, holidays, exceptions)
@@ -236,7 +273,7 @@ object Scheduler {
             exemptPredicate(exceptions)
         }
         val forceRun = if (holidays != null) buildForceRunPredicate(holidays, exceptions) else NEVER
-        return nextTriggerTime(a, shouldSkip, forceRun, exceptions)
+        return nextTriggerTime(a, shouldSkip, forceRun, exceptions, shifts)
     }
 
     /**
@@ -250,8 +287,11 @@ object Scheduler {
         startFrom: Calendar,
         shouldSkip: (Calendar) -> Boolean,
         forceRun: (Calendar) -> Boolean = { false },
-        exceptions: Set<String> = emptySet()
-    ): Long = nextTriggerTimeInternal(a, startFrom.timeInMillis, shouldSkip, forceRun, exceptions)
+        exceptions: Set<String> = emptySet(),
+        shifts: ShiftTable? = null
+    ): Long = nextTriggerTimeInternal(
+        a, startFrom.timeInMillis, shouldSkip, forceRun, exceptions, shifts
+    )
 
     /**
      * 计算下一次触发时间（毫秒）。
@@ -266,16 +306,34 @@ object Scheduler {
         a: Automation,
         shouldSkip: (Calendar) -> Boolean,
         forceRun: (Calendar) -> Boolean = { false },
-        exceptions: Set<String> = emptySet()
-    ): Long = nextTriggerTimeInternal(a, System.currentTimeMillis(), shouldSkip, forceRun, exceptions)
+        exceptions: Set<String> = emptySet(),
+        shifts: ShiftTable? = null
+    ): Long = nextTriggerTimeInternal(
+        a, System.currentTimeMillis(), shouldSkip, forceRun, exceptions, shifts
+    )
 
     private fun nextTriggerTimeInternal(
         a: Automation,
         now: Long,
         shouldSkip: (Calendar) -> Boolean,
         forceRun: (Calendar) -> Boolean,
-        exceptions: Set<String> = emptySet()
+        exceptions: Set<String> = emptySet(),
+        shifts: ShiftTable? = null
     ): Long {
+        // ── 班表模式分流 ───────────────────────────────────────────────
+        // 只有「规则锚定班次」且「确实拿到了班表」才走新路径。
+        // 班表为空（还没同步过）时**故意**落回下面的固定时刻逻辑 ——
+        // 否则用户刚打开开关、班表还没下发，规则就会变成永不触发，
+        // 而界面上又写着「已启用」，这是最难排查的一类故障。
+        if (a.shiftAnchor != ShiftAnchor.FIXED && shifts != null && !shifts.isEmpty()) {
+            nextTriggerTimeByShift(a, now, exceptions, shifts)?.let { return it }
+            // 扫描窗口内没有任何可用班次（公司只排到今天且时刻已过）：
+            // 退化为固定时刻，宁可多触发一次也不要静默失效。
+            if (BuildConfig.DEBUG) {
+                Log.w("Scheduler", "班表模式无可用班次，退化为固定时刻 id=${a.id}")
+            }
+        }
+
         // 起点日必须由 now 决定，不能用 Calendar.getInstance()（那永远是真实当前日期）。
         // 生产调用传的就是 System.currentTimeMillis()，两者等价；
         // 但 nextTriggerTimeFrom 需要把「现在」设成任意时刻，此时起点日必须跟着变，
@@ -335,6 +393,70 @@ object Scheduler {
         advanceToValidDay(cal, a, forceRun)
         advanceUntilValid(cal, a, now, shouldSkip, forceRun)
         return cal.timeInMillis
+    }
+
+    /**
+     * 班表模式的触发时刻：逐日扫描，取第一个「有班次 + 未被豁免 + 时刻未过」的日子。
+     *
+     * ## 为什么这里完全不看 repeatMode / skipHolidays / 调休
+     *
+     * 班表本身就是「这天到底上不上班、几点上班」的事实。再叠加星期位图会直接算错：
+     * 轮班的人周六要上 05:00 的班，而 weekdays 规则恰好把周末排除掉；
+     * 再叠加法定节假日也会算错：他在春节值班那天，国务院的通知说那天放假。
+     * 所以班表模式只认两个输入：**班表** 和 **用户显式请假（豁免）**。
+     * 豁免仍然生效 —— 「这天我自己不想启动」是用户意图，不是排班事实。
+     *
+     * @return null 表示扫描窗口内没有可用班次，调用方退化为固定时刻
+     */
+    private fun nextTriggerTimeByShift(
+        a: Automation,
+        now: Long,
+        exceptions: Set<String>,
+        shifts: ShiftTable
+    ): Long? {
+        val cal = Calendar.getInstance().apply { timeInMillis = now }
+        var guard = 0
+        while (guard++ < MAX_SHIFT_DAY_SCAN) {
+            val key = HolidayChecker.dateKey(cal)
+            val shift = shifts.of(key)
+            if (shift != null && !exceptions.contains(key)) {
+                val at = shiftTriggerAt(a, cal, shift)
+                // 今天这一班的点可能已经过了（9 点上班、现在 13 点），
+                // 那就继续看明天 —— 绝不能返回过去的时间点，那会让闹钟立刻响。
+                if (at > now) return at
+            }
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return null
+    }
+
+    /**
+     * 把「某天的班次 + 锚点 + 偏移」换算成绝对时刻。
+     *
+     * 关键在跨天班：05:00 上班、次日 05:00 下班存成 inMin=300 / outMin=1740，
+     * 锚定下班时要落在**次日** 05:00。所以先把「当天分钟数」按 1440 拆成
+     * 「第几天 + 当天第几分钟」，再一起加回日期 —— 若直接 set(HOUR_OF_DAY, 1740/60)，
+     * Calendar 会归一化成当天 05:00，白丢一整天。
+     */
+    private fun shiftTriggerAt(a: Automation, day: Calendar, shift: DailyShift): Long {
+        val base = if (a.shiftAnchor == ShiftAnchor.CLOCK_OUT) shift.outMin else shift.inMin
+        var target = base + a.shiftOffsetMin
+        var dayOffset = 0
+        while (target < 0) {
+            target += 1440
+            dayOffset -= 1
+        }
+        while (target >= 1440) {
+            target -= 1440
+            dayOffset += 1
+        }
+        return (day.clone() as Calendar).apply {
+            add(Calendar.DAY_OF_YEAR, dayOffset)
+            set(Calendar.HOUR_OF_DAY, target / 60)
+            set(Calendar.MINUTE, target % 60)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
     }
 
     /**

@@ -3,6 +3,7 @@ package com.workbuddy.quicklaunch.remote
 import android.content.Context
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
+import com.workbuddy.quicklaunch.data.DailyShift
 import com.workbuddy.quicklaunch.data.RuleException
 import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.RuleBackupStore
@@ -46,6 +47,40 @@ class SchedulerHook(private val context: Context) : ScheduleHook {
 
     override fun schedule(a: Automation, exceptions: Set<String>) =
         Scheduler.schedule(context, a, holidays = null, exceptions = exceptions)
+
+    /**
+     * 必须实现：班表写入后已经排好的闹钟不会自己变。
+     * 这里直接转调 Scheduler 的批量入口，与开机/覆盖安装走同一条路径。
+     */
+    override fun rescheduleAll() = Scheduler.rescheduleAll(context)
+}
+
+/** 生产实现：班表走 Room。 */
+class RoomShiftStore(private val context: Context) : ShiftStore {
+
+    private val db get() = AppDatabase.get(context)
+
+    override fun all(): List<DailyShift> = db.dailyShiftDao().getAll()
+
+    override fun from(dateKey: String): List<DailyShift> = db.dailyShiftDao().getFrom(dateKey)
+
+    override fun upsertAll(items: List<DailyShift>) = db.dailyShiftDao().upsertAll(items)
+
+    override fun deleteBefore(dateKey: String): Int = db.dailyShiftDao().deleteBefore(dateKey)
+
+    override fun deleteRange(fromKey: String, toKey: String): Int {
+        // DAO 里没有范围删除：退回逐条删。班表一天一行，区间通常很短，够用。
+        val dao = db.dailyShiftDao()
+        var removed = 0
+        dao.getFrom(fromKey).forEach { shift ->
+            if (shift.date <= toKey && dao.delete(shift.date) > 0) removed++
+        }
+        return removed
+    }
+
+    override fun clear(): Int = db.dailyShiftDao().clear()
+
+    override fun latest(): String? = db.dailyShiftDao().latestDate()
 }
 
 object RemoteBindings {
@@ -61,7 +96,8 @@ object RemoteBindings {
             hook = SchedulerHook(app),
             // 与本地编辑一致：改之前留一份旧值，用户在本地点「撤销」能还原远程改动
             backup = { RuleBackupStore.save(app, it) },
-            holidays = { HolidayChecker.fromDb(app) }
+            holidays = { HolidayChecker.fromDb(app) },
+            shiftStore = RoomShiftStore(app)
         )
     }
 

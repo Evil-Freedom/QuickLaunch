@@ -132,8 +132,10 @@ async function signedCall(cfg, method, pathOnly, query, payload) {
 
 // ── 子命令 ──────────────────────────────────────────────────────────
 
+// 与 RemoteProtocol.EDITABLE_FIELDS 逐项对齐：多写会被 409 拒绝，少写则改不动
 const EDITABLE = ['timeHour', 'timeMinute', 'repeatMode', 'repeatDays',
-  'skipHolidays', 'randomWindow', 'windowStartMin', 'windowEndMin', 'enabled'];
+  'skipHolidays', 'randomWindow', 'windowStartMin', 'windowEndMin', 'enabled',
+  'shiftAnchor', 'shiftOffsetMin'];
 
 function buildPatchPayload(argv) {
   const p = {};
@@ -266,6 +268,34 @@ async function main() {
       return;
     }
 
+    case 'shifts': {
+      // 班表同步：get 查看 / put 批量下发 / clear 清空
+      const sub = rest[0] && !rest[0].startsWith('--') ? rest[0] : 'get';
+      if (sub === 'get') {
+        const q = argv.from ? `?from=${encodeURIComponent(String(argv.from))}` : '';
+        out(await signedCall(cfg, 'GET', '/api/v1/shifts', q));
+        return;
+      }
+      if (sub === 'clear') {
+        out(await signedCall(cfg, 'DELETE', '/api/v1/shifts', '?all=1'));
+        return;
+      }
+      if (sub === 'put') {
+        if (!argv.file) throw new Error('--file 需要一个 JSON 文件路径（或先用 tools_shift_sync.py 生成）');
+        const raw = fs.readFileSync(path.resolve(String(argv.file)), 'utf8');
+        const parsed = JSON.parse(raw);
+        // 两种输入都接受：{shifts:[...]} 或直接 [...]
+        const body = { shifts: Array.isArray(parsed) ? parsed : parsed.shifts };
+        if (!Array.isArray(body.shifts) || body.shifts.length === 0) {
+          throw new Error('JSON 里没有 shifts 数组（或为空）');
+        }
+        if (argv.pruneBefore) body.pruneBefore = String(argv.pruneBefore);
+        out(await signedCall(cfg, 'POST', '/api/v1/shifts', '', body));
+        return;
+      }
+      throw new Error(`未知子命令 shifts ${sub}（可用：get / put / clear）`);
+    }
+
     default:
       printHelp();
       process.exitCode = 2;
@@ -296,6 +326,9 @@ function printHelp() {
   node ql_client.js exceptions --rule <id>
   node ql_client.js calendar --rule <id> [--days 7]
   node ql_client.js next     --rule <id> [--at <epochMs>]
+  node ql_client.js shifts   get   [--from YYYY-MM-DD]
+  node ql_client.js shifts   put   --file <班表JSON> [--pruneBefore YYYY-MM-DD]
+  node ql_client.js shifts   clear
 
 通用参数：--host <IP> --port <端口> --key <keyId> --secret <secret>
 配置默认从 ${CFG_FILE} 读取（pair 时自动写入）。`);

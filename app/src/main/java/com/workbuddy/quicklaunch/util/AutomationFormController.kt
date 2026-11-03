@@ -7,9 +7,11 @@ import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
+import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.data.TriggerType
 import java.util.Calendar
 import java.util.Locale
@@ -79,7 +81,14 @@ class AutomationFormController(
         val triggerChips: List<TextView>,
         val repeatChips: List<TextView>,
         val dayViews: List<TextView>,
-        val triggerIcons: List<Int>? = null
+        val triggerIcons: List<Int>? = null,
+        // ── 班表模式控件（可选）──────────────────────────────────────
+        // 全部可空：MainActivity 的快速创建布局没有这几个控件，
+        // 传 null 时班表相关逻辑整体跳过，旧布局零改动即可编译运行。
+        val cbFollowShift: CheckBox? = null,
+        val layoutShiftOffset: View? = null,
+        val btnShiftAnchor: TextView? = null,
+        val btnShiftOffset: TextView? = null
     )
 
     // ── 表单状态 ─────────────────────────────────────────────────
@@ -100,6 +109,11 @@ class AutomationFormController(
     var winEndMinute = 50
     var bluetoothName: String = ""
     var wifiName: String = ""
+
+    /** 触发时刻锚定方式，见 [ShiftAnchor]。FIXED 表示用上面的 hour/minute。 */
+    var shiftAnchor = ShiftAnchor.FIXED
+    /** 班表模式下的偏移分钟数，负数=提前。默认上班前 30 分钟。 */
+    var shiftOffsetMin = -30
 
     // ── 状态查询 ─────────────────────────────────────────────────
     // 映射逻辑统一委托给 RuleFormMapper（纯函数、可单测），
@@ -147,6 +161,12 @@ class AutomationFormController(
         views.layoutRandom.visibility = if (a.randomWindow) View.VISIBLE else View.GONE
         views.btnTime.visibility = if (a.randomWindow) View.GONE else View.VISIBLE
 
+        // 班表字段同样先写状态再改勾选态；最后统一 applyShiftModeUi 收拾联动
+        shiftAnchor = if (ShiftAnchor.isValid(a.shiftAnchor)) a.shiftAnchor else ShiftAnchor.FIXED
+        shiftOffsetMin = a.shiftOffsetMin
+        views.cbFollowShift?.isChecked = shiftAnchor != ShiftAnchor.FIXED
+        applyShiftModeUi()
+
         updateTimeLabel()
         updateWindowLabels()
         // 让宿主刷新「已选择：xxx」按钮文案
@@ -190,9 +210,103 @@ class AutomationFormController(
         }
         views.cbSkipHolidays.setOnCheckedChangeListener { _, checked -> skipHolidays = checked }
 
+        // ── 班表模式（仅当布局里存在这些控件时才接管）──────────────────
+        views.cbFollowShift?.setOnCheckedChangeListener { _, checked ->
+            if (checked) {
+                // 刚打开时若还没设过锚点，默认「上班前 30 分钟」——
+                // 这是轮班用户最常见的诉求，省掉一次点选
+                if (shiftAnchor == ShiftAnchor.FIXED) shiftAnchor = ShiftAnchor.CLOCK_IN
+            } else {
+                shiftAnchor = ShiftAnchor.FIXED
+            }
+            applyShiftModeUi()
+        }
+        views.btnShiftAnchor?.setOnClickListener { pickShiftAnchor() }
+        views.btnShiftOffset?.setOnClickListener { pickShiftOffset() }
+
         updateTimeLabel()
         updateWindowLabels()
+        updateShiftLabels()
         callbacks.onStateUiUpdate()
+    }
+
+    // ── 班表模式 ─────────────────────────────────────────────────
+
+    /**
+     * 班表模式与「固定时刻 / 随机窗口 / 跳过节假日」互斥。
+     *
+     * 这里选**禁用**而不是隐藏：隐藏会让用户以为自己的设置被清空了，
+     * 而禁用能让他看到「这些选项还在，只是当前由班表决定」，切回来也不会丢值。
+     */
+    private fun applyShiftModeUi() {
+        val on = shiftAnchor != ShiftAnchor.FIXED
+        views.layoutShiftOffset?.visibility = if (on) View.VISIBLE else View.GONE
+        views.cbRandom.isEnabled = !on
+        views.cbSkipHolidays.isEnabled = !on
+        views.btnTime.isEnabled = !on
+        views.btnTime.alpha = if (on) 0.4f else 1f
+        if (on && randomWindow) {
+            // 随机窗口和「跟随班次」都在决定时刻，同时开着只会有一个生效，
+            // 与其让用户猜哪个赢，不如直接关掉随机窗口
+            randomWindow = false
+            views.cbRandom.isChecked = false
+            views.layoutRandom.visibility = View.GONE
+            views.btnTime.visibility = View.VISIBLE
+        }
+        updateShiftLabels()
+        callbacks.onStateUiUpdate()
+    }
+
+    fun shiftAnchorLabel(): String =
+        if (shiftAnchor == ShiftAnchor.CLOCK_OUT) "下班" else "上班"
+
+    fun shiftOffsetLabel(): String = when {
+        shiftOffsetMin == 0 -> "准时"
+        shiftOffsetMin < 0 -> "提前 ${-shiftOffsetMin} 分钟"
+        else -> "延后 $shiftOffsetMin 分钟"
+    }
+
+    fun updateShiftLabels() {
+        views.btnShiftAnchor?.text = shiftAnchorLabel()
+        views.btnShiftOffset?.text = shiftOffsetLabel()
+    }
+
+    private fun pickShiftAnchor() {
+        val labels = arrayOf("上班时", "下班时")
+        val checked = if (shiftAnchor == ShiftAnchor.CLOCK_OUT) 1 else 0
+        MaterialAlertDialogBuilder(context)
+            .setTitle("锚定哪个时刻")
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                shiftAnchor = if (which == 1) ShiftAnchor.CLOCK_OUT else ShiftAnchor.CLOCK_IN
+                // 锚点换了，原来的偏移方向大概率不再合理：上班前 30 分钟 → 下班前 30 分钟
+                // 仍是合法的，所以只刷新标签，不强行改偏移
+                updateShiftLabels()
+                dialog.dismiss()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun pickShiftOffset() {
+        // 预设比再做一个时间轮省事，也覆盖了「提前打卡」这类真实场景
+        val offsets = intArrayOf(-60, -30, -15, 0, 15, 30, 60)
+        val labels = offsets.map { off ->
+            when {
+                off == 0 -> "准时（班次时刻）"
+                off < 0 -> "提前 ${-off} 分钟"
+                else -> "延后 $off 分钟"
+            }
+        }.toTypedArray()
+        val checked = offsets.indexOf(shiftOffsetMin).let { if (it >= 0) it else 1 }
+        MaterialAlertDialogBuilder(context)
+            .setTitle("相对班次时刻")
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                shiftOffsetMin = offsets[which]
+                updateShiftLabels()
+                dialog.dismiss()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     private fun setupTriggerIcon(textView: TextView, index: Int) {
@@ -293,7 +407,8 @@ class AutomationFormController(
         }
         val repeatKey = currentRepeatKey()
         val mask = if (repeatKey == "custom") repeatDaysMask() else 0
-        if (repeatKey == "custom" && mask == 0) {
+        // 班表模式下星期位图不参与判定，没勾也不影响触发，这里不该拦
+        if (repeatKey == "custom" && mask == 0 && shiftAnchor == ShiftAnchor.FIXED) {
             callbacks.onValidationError(strings.pickDay)
             return
         }
@@ -319,6 +434,10 @@ class AutomationFormController(
             windowEndMin = weMin,
             bluetoothName = bluetoothName,
             wifiName = wifiName,
+            // 班表模式下重复模式交给班表决定，但字段仍保留：用户切回固定时刻时
+            // 原来的星期选择还在，不用重设一遍
+            shiftAnchor = shiftAnchor,
+            shiftOffsetMin = if (shiftAnchor == ShiftAnchor.FIXED) 0 else shiftOffsetMin,
         )
 
         views.btnSave.isEnabled = false
@@ -390,6 +509,10 @@ class AutomationFormController(
         skipHolidays = false
         bluetoothName = ""
         wifiName = ""
+        shiftAnchor = ShiftAnchor.FIXED
+        shiftOffsetMin = -30
+        views.cbFollowShift?.isChecked = false
+        applyShiftModeUi()
         val now = Calendar.getInstance()
         hour = now.get(Calendar.HOUR_OF_DAY)
         minute = now.get(Calendar.MINUTE)

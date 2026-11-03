@@ -20,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.workbuddy.quicklaunch.adapter.BluetoothDeviceAdapter
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
+import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.DialogBluetoothDevicesBinding
 import com.workbuddy.quicklaunch.databinding.ViewLaunchBinding
@@ -31,6 +32,7 @@ import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import com.workbuddy.quicklaunch.util.RuleBackupStore
 import com.workbuddy.quicklaunch.util.Scheduler
+import com.workbuddy.quicklaunch.util.ShiftTable
 import com.workbuddy.quicklaunch.util.WifiNetworks
 import com.workbuddy.quicklaunch.util.tappableSnackbar
 import java.util.Calendar
@@ -295,7 +297,9 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
      */
     private class RuleUiData(
         val exceptions: Map<Long, List<String>>,
-        val holidays: HolidayChecker?
+        val holidays: HolidayChecker?,
+        /** 班表快照。主线程算「下次触发」时不能查 Room，必须在这里预加载。 */
+        val shifts: ShiftTable?
     )
 
     private fun loadRuleUiData(): RuleUiData {
@@ -305,7 +309,14 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
         val holidays = runCatching {
             HolidayChecker.fromDb(requireContext().applicationContext)
         }.getOrNull()
-        return RuleUiData(exceptions, holidays)
+        // 只读「今天起」的班表：历史班次对「下次什么时候触发」没有意义
+        val shifts = runCatching {
+            ShiftTable.fromDb(
+                requireContext().applicationContext,
+                HolidayChecker.dateKey(Calendar.getInstance())
+            )
+        }.getOrNull()
+        return RuleUiData(exceptions, holidays, shifts)
     }
 
     private fun updateDashboard(automations: List<Automation>, ui: RuleUiData) {
@@ -331,10 +342,11 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
         if (rules.isEmpty()) return null
         var best = Long.MAX_VALUE
         for (rule in rules) {
-            if (rule.randomWindow) continue
+            // 班表模式不受随机窗口影响（它由班次决定时刻），不能跟着跳过
+            if (rule.randomWindow && rule.shiftAnchor == ShiftAnchor.FIXED) continue
             val ex = ui.exceptions[rule.id].orEmpty().toSet()
             val fire = runCatching {
-                Scheduler.peekNextTriggerAt(rule, ui.holidays, ex)
+                Scheduler.peekNextTriggerAt(rule, ui.holidays, ex, ui.shifts)
             }.getOrNull() ?: continue
             if (fire in 1 until best) best = fire
         }

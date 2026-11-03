@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.RepeatMode
+import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ItemAutomationBinding
 import com.workbuddy.quicklaunch.util.HolidayChecker
@@ -146,16 +147,20 @@ class AutomationAdapter(
         tag.setOnClickListener { onExceptions(a) }
     }
 
-    private fun triggerLabel(a: Automation): String = when (a.triggerType) {
-        TriggerType.TIME ->
+    private fun triggerLabel(a: Automation): String = when {
+        // 班表模式单独一条分支：用户看到「定时 08:30（每天）」会以为每天固定 8:30，
+        // 而实际是由当天班次算出来的，必须把锚点语义显示出来。
+        a.triggerType == TriggerType.TIME && a.shiftAnchor != ShiftAnchor.FIXED ->
+            "班表 ${ShiftAnchor.describe(a.shiftAnchor, a.shiftOffsetMin)}"
+        a.triggerType == TriggerType.TIME ->
             // 显式给 Locale，避免依赖系统默认 locale 产生非预期数字形态
             String.format(
                 Locale.US, "定时 %02d:%02d（%s）%s",
                 a.timeHour, a.timeMinute, repeatLabel(a),
                 if (a.skipHolidays) "·跳假" else ""
             )
-        TriggerType.CHARGING -> "充电时"
-        TriggerType.WIFI -> if (a.wifiName.isNotEmpty()) "连接 WiFi:${a.wifiName}" else "连接 WiFi"
+        a.triggerType == TriggerType.CHARGING -> "充电时"
+        a.triggerType == TriggerType.WIFI -> if (a.wifiName.isNotEmpty()) "连接 WiFi:${a.wifiName}" else "连接 WiFi"
         else -> if (a.bluetoothName.isNotEmpty()) "连接蓝牙:${a.bluetoothName}" else "连接蓝牙"
     }
 
