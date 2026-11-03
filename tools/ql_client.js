@@ -280,6 +280,18 @@ async function main() {
         out(await signedCall(cfg, 'DELETE', '/api/v1/shifts', '?all=1'));
         return;
       }
+      // 按区间删：用于「以值班表为准」时摘掉表上已不存在的日子。
+      // 不给区间就必须显式 accepted clear，避免手滑清空整张班表。
+      if (sub === 'del') {
+        if (!argv.from && !argv.to) {
+          throw new Error('del 需要 --from 和/或 --to；要清空全部请用 clear');
+        }
+        const parts = [];
+        if (argv.from) parts.push(`from=${encodeURIComponent(String(argv.from))}`);
+        if (argv.to) parts.push(`to=${encodeURIComponent(String(argv.to))}`);
+        out(await signedCall(cfg, 'DELETE', '/api/v1/shifts', '?' + parts.join('&')));
+        return;
+      }
       if (sub === 'put') {
         if (!argv.file) throw new Error('--file 需要一个 JSON 文件路径（或先用 tools_shift_sync.py 生成）');
         const raw = fs.readFileSync(path.resolve(String(argv.file)), 'utf8');
@@ -293,7 +305,7 @@ async function main() {
         out(await signedCall(cfg, 'POST', '/api/v1/shifts', '', body));
         return;
       }
-      throw new Error(`未知子命令 shifts ${sub}（可用：get / put / clear）`);
+      throw new Error(`未知子命令 shifts ${sub}（可用：get / put / del / clear）`);
     }
 
     default:
@@ -328,6 +340,7 @@ function printHelp() {
   node ql_client.js next     --rule <id> [--at <epochMs>]
   node ql_client.js shifts   get   [--from YYYY-MM-DD]
   node ql_client.js shifts   put   --file <班表JSON> [--pruneBefore YYYY-MM-DD]
+  node ql_client.js shifts   del   [--from YYYY-MM-DD] [--to YYYY-MM-DD]
   node ql_client.js shifts   clear
 
 通用参数：--host <IP> --port <端口> --key <keyId> --secret <secret>
