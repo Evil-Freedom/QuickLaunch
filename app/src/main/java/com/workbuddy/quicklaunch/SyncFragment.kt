@@ -57,6 +57,9 @@ class SyncFragment : Fragment(), SyncTabController.SyncCallbacks {
                 swAntiSleep = binding.swAntiSleep,
                 layoutAntiSleep = binding.layoutAntiSleep,
                 layoutHolidayCard = binding.layoutHolidayCard,
+                swAutoUnlock = binding.swAutoUnlock,
+                tvAutoUnlockPin = binding.tvAutoUnlockPin,
+                swAutoUnlockCharging = binding.swAutoUnlockCharging,
                 dotTimor = binding.dotTimor,
                 badgeTimor = binding.badgeTimor,
                 dotHolidayCn = binding.dotHolidayCn,
@@ -83,6 +86,7 @@ class SyncFragment : Fragment(), SyncTabController.SyncCallbacks {
         if (_binding == null) return
         syncController.setupSourceSpinner(this)
         syncController.syncAntiSleepUi(this)
+        syncController.syncAutoUnlockUi(this)
         syncController.updateSourceStatus()
     }
 

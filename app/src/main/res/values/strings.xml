@@ -54,6 +54,28 @@
     <string name="main_anti_sleep_turned_on">已开启：屏幕（含外屏）保持常亮</string>
     <string name="main_anti_sleep_turned_off">已关闭：恢复系统默认息屏</string>
     <string name="main_anti_sleep_failed">开启失败，请检查悬浮窗权限是否被系统撤回</string>
+
+    <!-- 锁屏自动解锁 -->
+    <string name="auto_unlock_title">锁屏自动解锁</string>
+    <string name="auto_unlock_hint">屏幕亮着且确实处于锁屏时，自动输入密码解锁（需要 root）</string>
+    <string name="auto_unlock_pin_unset">锁屏密码：未设置 · 点此设置</string>
+    <string name="auto_unlock_pin_set">锁屏密码：已设置 %1$s · 点此修改</string>
+    <string name="auto_unlock_charging_only">仅充电时解锁</string>
+    <string name="auto_unlock_dialog_title">设置锁屏密码</string>
+    <string name="auto_unlock_dialog_msg">只支持 4~16 位数字（数字 PIN）。密码用系统 KeyStore 加密后保存在本机，不上传。</string>
+    <string name="auto_unlock_dialog_hint">锁屏密码</string>
+    <string name="auto_unlock_saved">锁屏密码已保存</string>
+    <string name="auto_unlock_cleared">已清除锁屏密码，自动解锁已关闭</string>
+    <string name="auto_unlock_need_pin">请先设置锁屏密码</string>
+    <string name="auto_unlock_need_root">自动解锁需要 root 权限（当前不可用）</string>
+    <string name="auto_unlock_turned_on">已开启：锁屏后自动解锁</string>
+    <string name="auto_unlock_turned_off">已关闭：锁屏后不再自动解锁</string>
+    <string name="auto_unlock_bad_pin">密码格式不对：只能是 4~16 位数字</string>
+    <string name="auto_unlock_give_up_title">自动解锁已暂停</string>
+    <string name="auto_unlock_give_up_text">连续两次解锁失败（密码可能不对），已自动关闭该功能，请重新设置</string>
+    <string name="auto_unlock_ok">确定</string>
+    <string name="auto_unlock_clear">清除密码</string>
+    <string name="auto_unlock_dialog_cancel">取消</string>
     <string name="main_permission_required">需要开启以下权限</string>
     <string name="main_permission_overlay">悬浮窗权限 —— 后台自动拉起应用的必备条件，不开则只能靠点通知启动</string>
     <string name="main_permission_battery">忽略电池优化 —— 否则休眠时定时任务会被系统推迟或杀掉</string>

@@ -25,6 +25,7 @@ import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.MainActivity
 import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.util.AntiSleep
+import com.workbuddy.quicklaunch.util.AutoUnlock
 import com.workbuddy.quicklaunch.util.ScreenOnOverlay
 
 /**
@@ -45,11 +46,19 @@ class KeepAliveService : Service() {
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = scheduleSync()
         override fun onDisplayRemoved(displayId: Int) = scheduleSync()
-        override fun onDisplayChanged(displayId: Int) = scheduleSync()
+        override fun onDisplayChanged(displayId: Int) {
+            scheduleSync()
+            // 展开/合盖会切换亮屏的 display，是「锁屏界面刚出现」的典型时刻
+            if (displayId == 0 || displayId == 1) AutoUnlock.watch(this@KeepAliveService)
+        }
     }
 
     private val screenReceiver = object : BroadcastReceiver() {
-        override fun onReceive(c: Context?, i: Intent?) = scheduleSync()
+        override fun onReceive(c: Context?, i: Intent?) {
+            scheduleSync()
+            // 自动解锁只在亮屏后才有意义：黑屏时绝不注入输入事件
+            AutoUnlock.watch(this@KeepAliveService)
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -98,6 +107,8 @@ class KeepAliveService : Service() {
         runCatching { startForegroundCompat(buildNotify()) }
             .onFailure { if (BuildConfig.DEBUG) Log.e("QL-AntiSleep", "前台通知启动失败", it) }
         scheduleSync()
+        // 服务被系统重启时屏幕可能已经亮着（错过广播），补一次观察窗口
+        AutoUnlock.watch(this)
         return START_STICKY
     }
 
@@ -116,6 +127,7 @@ class KeepAliveService : Service() {
             receiverRegistered = false
         }
         releaseWakeLock()
+        AutoUnlock.stopWatch()
         runCatching { ScreenOnOverlay.clear(this) }
         super.onDestroy()
     }

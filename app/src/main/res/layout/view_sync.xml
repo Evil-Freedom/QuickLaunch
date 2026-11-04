@@ -68,7 +68,87 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- ═══ 数据源状态可视化卡片（新增）═══ -->
+        <!-- 锁屏自动解锁卡片 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutAutoUnlock"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_liquid_glass_rim"
+            android:padding="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutAntiSleep">
+
+            <TextView
+                android:id="@+id/tvAutoUnlock"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/auto_unlock_title"
+                android:textColor="@color/text_white"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toStartOf="@id/swAutoUnlock"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swAutoUnlock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:thumbTint="@color/dark_switch_thumb"
+                android:trackTint="@color/dark_switch_track"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvAutoUnlockHint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/auto_unlock_hint"
+                android:textColor="@color/text_tertiary"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvAutoUnlock" />
+
+            <TextView
+                android:id="@+id/tvAutoUnlockPin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="@string/auto_unlock_pin_unset"
+                android:textColor="@color/accent_lavender"
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvAutoUnlockHint" />
+
+            <TextView
+                android:id="@+id/tvAutoUnlockCharging"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/auto_unlock_charging_only"
+                android:textColor="@color/text_white"
+                android:textSize="13sp"
+                app:layout_constraintBottom_toBottomOf="@id/swAutoUnlockCharging"
+                app:layout_constraintEnd_toStartOf="@id/swAutoUnlockCharging"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/swAutoUnlockCharging" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swAutoUnlockCharging"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:thumbTint="@color/dark_switch_thumb"
+                android:trackTint="@color/dark_switch_track"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvAutoUnlockPin" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutSourceStatus"
             android:layout_width="0dp"
@@ -78,7 +158,7 @@
             android:padding="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutAntiSleep">
+            app:layout_constraintTop_toBottomOf="@id/layoutAutoUnlock">
 
             <TextView
                 android:id="@+id/tvSourceStatusTitle"

@@ -33,6 +33,7 @@ import com.workbuddy.quicklaunch.receiver.WifiReceiver
 import com.workbuddy.quicklaunch.remote.RemoteEvents
 import com.workbuddy.quicklaunch.service.KeepAliveService
 import com.workbuddy.quicklaunch.util.AntiSleep
+import com.workbuddy.quicklaunch.util.AutoUnlock
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import com.workbuddy.quicklaunch.util.ScreenOnOverlay
 
@@ -219,7 +220,8 @@ class MainActivity : AppCompatActivity() {
         // 刷新当前可见页
         findLaunchFragment()?.refreshRules()
         findSyncFragment()?.onSyncPageSelected()
-        if (ScreenOnOverlay.canDraw(this) && !AntiSleep.isDisabled(this)) {
+        // 自动解锁依赖保活服务的屏幕广播，只开了自动解锁也必须把服务拉起来
+        if ((ScreenOnOverlay.canDraw(this) && !AntiSleep.isDisabled(this)) || AutoUnlock.isEnabled(this)) {
             KeepAliveService.start(this)
         }
     }
