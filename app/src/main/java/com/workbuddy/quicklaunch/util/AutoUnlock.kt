@@ -164,7 +164,12 @@ object AutoUnlock {
         override fun run() {
             val app = appCtx
             if (app == null || !watching) return
-            if (SystemClock.elapsedRealtime() > watchEnd) return
+            if (SystemClock.elapsedRealtime() > watchEnd) {
+                // 窗口结束必须把 watching 复位：否则后续 watch() 会被
+                // 「if (watching) return」挡掉，观察器就此静默死亡（表现为功能时好时坏）
+                watching = false
+                return
+            }
             if (!isEnabled(app)) return stopWatch()
 
             val locked = deviceLocked(app)
