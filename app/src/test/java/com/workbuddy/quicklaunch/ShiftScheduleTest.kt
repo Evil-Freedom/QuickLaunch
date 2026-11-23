@@ -208,9 +208,14 @@ class ShiftScheduleTest {
      */
     @Test
     fun `班表模式下 peek 可正常返回且不崩`() {
+        // peekNextTriggerAt 内部用的是真实当前时间，所以班表必须相对「今天」构造。
+        // 曾经这里写死 2026-11-02 / 2026-11-05，日期一过就走进「无可用班次 → 退化」分支，
+        // 测试跟着日历变红/变绿 —— 那种用例测的不是逻辑，是运行日期。
+        val day1 = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+        val day2 = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 3) }
         val t = table(
-            shift("2026-11-02", 540, 1080),
-            shift("2026-11-05", 300, 1740)
+            shift(HolidayChecker.dateKey(day1), 540, 1080),
+            shift(HolidayChecker.dateKey(day2), 300, 1740)
         )
         val ck = HolidayChecker.EMPTY
         val nowMs = System.currentTimeMillis()

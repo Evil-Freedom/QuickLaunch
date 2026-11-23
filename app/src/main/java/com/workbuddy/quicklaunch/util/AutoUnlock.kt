@@ -251,6 +251,11 @@ object AutoUnlock {
      */
     @Suppress("DEPRECATION")
     private fun injectAndVerify(ctx: Context, display: Display, pin: String): Boolean {
+        // 纵深防御：setPin 时校验过格式，但这里是**从存储读回**的字符串，且下面直接拼进
+        // shell 命令字面量（无引号包裹）。若不在这里再校验一次，被篡改的 SharedPreferences
+        // 就能注入任意命令片段。校验失败按「解锁失败」处理，不抛异常。
+        if (!AutoUnlockDecision.validPin(pin)) return false
+
         val p = Point()
         runCatching { display.getRealSize(p) }
         val w = if (p.x > 0) p.x else display.mode.physicalWidth
@@ -261,9 +266,10 @@ object AutoUnlock {
         val y1 = swipe[1]
         val y2 = swipe[3]
 
-        // 一条 su 里跑完：每次 fork `input` 都要起一个 app_process，分开调用会慢一倍以上
+        // 一条 su 里跑完：每次 fork `input` 都要起一个 app_process，分开调用会慢一倍以上。
+        // pin 用单引号包住，与上面的格式校验构成双保险。
         val cmd = "input -d $id swipe $x $y1 $x $y2 250; " +
-            "sleep 0.45; input -d $id text $pin; sleep 0.25; input keyevent 66"
+            "sleep 0.45; input -d $id text '$pin'; sleep 0.25; input keyevent 66"
         RootUtils.runAsRoot(cmd)
 
         // keyguard 消失是异步的，给 1.4s；期间每 200ms 读一次真实状态

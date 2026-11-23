@@ -329,8 +329,10 @@ object Scheduler {
             nextTriggerTimeByShift(a, now, exceptions, shifts)?.let { return it }
             // 扫描窗口内没有任何可用班次（公司只排到今天且时刻已过）：
             // 退化为固定时刻，宁可多触发一次也不要静默失效。
+            // Log 包 runCatching：android.util.Log 在 JVM 单测里是未实现的桩，直接调用会抛
+            // RuntimeException；日志本身不该有能力把排程链路打挂。
             if (BuildConfig.DEBUG) {
-                Log.w("Scheduler", "班表模式无可用班次，退化为固定时刻 id=${a.id}")
+                runCatching { Log.w("Scheduler", "班表模式无可用班次，退化为固定时刻 id=${a.id}") }
             }
         }
 
