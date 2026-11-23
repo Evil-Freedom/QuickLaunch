@@ -170,4 +170,68 @@ class LockScreenLaunchTest {
         val again = e.onBlockedByKeyguard(2_000L)
         assertEquals(LaunchAttemptEngine.Decision.Idle, again)
     }
+
+    // ── 自动解锁会开门时的一让（真机发现：任务判死早于解锁完成）──────────
+
+    @Test
+    fun `自动解锁可用时先让路而不是判死`() {
+        // 真机现场：任务 45ms 判 KEYGUARD_BLOCKED → 1.5 秒后解锁成功 → 没人再启动它。
+        val e = engine()
+        e.start(0L, alreadyForeground = false)
+        e.onLaunchDispatched(0L)
+
+        val d = e.onBlockedByKeyguard(1_000L, "ROOT", keyguardWillOpen = true)
+        assertTrue("应等待解锁而不是结案：$d", d is LaunchAttemptEngine.Decision.WaitUntil)
+        assertEquals(LaunchAttemptState.RETRY_WAIT, e.state)
+        assertEquals(LaunchAttemptEngine.REASON_KEYGUARD_BLOCKED, e.lastError)
+        // 等待时长要覆盖实测解锁耗时（内屏 1.44s / 外屏 1.18s）
+        assertEquals(1_000L + LaunchAttemptEngine.KEYGUARD_RESCUE_DELAY_MS, (d as LaunchAttemptEngine.Decision.WaitUntil).at)
+    }
+
+    @Test
+    fun `让路期间不提前重发启动`() {
+        val e = engine()
+        e.start(0L, alreadyForeground = false)
+        e.onLaunchDispatched(0L)
+        e.onBlockedByKeyguard(1_000L, "ROOT", keyguardWillOpen = true)
+
+        // 还没到点：只能等
+        val early = e.onTick(2_000L)
+        assertTrue("未到点不应重发：$early", early is LaunchAttemptEngine.Decision.WaitUntil)
+
+        // 到点：重发一次
+        val due = e.onTick(1_000L + LaunchAttemptEngine.KEYGUARD_RESCUE_DELAY_MS)
+        assertTrue("到点应重发启动：$due", due is LaunchAttemptEngine.Decision.DispatchLaunch)
+    }
+
+    @Test
+    fun `只让一次 解锁失败后回到收手`() {
+        // 关键边界：解锁失败（密码错/被停用/root 掉了）时若继续让路，
+        // 就变成无限等待 + 反复点亮屏幕。
+        val e = engine()
+        e.start(0L, alreadyForeground = false)
+        e.onLaunchDispatched(0L)
+        e.onBlockedByKeyguard(1_000L, "ROOT", keyguardWillOpen = true)
+
+        e.onTick(1_000L + LaunchAttemptEngine.KEYGUARD_RESCUE_DELAY_MS)
+        e.onLaunchDispatched(5_000L, dispatchAccepted = true)
+
+        val second = e.onBlockedByKeyguard(6_000L, "ROOT", keyguardWillOpen = true)
+        assertTrue(
+            "第二次必须结案而不是再等一轮：$second",
+            second is LaunchAttemptEngine.Decision.Finished
+        )
+        assertEquals(LaunchAttemptState.MANUAL_REQUIRED, e.state)
+    }
+
+    @Test
+    fun `自动解锁不可用时行为不变`() {
+        // 回归：没有自动解锁的能力时，仍然是「立即收手」，不空等也不重复点亮屏幕。
+        val e = engine()
+        e.start(0L, alreadyForeground = false)
+        e.onLaunchDispatched(0L)
+        val d = e.onBlockedByKeyguard(1_000L, "ROOT", keyguardWillOpen = false)
+        assertTrue("应立即结案：$d", d is LaunchAttemptEngine.Decision.Finished)
+        assertEquals(LaunchAttemptState.MANUAL_REQUIRED, e.state)
+    }
 }

@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.workbuddy.quicklaunch.service.LaunchFailureNotifier
+import com.workbuddy.quicklaunch.util.AutoUnlock
 import com.workbuddy.quicklaunch.service.LaunchService
 import java.util.UUID
 import java.util.concurrent.Executors
@@ -223,7 +224,10 @@ object LaunchAttemptController {
                     // 记一次尝试后直接按锁屏挡住收手，不再点亮屏幕重试
                     engine.start(now, alreadyForeground = false)
                     engine.onLaunchDispatched(now, dispatchAccepted = true)
-                    handle(app, runner, engine.onBlockedByKeyguard(now, snap?.source))
+                    handle(
+                        app, runner,
+                        engine.onBlockedByKeyguard(now, snap?.source, requestKeyguardRescue(app))
+                    )
                 } else {
                     handle(app, runner, engine.start(now, foreground))
                 }
@@ -319,7 +323,7 @@ object LaunchAttemptController {
                         ForegroundJudge.Verdict.VISIBLE ->
                             engine.onProbeResult(now, hit = true, source = snap.source)
                         ForegroundJudge.Verdict.BLOCKED_BY_KEYGUARD ->
-                            engine.onBlockedByKeyguard(now, snap.source)
+                            engine.onBlockedByKeyguard(now, snap.source, requestKeyguardRescue(app))
                         else -> engine.onProbeResult(now, hit = false, source = snap.source)
                     }
                 )
@@ -387,6 +391,23 @@ object LaunchAttemptController {
 
     /** 判定「刚创建」的时间窗，见 [recover]。 */
     private const val FRESH_TASK_WINDOW_MS = 5_000L
+
+    /**
+     * 自动解锁是否真的会把锁屏打开；会的话顺手唤起一次观察窗口。
+     *
+     * 唤起是必要的：`SCREEN_ON` 广播可能早于本任务（例如闹钟触发时屏幕刚亮），
+     * 那时 AutoUnlock 的 12 秒观察窗口可能已经走完，干等不会有人来开门。
+     *
+     * 任一条件不满足都返回 false —— 判定链回到「立即收手」，
+     * 不因为一个不可用的解锁能力而让任务空等并反复点亮屏幕。
+     */
+    private fun requestKeyguardRescue(app: Context): Boolean = runCatching {
+        val can = AutoUnlock.isEnabled(app) &&
+            AutoUnlock.hasPin(app) &&
+            !AutoUnlock.isSecurityLocked(app)
+        if (can) AutoUnlock.watch(app)
+        can
+    }.getOrDefault(false)
 
     private fun resolveProbe(app: Context): ForegroundProbe =
         probe ?: CompositeProbe.create(app).also { probe = it }

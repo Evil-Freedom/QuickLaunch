@@ -56,6 +56,14 @@ class LaunchAttemptEngine(
     var lastError: String = ""
         private set
 
+    /**
+     * 是否已经为「自动解锁正在开门」让过一次路。
+     *
+     * 只让一次是硬约束：解锁失败（密码错、被停用、root 掉了）时再让路
+     * 就变成无限等待，而每次等待都会重新点亮屏幕。
+     */
+    private var keyguardRescueTried = false
+
     /** 终结原因。成功时也有值（如 ALREADY_FOREGROUND / FOREGROUND_CONFIRMED）。 */
     var finishedReason: String = ""
         private set
@@ -233,7 +241,11 @@ class LaunchAttemptEngine(
      * **不重试**：锁屏是持续状态，再试 2 次只会再点亮两次屏幕，
      * 而结果不会变。直接收手并让通知告诉用户「需要解锁」。
      */
-    fun onBlockedByKeyguard(now: Long, source: String? = null): Decision {
+    fun onBlockedByKeyguard(
+        now: Long,
+        source: String? = null,
+        keyguardWillOpen: Boolean = false
+    ): Decision {
         if (state.isTerminal) return Decision.Idle
         if (source != null) attempts.lastOrNull()?.probeSource = source
         attempts.lastOrNull()?.apply {
@@ -243,6 +255,19 @@ class LaunchAttemptEngine(
             }
         }
         lastError = REASON_KEYGUARD_BLOCKED
+
+        // 自动解锁已启用时会主动把锁屏打开，这时直接判死是错的：
+        // 真机实测就是「任务 45ms 判死 → 1.5 秒后解锁成功 → 没人再启动」。
+        // 但只能让路一次：解锁失败时必须回到「收手」，否则变成无限等待。
+        if (keyguardWillOpen && !keyguardRescueTried) {
+            keyguardRescueTried = true
+            state = LaunchAttemptState.RETRY_WAIT
+            // retryAt 必须一起设：onTick 在 RETRY_WAIT 分支靠它判断是否到点，
+            // 留成旧值会让下一次 tick 立刻重发启动（等于没等）。
+            retryAt = now + KEYGUARD_RESCUE_DELAY_MS
+            return Decision.WaitUntil(retryAt)
+        }
+
         return finish(now, LaunchAttemptState.MANUAL_REQUIRED, REASON_KEYGUARD_BLOCKED)
     }
 
@@ -302,6 +327,14 @@ class LaunchAttemptEngine(
         const val REASON_PACKAGE_MISSING = "PACKAGE_MISSING"
         const val REASON_NO_PROBE = "NO_FOREGROUND_PROBE"
         const val REASON_KEYGUARD_BLOCKED = "KEYGUARD_BLOCKED"
+
+        /**
+         * 锁屏被自动解锁挡住时的让路时长。
+         *
+         * 真机实测：watch 启动到 Keyguard 解除约 1.2~2.0 秒（内屏 1.44s / 外屏 1.18s）。
+         * 给 4 秒包含 bouncer 动画与一次上滑重试的余量。
+         */
+        const val KEYGUARD_RESCUE_DELAY_MS = 4_000L
 
         const val OUTCOME_PENDING = "PENDING"
         const val OUTCOME_SUCCESS = "SUCCESS"

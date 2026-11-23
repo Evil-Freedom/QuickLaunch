@@ -306,8 +306,62 @@ ActivityManager **收到广播**之间有约 36 秒（真机日志：命令 16:0
 把「有没有前台探测能力」的判断从广播线程移到探测线程
 （它内部要 fork `su`，不该阻塞广播处理）。
 
-### 9.6 仍未验证
+### 9.6 合盖外屏启动（后续已在 v1.4.2 解决）
 
-**合盖（外屏 display 1）状态下的自动启动** —— 需要物理合盖，
-本轮未执行。选屏逻辑未改动（`DisplayPicker` 原样保留），
-判定侧已按 `Display #N` 分段，合盖时外屏的 top Activity 会被正确识别。
+本节写作时合盖外屏启动尚未验证。后续实测发现普通 App 无法跨屏启动
+（`setLaunchDisplayId(1)` 返回 true 但目标落到 Display #5 虚拟屏），
+改由 `RootDisplayLauncher` 走 `am start --display N` 解决，真机 3.45 秒成功。
+详见 `docs/RELEASE_1.4.2.md` 与 §10。
+
+---
+
+## 10. 与自动解锁的协同（v1.4.2）
+
+### 10.1 发现的问题
+
+自动解锁启用后，出现了新形态的失败：
+
+```
+17:18:09.358 新建任务 state=PENDING
+17:18:09.403 任务结束 MANUAL_REQUIRED error=KEYGUARD_BLOCKED   ← 45 ms 判死
+17:18:10.043 AutoUnlock watch 启动
+17:18:11.559 自动解锁成功                                        ← 但任务已经死了
+```
+
+`onBlockedByKeyguard` 立即收手这个行为，在自动解锁**关闭**时是正确的
+（锁屏不会自己消失，重试只会反复点亮屏幕）。但自动解锁开着时，
+锁屏**马上就会**被打开 —— 此时判死等于把一次本来会成功的启动丢掉。
+
+### 10.2 修复：只让路一次
+
+`onBlockedByKeyguard` 增加 `keyguardWillOpen` 参数。为 true 时转入 `RETRY_WAIT`
+并等 `KEYGUARD_RESCUE_DELAY_MS`（4 秒，覆盖实测 1.18~1.44 秒的解锁耗时 + 动画余量），
+到点后重新发起一次启动。
+
+`keyguardWillOpen` 由控制器判定，三个条件全满足才算：
+
+```
+AutoUnlock.isEnabled && AutoUnlock.hasPin && !AutoUnlock.isSecurityLocked
+```
+
+并且会顺手调一次 `AutoUnlock.watch()`：`SCREEN_ON` 广播可能早于本任务
+（闹钟触发时屏幕刚亮），那时 12 秒观察窗口可能已经走完，干等不会有人来开门。
+
+**只让一次**是硬约束（`keyguardRescueTried`）：解锁失败（密码错、被停用、
+root 掉了）时必须回到「立即收手」，否则就是无限等待 + 反复点亮屏幕。
+
+### 10.3 真机结果（合盖 + 锁屏 + 触发启动）
+
+```
+17:24:46.119 第 1 次发出启动
+17:24:46.441 AutoUnlock 判定 ATTEMPT locked=true 屏=1
+17:24:46.820 上滑 display=1 设备=/dev/input/event8 缩放=16.0
+17:24:47.586 Keyguard 已解除 display=1（自动提交）
+17:24:48.265 探测 VISIBLE top={1=com.workbuddy.quicklaunch} lit=[1]
+17:24:49.136 探测 VISIBLE（连续 2 次命中）
+17:24:49.137 任务结束 state=SUCCESS attempt=1/3
+```
+
+这次解锁比首次探测还快（约 2.1 秒），因此没走到让路分支 —— 说明让路只在
+解锁较慢时才会用到，是兜底而非主路径。外屏 `topResumedActivity` 确认为目标，
+`attempt=1/3`，自动解锁 `failures` 保持 0。
