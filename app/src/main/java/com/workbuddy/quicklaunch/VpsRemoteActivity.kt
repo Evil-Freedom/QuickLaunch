@@ -58,6 +58,7 @@ class VpsRemoteActivity : AppCompatActivity() {
         val s = VpsSettings.load(this)
         binding.swVpsEnabled.isChecked = s.enabled
         binding.etVpsUrl.setText(s.baseUrl)
+        binding.etVpsBackup.setText(s.backupUrl)
         binding.etVpsDevice.setText(s.deviceId)
         // 密钥不回显：用户重新填才会覆盖，避免截图/录屏泄露
         binding.etVpsSecret.setText("")
@@ -78,6 +79,19 @@ class VpsRemoteActivity : AppCompatActivity() {
             toast(urlError)
             return
         }
+        // 备用地址可留空；填了就必须是合法地址（同样只接受 https 或回环）
+        val backupRaw = binding.etVpsBackup.text?.toString().orEmpty().trim()
+        if (backupRaw.isNotEmpty()) {
+            val backupError = VpsSettings.validateUrl(backupRaw)
+            if (backupError != null) {
+                toast("备用地址：$backupError")
+                return
+            }
+            if (backupRaw.trimEnd('/') == urlRaw.trim().trimEnd('/')) {
+                toast("备用地址不能和主地址相同")
+                return
+            }
+        }
         val deviceId = binding.etVpsDevice.text?.toString().orEmpty().trim()
         if (deviceId.isBlank()) {
             toast("请填写设备 ID")
@@ -93,6 +107,7 @@ class VpsRemoteActivity : AppCompatActivity() {
             ?: VpsSettings.DEFAULT_INTERVAL_SEC
 
         VpsSettings.setBaseUrl(this, urlRaw)
+        VpsSettings.setBackupUrl(this, backupRaw)
         VpsSettings.setDeviceId(this, deviceId)
         if (secretInput.isNotBlank()) VpsSettings.setSecret(this, secretInput)
         VpsSettings.setInterval(this, interval)

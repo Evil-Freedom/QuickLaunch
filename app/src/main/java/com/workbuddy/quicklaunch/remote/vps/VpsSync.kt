@@ -53,43 +53,73 @@ object VpsSync {
         val settings = VpsSettings.load(app)
         if (!settings.ready()) return Outcome.NotConfigured
 
-        val nonce = VpsClient.newNonce()
         val since = settings.appliedVersion
         val appliedHash = VpsSettings.appliedHash(app)
-        when (val fetched = VpsClient.fetch(settings, since, nonce, appliedHash)) {
-            is FetchOutcome.NotModified -> {
-                VpsSettings.setLastSync(app, System.currentTimeMillis(), "无更新")
-                return Outcome.UpToDate(settings.appliedVersion)
-            }
-            is FetchOutcome.Fail -> {
-                // 关键：这里不碰任何本地状态。规则、闹钟、重试策略全部维持原样。
-                VpsSettings.setLastSync(
-                    app, System.currentTimeMillis(), "拉取失败：${fetched.reason}"
-                )
-                return Outcome.Failed(fetched.reason)
-            }
-            is FetchOutcome.Ok -> {
-                val secret = settings.secret()
-                    ?: return Outcome.Failed("设备密钥不可用")
-                return when (val parsed = VpsEnvelope.parse(
-                    fetched.body, secret, nonce, settings.appliedVersion
-                )) {
-                    is VpsEnvelope.Result.NoChange -> {
-                        VpsSettings.setLastSync(app, System.currentTimeMillis(), "无更新（v${parsed.version}）")
-                        Outcome.UpToDate(parsed.version)
-                    }
-                    is VpsEnvelope.Result.Err -> {
+
+        var lastFail: FetchOutcome.Fail? = null
+        for (url in candidateUrls(app, settings)) {
+            // nonce 必须每个地址都新生成：主地址那次请求可能已经在服务端记过
+            // nonce（比如 502 是网关返回的，请求其实到过 api），复用会被判重放。
+            val nonce = VpsClient.newNonce()
+            when (val fetched = VpsClient.fetch(settings, since, nonce, appliedHash, url)) {
+                is FetchOutcome.NotModified -> {
+                    VpsSettings.setLastGoodUrl(app, url)
+                    VpsSettings.setLastSync(app, System.currentTimeMillis(), "无更新")
+                    return Outcome.UpToDate(settings.appliedVersion)
+                }
+
+                is FetchOutcome.Fail -> {
+                    lastFail = fetched
+                    // 只有「网络/网关」层的失败才值得换地址。
+                    // 401 是签名或设备问题、400 是参数问题 —— 换个域名一模一样。
+                    if (!VpsUrls.retryable(fetched.code)) {
                         VpsSettings.setLastSync(
-                            app, System.currentTimeMillis(), "校验失败：${parsed.reason}"
+                            app, System.currentTimeMillis(), "拉取失败：${fetched.reason}"
                         )
-                        Log.w(TAG, "配置校验失败 ${parsed.reason}: ${parsed.detail}")
-                        Outcome.Failed("${parsed.reason}: ${parsed.detail}")
+                        return Outcome.Failed(fetched.reason)
                     }
-                    is VpsEnvelope.Result.Ok -> apply(app, settings, parsed)
+                    Log.i(TAG, "地址不可用，尝试下一个：$url (${fetched.reason})")
+                }
+
+                is FetchOutcome.Ok -> {
+                    VpsSettings.setLastGoodUrl(app, url)
+                    val secret = settings.secret()
+                        ?: return Outcome.Failed("设备密钥不可用")
+                    return when (val parsed = VpsEnvelope.parse(
+                        fetched.body, secret, nonce, settings.appliedVersion
+                    )) {
+                        is VpsEnvelope.Result.NoChange -> {
+                            VpsSettings.setLastSync(
+                                app, System.currentTimeMillis(), "无更新（v${parsed.version}）"
+                            )
+                            Outcome.UpToDate(parsed.version)
+                        }
+                        is VpsEnvelope.Result.Err -> {
+                            VpsSettings.setLastSync(
+                                app, System.currentTimeMillis(), "校验失败：${parsed.reason}"
+                            )
+                            Log.w(TAG, "配置校验失败 ${parsed.reason}: ${parsed.detail}")
+                            Outcome.Failed("${parsed.reason}: ${parsed.detail}")
+                        }
+                        is VpsEnvelope.Result.Ok -> apply(app, settings, parsed)
+                    }
                 }
             }
         }
+
+        // 所有地址都不通：本地状态一律不动，等下一次窗口再试。
+        val reason = lastFail?.reason ?: "没有可用地址"
+        VpsSettings.setLastSync(app, System.currentTimeMillis(), "拉取失败：$reason")
+        return Outcome.Failed(reason)
     }
+
+    /** 顺序见 [VpsUrls.candidates]：上次成功的 → 主 → 备。 */
+    private fun candidateUrls(app: Context, settings: VpsSettings.Data): List<String> =
+        VpsUrls.candidates(
+            lastGood = VpsSettings.lastGoodUrl(app),
+            baseUrl = settings.baseUrl,
+            backupUrl = settings.backupUrl
+        )
 
     private fun apply(
         app: Context,
@@ -161,7 +191,10 @@ object VpsSync {
             VpsClient.report(
                 settings, parsed.version, failed == 0, detail,
                 deviceInfo = deviceInfo(app),
-                unlockStatus = AutoUnlockStatus.snapshot(app)
+                unlockStatus = AutoUnlockStatus.snapshot(app),
+                // 必须和这一轮真正连通的地址一致：否则会出现
+                // 「配置拉下来了、回执却发不出去」—— 主地址被网络拦时就是这种局面。
+                baseUrl = VpsSettings.lastGoodUrl(app).ifBlank { settings.baseUrl }
             )
         }
 

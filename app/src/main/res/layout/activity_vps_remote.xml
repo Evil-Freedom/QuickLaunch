@@ -82,6 +82,29 @@
                 android:textColorHint="@color/dark_text_tertiary"
                 android:textSize="14sp" />
 
+            <!-- 备用入口：部分网络会按域名拦截主地址（例如公司网禁 *.duckdns.org），
+                 这时自动改走这个地址。留空表示不用。 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="备用地址（可选，主地址不通时自动改用）"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <EditText
+                android:id="@+id/etVpsBackup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="https://备用域名或 IP 形式地址"
+                android:importantForAutofill="no"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:textColor="@color/dark_text_primary"
+                android:textColorHint="@color/dark_text_tertiary"
+                android:textSize="14sp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

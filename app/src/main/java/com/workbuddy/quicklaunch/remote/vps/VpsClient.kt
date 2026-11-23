@@ -26,6 +26,14 @@ object VpsSettings {
     data class Data(
         val enabled: Boolean,
         val baseUrl: String,
+        /**
+         * 备用入口。主地址在**当前网络**不可达时自动改用它。
+         *
+         * 真实场景：公司/园区网络会按域名做拦截（`*.duckdns.org` 直接 403 或 TLS reset），
+         * 而同一个服务换一个域名就通。有两个地址时，换网络（WiFi ↔ 移动数据）
+         * 不需要重新配置，客户端自己会选能用的那个。
+         */
+        val backupUrl: String,
         val deviceId: String,
         val secretB64: String,
         val appliedVersion: Long,
@@ -45,6 +53,7 @@ object VpsSettings {
         return Data(
             enabled = p.getBoolean("enabled", false),
             baseUrl = p.getString("base_url", "").orEmpty().trimEnd('/'),
+            backupUrl = p.getString("backup_url", "").orEmpty().trimEnd('/'),
             deviceId = p.getString("device_id", "").orEmpty(),
             secretB64 = p.getString("secret", "").orEmpty(),
             appliedVersion = p.getLong("applied_version", 0L),
@@ -58,6 +67,21 @@ object VpsSettings {
 
     fun setBaseUrl(context: Context, url: String) =
         prefs(context).edit().putString("base_url", url.trim().trimEnd('/')).apply()
+
+    fun setBackupUrl(context: Context, url: String) =
+        prefs(context).edit().putString("backup_url", url.trim().trimEnd('/')).apply()
+
+    /**
+     * 上次真正连通的那个地址。
+     *
+     * 有它才能避免「每次都先试一遍注定失败的地址」：在公司网络下主域名永远
+     * 超时，没有这个记忆就要白等 10 秒连接超时才开始试备用。
+     */
+    fun lastGoodUrl(context: Context): String =
+        prefs(context).getString("last_good_url", "").orEmpty()
+
+    fun setLastGoodUrl(context: Context, url: String) =
+        prefs(context).edit().putString("last_good_url", url.take(200)).apply()
 
     fun setDeviceId(context: Context, id: String) =
         prefs(context).edit().putString("device_id", id.trim()).apply()
@@ -173,7 +197,8 @@ object VpsClient {
         settings: VpsSettings.Data,
         since: Long,
         nonce: String,
-        appliedHash: String = ""
+        appliedHash: String = "",
+        baseUrl: String = settings.baseUrl
     ): FetchOutcome {
         val secret = settings.secret()
             ?: return FetchOutcome.Fail(-1, "设备密钥不是合法 Base64")
@@ -186,7 +211,7 @@ object VpsClient {
 
         var conn: HttpURLConnection? = null
         return try {
-            conn = (URL(settings.baseUrl + path).openConnection() as HttpURLConnection).apply {
+            conn = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
                 connectTimeout = CONNECT_TIMEOUT_MS
                 readTimeout = READ_TIMEOUT_MS
@@ -208,7 +233,7 @@ object VpsClient {
                     val err = runCatching {
                         conn.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
                     }.getOrDefault("")
-                    VpsSettings.log("拉取失败 code=$code body=${err.take(200)}")
+                    VpsSettings.log("拉取失败 code=$code via=$baseUrl body=${err.take(120)}")
                     FetchOutcome.Fail(code, err.take(300).ifBlank { "HTTP $code" })
                 }
             }
@@ -230,7 +255,8 @@ object VpsClient {
         ok: Boolean,
         detail: String,
         deviceInfo: org.json.JSONObject? = null,
-        unlockStatus: org.json.JSONObject? = null
+        unlockStatus: org.json.JSONObject? = null,
+        baseUrl: String = settings.baseUrl
     ): Boolean {
         val secret = settings.secret() ?: return false
         val ts = System.currentTimeMillis()
@@ -249,7 +275,7 @@ object VpsClient {
         }.toString()
         var conn: HttpURLConnection? = null
         return try {
-            conn = (URL(settings.baseUrl + "/api/v1/report").openConnection() as HttpURLConnection).apply {
+            conn = (URL(baseUrl + "/api/v1/report").openConnection() as HttpURLConnection).apply {
                 requestMethod = "POST"
                 doOutput = true
                 connectTimeout = CONNECT_TIMEOUT_MS
