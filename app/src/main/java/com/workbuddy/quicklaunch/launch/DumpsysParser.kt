@@ -57,14 +57,31 @@ object DumpsysParser {
         val anySleeping: Boolean get() = sleepingDisplays.isNotEmpty()
 
         /**
-         * 「设备在睡眠，但目标 App 已经在某个睡眠屏上被启动过」。
+         * 「设备在睡眠」= 用户能看到的那块屏在睡。
+         *
+         * 折叠屏合盖时内屏（display 0）物理关闭、`isSleeping=true`，
+         * 而外屏（display 1）正常活跃 —— 此时 `anySleeping` 为真但设备**不**在睡眠。
+         * 只看「任一屏睡眠」会把合盖误判成锁屏（真机踩过）。
+         *
+         * @param litDisplays 当前亮着的屏。为空（读不到）时退化为「有任一屏睡眠」。
+         */
+        fun deviceSleeping(litDisplays: Set<Int>): Boolean =
+            if (litDisplays.isEmpty()) anySleeping
+            else litDisplays.all { it in sleepingDisplays } && litDisplays.isNotEmpty()
+
+        /**
+         * 「目标 App 已经在某个**亮着但睡眠**的屏上被启动过」。
          *
          * 这是锁屏场景的唯一正确解释：App 确实被拉起来了（出现在 lastPaused），
          * 但 Keyguard 让它永远拿不到 resumed —— 用户看不到，也不该被重试。
+         *
+         * 只算亮着的屏：合盖时内屏（睡眠但不亮）上的旧记录不能当作「被锁屏挡住」。
          */
-        fun sleepingWith(targetPkg: String): Boolean =
-            targetPkg.isNotEmpty() && anySleeping &&
-                sleepingDisplays.any { lastPausedByDisplay[it] == targetPkg }
+        fun sleepingWith(targetPkg: String, litDisplays: Set<Int> = emptySet()): Boolean {
+            if (targetPkg.isEmpty() || !anySleeping) return false
+            val candidates = if (litDisplays.isEmpty()) sleepingDisplays else sleepingDisplays.filter { it in litDisplays }
+            return candidates.any { lastPausedByDisplay[it] == targetPkg }
+        }
     }
 
     fun parseState(dump: String): DumpState {

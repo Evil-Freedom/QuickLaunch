@@ -23,6 +23,7 @@ import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.LaunchProxyActivity
 import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.launch.LaunchAttemptController
+import com.workbuddy.quicklaunch.util.DisplayPicker
 
 /**
  * 前台服务：保证触发瞬间进程存活，并把启动动作交给 LaunchProxyActivity。
@@ -57,7 +58,7 @@ class LaunchService : Service() {
         runCatching { startForegroundCompat(Notifier.build(this, pkg, appName, ongoing = true)) }
 
         val launched = runCatching { Settings.canDrawOverlays(this) }.getOrDefault(false) &&
-            runCatching { startActivity(LaunchProxyActivity.intent(this, pkg, attemptId)) }.isSuccess
+            runCatching { startProxy(pkg, attemptId) }.isSuccess
 
         // 没有悬浮窗权限时 startActivity 会被系统静默丢弃，统一补一条全屏通知兜底
         if (!launched) {
@@ -69,6 +70,27 @@ class LaunchService : Service() {
 
         stopSelf()
         return START_NOT_STICKY
+    }
+
+    /**
+     * 启动中转页，并把它**投到目标屏幕**上。
+     *
+     * ## 为什么要把中转页也投过去
+     *
+     * 合盖实测：从 display 0（内屏）内的 Activity 用 `setLaunchDisplayId(1)`
+     * 启动目标，系统会**静默忽略**这个 display 选项（目标仍落在内屏，
+     * 而内屏已物理关闭）。但把中转页自己投到外屏后，从它启动的目标
+     * 天然继承同一 display —— 这是 Android 多屏的既定语义，
+     * 比「跨屏指定启动」可靠得多（后者受发起方所在 display 限制）。
+     *
+     * 同时保留中转页内部的 options：投屏成功时它是冗余的双保险；
+     * 投屏被忽略时它仍可能生效。
+     */
+    private fun startProxy(pkg: String, attemptId: String?): Boolean {
+        // 不指定 display：中转页会落在触发瞬间活跃的那块屏上，
+        // 随后它启动的目标继承同一 display。见 LaunchProxyActivity 里的说明。
+        return runCatching { startActivity(LaunchProxyActivity.intent(this, pkg, attemptId)) }
+            .isSuccess
     }
 
     private fun startForegroundCompat(n: Notification) {

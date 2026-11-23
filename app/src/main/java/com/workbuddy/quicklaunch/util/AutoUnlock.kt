@@ -287,6 +287,20 @@ object AutoUnlock {
             busy.set(false)
             return
         }
+        // 外屏（display 1）跳过注入。
+        //
+        // 2026-11-23 合盖实测：外屏 1056x1066（近方形），Keyguard 的 bouncer 布局与
+        // 内屏 1080x2640（长条形）完全不同 —— 现有滑动比例（0.82h→0.28h）与 PIN
+        // 键盘位置只在内屏验证过。盲试的结果是连续两次失败直接触发安全停用
+        // （failures 2/2），把用户的额度耗在一个已知不可靠的路径上。
+        //
+        // 在拿到外屏实测参数之前，宁可不动作：合盖时目标 App 由 root 跨屏启动
+        // 已经在锁屏后（见 RootDisplayLauncher），用户解锁即可看到，不是死局。
+        if (display.displayId == com.workbuddy.quicklaunch.launch.EXTERNAL_DISPLAY_ID) {
+            busy.set(false)
+            if (BuildConfig.DEBUG) Log.i(TAG, "跳过：当前只亮外屏，注入参数未在外屏验证")
+            return
+        }
         // 「上次解锁时间」记的是注入开始时刻：这是用户语义里的
         // 「手机是什么时候尝试解锁的」，与验证结果（完成时刻）差不到 3 秒。
         sp(ctx).edit().putLong(KEY_LAST_ATTEMPT_AT, System.currentTimeMillis()).apply()

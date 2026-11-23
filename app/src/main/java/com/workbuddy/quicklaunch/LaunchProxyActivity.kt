@@ -5,9 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import com.workbuddy.quicklaunch.launch.LaunchAttemptController
+import com.workbuddy.quicklaunch.launch.RootDisplayLauncher
 import com.workbuddy.quicklaunch.util.DisplayPicker
+import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 
 /**
  * 透明中转页：触发时先拉起它，再由它启动目标 App。多花一个 Activity，一次解决四件事：
@@ -66,13 +69,36 @@ class LaunchProxyActivity : Activity() {
         }
         target.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
 
-        // 显式投到当前点亮的屏幕；单屏设备 options 为 null，等价于普通 startActivity
-        val ok = runCatching { startActivity(target, DisplayPicker.launchOptions(this)) }.isSuccess
-        val finalOk = if (!ok) {
-            // 副屏被拒时退回主屏，总比不启动强
-            runCatching { startActivity(target) }.isSuccess
-        } else {
-            true
+        // 跨屏（合盖外屏）：普通 App 的 startActivity 无法把目标送到非默认 display
+        // （真机实测：请求返回 true，目标却落到 Display #5 虚拟屏）。改走 root：
+        // `su -c am start --display N -n pkg/cls` 是唯一被验证可行的路径。
+        //
+        // 调度到后台线程是因为要 fork su（主线程会 ANR）；中转页随即 finish，
+        // 不影响后台任务继续 —— root 启动不依赖本 Activity 存活。
+        val displayId = DisplayPicker.activeDisplayId(this)
+        if (displayId != android.view.Display.DEFAULT_DISPLAY) {
+            val app = applicationContext
+            Log.i("QL-LaunchProxy", "跨屏启动 display=$displayId pkg=$pkg，走 root 路径")
+            QuickLaunchExecutors.io.execute {
+                val ok = RootDisplayLauncher.launchOnDisplay(app, pkg, displayId)
+                LaunchAttemptController.onProxyLaunched(app, attemptId, ok)
+            }
+            return
+        }
+
+        // ⚠️ 同屏路径刻意**不**调用 setLaunchDisplayId。
+        //
+        // 2026-11-23 合盖真机实测：从 App 进程用 ActivityOptions.setLaunchDisplayId(1)
+        // 启动目标，`startActivity` 返回 true，但目标根本不会出现在外屏 ——
+        // Android 12+ 对普通 App 的跨屏启动有平台限制，请求被静默丢弃。
+        // （对照：`adb shell am start --display 1` 能成功，因为 shell 有跨用户权限。）
+        //
+        // 正确做法是**让系统决定**：新 Activity 会落在「中转页自己所在的那块屏」，
+        // 而中转页由前台服务在触发瞬间拉起，自然落在当时活跃的屏幕上
+        // （合盖=外屏、展开=内屏）。这条路径从 1.3.x 起就是这样工作的。
+        val finalOk = runCatching { startActivity(target) }.isSuccess
+        runCatching {
+            android.util.Log.i("QL-LaunchProxy", "启动 pkg=$pkg ok=$finalOk（不指定 display）")
         }
         reportDispatch(attemptId, finalOk)
     }

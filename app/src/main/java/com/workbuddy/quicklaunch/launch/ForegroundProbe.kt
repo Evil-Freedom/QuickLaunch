@@ -92,20 +92,21 @@ class RootProbe(
         val state = runCatching { DumpsysParser.parseState(dump) }
             .getOrDefault(DumpsysParser.DumpState())
         val lit = runCatching { litDisplayIds() }.getOrDefault(emptySet())
-        val sleepingWith = runCatching { state.sleepingWith(targetPkg) }.getOrDefault(false)
+        val sleepingWith = runCatching { state.sleepingWith(targetPkg, lit) }.getOrDefault(false)
+        val deviceSleeping = runCatching { state.deviceSleeping(lit) }.getOrDefault(false)
         return ProbeSnapshot(
             verdict = ForegroundJudge.judge(
                 targetPkg = targetPkg,
                 topByDisplay = state.topByDisplay,
                 litDisplays = lit,
-                deviceSleeping = state.anySleeping,
+                deviceSleeping = deviceSleeping,
                 sleepingWithTarget = sleepingWith
             ),
             source = SOURCE,
             topByDisplay = state.topByDisplay,
             litDisplays = lit,
             note = buildString {
-                if (state.anySleeping) append("设备睡眠中; ")
+                if (deviceSleeping) append("设备睡眠中; ")
                 if (state.topByDisplay.isEmpty() && !state.anySleeping) append("未解析到 topResumedActivity; ")
                 if (sleepingWith) append("目标已在睡眠屏上被启动; ")
             }.trim().trimEnd(';').trim()
@@ -284,5 +285,5 @@ class CompositeProbe(
     }
 }
 
-/** razr 外屏的固定 displayId。与 [com.workbuddy.quicklaunch.util.DisplayPicker] 的假设一致。 */
-private const val EXTERNAL_DISPLAY_ID = 1
+/** razr 外屏的固定 displayId。DisplayPicker 与探针共用同一个常量，避免两处写成不同的数。 */
+internal const val EXTERNAL_DISPLAY_ID = 1
