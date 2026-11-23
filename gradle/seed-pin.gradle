@@ -1,0 +1,50 @@
+// 真机验收辅助：每次 install* 之后把锁屏 PIN 注入已安装的 App。
+//
+// 起因：`adb uninstall`、换签名、清数据都会抹掉 /data/data/<pkg>，锁屏自动解锁的 PIN
+// 随之丢失，每轮验收都要手动进设置页重填一遍。这里把 tools/seed_pin.py 挂到安装任务
+// 的收尾，做到「装完就能测」。带 --clean 是为了让失败额度也回到可测状态。
+//
+// 生效条件：local.properties 里有 ql.debug.pin（该文件在 .gitignore 里，不入库）。
+// 没有这一项时本脚本不注册任何任务，其他机器与 CI 构建不受影响。
+// 注入失败只警告不中断构建 —— 验收工具不该让构建失败。
+
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) {
+    localPropsFile.withInputStream { localProps.load(it) }
+}
+
+if (localProps.getProperty('ql.debug.pin')) {
+    def seedPin = tasks.register('seedPin') {
+        group = 'quicklaunch'
+        description = '把锁屏 PIN 注入已安装的真机 App（重装后恢复自动解锁）'
+
+        doLast {
+            def python = ['python', 'python3'].find { exe ->
+                try {
+                    return new ProcessBuilder(exe, '--version').redirectErrorStream(true).start().waitFor() == 0
+                } catch (IOException ignored) {
+                    return false
+                }
+            }
+            if (python == null) {
+                logger.warn('[seedPin] 未找到 python，跳过 PIN 注入')
+                return
+            }
+            def proc = new ProcessBuilder(
+                    python,
+                    rootProject.file('tools/seed_pin.py').absolutePath,
+                    '--enable', '--clean'
+            ).directory(rootProject.projectDir)
+                    .redirectErrorStream(true)
+                    .start()
+            proc.inputStream.eachLine { logger.lifecycle("[seedPin] ${it}") }
+            def code = proc.waitFor()
+            if (code != 0) logger.warn("[seedPin] 退出码 ${code}（不影响构建）")
+        }
+    }
+
+    tasks.matching { it.name.startsWith('install') }.configureEach {
+        finalizedBy seedPin
+    }
+}

@@ -178,6 +178,23 @@ object AutoUnlock {
     fun pinStorageKind(ctx: Context): PinVault.StorageKind =
         PinVault.storageKindOf(runCatching { sp(ctx).getString(KEY_PIN, null) }.getOrNull())
 
+    /**
+     * 把混淆存储的 PIN 就地升级成 AndroidKeyStore 加密。
+     *
+     * 触发场景只有一种：**已保存的 PIN 是 x1 混淆态，而当前 KeyStore 可用**。
+     * 这既包括「保存时 KeyStore 恰好坏了、之后恢复」的机器，也包括由
+     * `tools/seed_pin.py` 在装机后注入的 PIN（脚本拿不到 App 进程内的密钥）。
+     *
+     * 只重写密码本身，不动开关、失败计数与停用标记 —— 升级不该有任何策略副作用。
+     */
+    fun upgradePinStorageIfPossible(ctx: Context) {
+        val blob = runCatching { sp(ctx).getString(KEY_PIN, null) }.getOrNull()
+        if (PinVault.storageKindOf(blob) != PinVault.StorageKind.OBFUSCATED) return
+        if (!PinVault.isKeystoreAvailable()) return
+        val plain = PinVault.open(ctx, blob) ?: return
+        PinVault.seal(ctx, plain)?.let { sp(ctx).edit().putString(KEY_PIN, it).apply() }
+    }
+
     // ── 纯决策（可单测） ──────────────────────────────────────────
 
     /**

@@ -39,6 +39,10 @@ class AutoUnlockActivity : AppCompatActivity() {
         binding = ActivityAutoUnlockBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 混淆态（保存时 KeyStore 不可用，或由 tools/seed_pin.py 注入）的密码，
+        // 在 KeyStore 恢复可用后就地升级为加密存储，本页的「降级存储」警告因此只在真降级时出现。
+        AutoUnlock.upgradePinStorageIfPossible(this)
+
         binding.btnSetPin.setOnClickListener { askPin() }
         binding.btnClearPin.setOnClickListener { confirmClearPin() }
         binding.swChargingOnly.setOnCheckedChangeListener { _, checked ->

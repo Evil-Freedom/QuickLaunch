@@ -106,3 +106,7 @@ dependencies {
     // RuntimeException("... not mocked")。引入真实实现，让解析器逻辑可被真正验证。
     testImplementation 'org.json:json:20240303'
 }
+
+// 真机验收：install* 之后自动把锁屏 PIN 注入 App（PIN 存在 local.properties，不入库）。
+// 详见 gradle/seed-pin.gradle 与 tools/seed_pin.py。
+apply from: rootProject.file('gradle/seed-pin.gradle')
