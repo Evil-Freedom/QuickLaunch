@@ -83,6 +83,18 @@ object VpsSettings {
     fun setLastGoodUrl(context: Context, url: String) =
         prefs(context).edit().putString("last_good_url", url.take(200)).apply()
 
+    /**
+     * 上次上报给服务端的规则清单指纹。
+     *
+     * 用它判断「本地规则有没有变过」：不变就不上报，避免每分钟发一条
+     * 内容完全相同的请求。变了才发 —— 这是「手机改、看板也能看到」的触发点。
+     */
+    fun ruleFingerprint(context: Context): String =
+        prefs(context).getString("rule_fingerprint", "").orEmpty()
+
+    fun setRuleFingerprint(context: Context, fp: String) =
+        prefs(context).edit().putString("rule_fingerprint", fp.take(64)).apply()
+
     fun setDeviceId(context: Context, id: String) =
         prefs(context).edit().putString("device_id", id.trim()).apply()
 

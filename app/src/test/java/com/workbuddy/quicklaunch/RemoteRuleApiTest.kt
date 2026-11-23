@@ -40,6 +40,11 @@ class RemoteRuleApiTest {
             ops += "update:${a.id}"
             rules[a.id] = a
         }
+
+        override fun delete(a: Automation) {
+            ops += "delete:${a.id}"
+            rules.remove(a.id)
+        }
         override fun exceptionsOf(ruleId: Long): List<RuleException> =
             exceptions.filter { it.ruleId == ruleId }.sortedBy { it.date }
         override fun addException(e: RuleException) {
@@ -65,6 +70,12 @@ class RemoteRuleApiTest {
             ops += "schedule:${a.id}"
             lastScheduled = a
             lastExceptions = exceptions
+        }
+
+        // 删除规则时必须把正在跑的重试任务一起停掉，
+        // 否则删除后仍会有一次「启动失败」的通知冒出来。
+        override fun cancelActiveAttempts(ruleId: Long) {
+            ops += "cancelActiveAttempts:$ruleId"
         }
     }
 
@@ -159,7 +170,12 @@ class RemoteRuleApiTest {
         ops.clear()
 
         api().patch(7, JSONObject("""{"enabled":false}"""))
-        assertEquals(listOf("backup:7", "update:7", "cancel:7"), ops)
+        // 停用后还要把正在跑的重试任务停掉，否则用户刚关掉规则，
+        // 几秒后又会被一个既有的重试拉起来一次。
+        assertEquals(
+            listOf("backup:7", "update:7", "cancel:7", "cancelActiveAttempts:7"),
+            ops
+        )
         assertEquals(false, store.rules[7]!!.enabled)
     }
 
@@ -436,6 +452,35 @@ class RemoteRuleApiTest {
         assertEquals("明天 07:00", RemoteRuleApi.humanize(today7 + 86_400_000L, base))
         // 跨两天以上直接给日期，不编造"后天"这类容易算错的词
         assertTrue(RemoteRuleApi.humanize(today7 + 5 * 86_400_000L, base).startsWith("10-13"))
+    }
+
+    // ── 远程删除（网页看板下发的删除指令）──────────────────────────
+
+    @Test
+    fun `远程删除先取消闹钟再删库`() {
+        seed(rule())
+        ops.clear()
+
+        val r = api().delete(7)
+        assertTrue("删除应成功：$r", r is RemoteRuleApi.WriteResult.Ok)
+        // 顺序：先 cancel 再 delete。反过来的话闹钟会在规则已消失后仍被触发，
+        // 代理拿着不存在的规则什么也做不了，只留下一条「启动失败」的噪声。
+        assertEquals(
+            listOf("cancel:7", "cancelActiveAttempts:7", "delete:7"),
+            ops.filter { it.startsWith("cancel") || it.startsWith("delete") }
+        )
+        assertEquals(null, store.getById(7))
+    }
+
+    @Test
+    fun `删除不存在的规则返回 404 且不留痕迹`() {
+        seed(rule())
+        ops.clear()
+
+        val r = api().delete(999)
+        assertTrue("应返回 notFound：$r", r is RemoteRuleApi.WriteResult.Err)
+        assertEquals(404, (r as RemoteRuleApi.WriteResult.Err).code)
+        assertEquals("不该碰闹钟也不该删别的规则", 1, store.rules.size)
     }
 
     @Test

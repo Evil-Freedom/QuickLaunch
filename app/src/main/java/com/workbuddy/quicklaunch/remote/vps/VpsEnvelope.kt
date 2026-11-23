@@ -49,7 +49,15 @@ object VpsEnvelope {
             /** 自动解锁策略。null = 本次不下发、不动本地。 */
             val unlock: JSONObject?,
             /** 本次配置的内容指纹。应用成功后要存下来，下次请求带回去。 */
-            val hash: String
+            val hash: String,
+            /**
+             * 要删除的规则 id。
+             *
+             * 手机是权威方，网页上删掉的规则必须显式下发删除指令 ——
+             * 否则手机下次上报规则清单时，服务端会把它当「本地没有的新规则」
+             * 重新建档，删除等于没删。
+             */
+            val deleted: List<Long>
         ) : Result()
 
         /** 服务端版本没有推进，无事可做。不是错误。 */
@@ -133,9 +141,18 @@ object VpsEnvelope {
                 arr.optJSONObject(i)?.let { rules += it }
             }
         }
+        val deleted = ArrayList<Long>()
+        obj.optJSONArray("deleted")?.let { arr ->
+            for (i in 0 until arr.length()) {
+                val id = arr.optLong(i, 0L)
+                if (id > 0) deleted += id
+            }
+        }
+
         return Result.Ok(
             version, issuedAt, rules,
-            obj.optJSONObject("retry"), obj.optJSONObject("unlock"), contentHash
+            obj.optJSONObject("retry"), obj.optJSONObject("unlock"), contentHash,
+            deleted
         )
     }
 

@@ -3,98 +3,104 @@
 {% block title %}规则 · QuickLaunch{% endblock %}
 {% block content %}
 
+{# ═══ 状态条：版本 + 发布 ═══ #}
 <div class="card">
-  <h2>当前状态</h2>
-  <div class="row">
-    <span>配置版本 <b>v{{ version }}</b></span>
-    <span class="muted">·</span>
-    <span class="muted">共 {{ rules|length }} 条规则</span>
-    <form method="post" action="/publish" style="margin-left:auto">
+  <div class="row" style="justify-content:space-between">
+    <div>
+      <div style="font-size:15px;font-weight:600">启动规则</div>
+      <div class="muted" style="font-size:12px;margin-top:3px">
+        共 {{ rules|length }} 条 · 配置版本 <b>v{{ version }}</b>
+        {% if device and device.last_version %}
+          · 手机已应用 <b>v{{ device.last_version }}</b>
+        {% endif %}
+      </div>
+    </div>
+    <form method="post" action="/publish" style="margin:0">
       <input type="hidden" name="note" value="手动发布">
       <button type="submit">发布新版本</button>
     </form>
   </div>
   <p class="hint">
-    手机每 10 分钟主动来拉一次（间隔可在手机上改）。发布后最多 10 分钟生效；
+    在手机上改完保存的规则会自动同步上来；在这里改完需要点「保存并发布」才会下发。
     手机离线时继续用本地最后一次有效配置。
   </p>
 </div>
 
-<div class="card">
-  <h2>启动规则</h2>
-  {% if not rules %}
-  <p class="muted">还没有规则。首次使用请在手机端把现有规则导出后导入，或手动添加。</p>
-  {% endif %}
-  <table>
-    <thead>
-      <tr><th>ID</th><th>时间</th><th>重复</th><th>跳过节假日</th><th>状态</th><th></th></tr>
-    </thead>
-    <tbody>
-    {% for r in rules %}
-      <tr>
-        <td class="mono">#{{ r.id }}</td>
-        <td class="mono">{{ '%02d:%02d'|format(r.get('timeHour', 0), r.get('timeMinute', 0)) }}</td>
-        <td>{{ r.get('repeatMode', 'daily') }}{% if r.get('repeatMode') == 'custom' %} ({{ r.get('repeatDays', 0) }}){% endif %}</td>
-        <td>{{ '是' if r.get('skipHolidays') else '否' }}</td>
-        <td>
-          {% if r.get('enabled', True) %}
-            <span class="tag on">启用</span>
-          {% else %}
-            <span class="tag off">停用</span>
-          {% endif %}
-        </td>
-        <td><a href="#r{{ r.id }}" style="color:var(--accent)">编辑</a></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-{% for r in rules %}
-<div class="card" id="r{{ r.id }}">
-  <h2>编辑规则 #{{ r.id }}</h2>
-  <form method="post" action="/rules/{{ r.id }}/edit">
-    <div class="row">
-      <label>时 <input type="number" name="time_hour" min="0" max="23" value="{{ r.get('timeHour', 0) }}"></label>
-      <label>分 <input type="number" name="time_minute" min="0" max="59" value="{{ r.get('timeMinute', 0) }}"></label>
-      <label>重复
-        <select name="repeat_mode">
-          {% for m in ['daily', 'weekdays', 'weekend', 'custom', 'once'] %}
-          <option value="{{ m }}" {% if r.get('repeatMode') == m %}selected{% endif %}>{{ m }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <label>星期位图 <input type="number" name="repeat_days" min="0" max="127" value="{{ r.get('repeatDays', 0) }}"></label>
-      <label>跳过节假日 <input type="number" name="skip_holidays" min="0" max="1" value="{{ 1 if r.get('skipHolidays') else 0 }}"></label>
-      <label>启用 <input type="number" name="enabled" min="0" max="1" value="{{ 1 if r.get('enabled', True) else 0 }}"></label>
+{# ═══ 冲突裁决 ═══ #}
+{% for c in conflict_views %}
+<div class="banner warn">
+  <div style="font-weight:600;margin-bottom:8px">
+    规则 #{{ c.raw.rule_id }} 在手机和网页上都改过
+  </div>
+  <div style="font-size:12px;line-height:1.9">
+    <div>网页版：{{ c.server.desc if c.server else '—' }}</div>
+    <div>手机版：{{ c.device.desc if c.device else '—' }}</div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <form method="post" action="/conflicts/{{ c.raw.rule_id }}/resolve" style="margin:0">
+      <input type="hidden" name="keep" value="server">
       <input type="hidden" name="publish" value="1">
-      <button type="submit">保存并发布</button>
-    </div>
-    <p class="hint">星期位图仅 repeatMode=custom 时生效：bit0=周日 … bit6=周六，例如周一三五 = 42。</p>
-  </form>
+      <button type="submit" class="ghost">保留网页版</button>
+    </form>
+    <form method="post" action="/conflicts/{{ c.raw.rule_id }}/resolve" style="margin:0">
+      <input type="hidden" name="keep" value="device">
+      <input type="hidden" name="publish" value="1">
+      <button type="submit" class="ghost">保留手机版</button>
+    </form>
+    <a href="/rules/{{ c.raw.rule_id }}" style="color:var(--accent);font-size:13px">先看详情</a>
+  </div>
 </div>
 {% endfor %}
 
-<div class="card">
-  <h2>重试策略（全局）</h2>
-  <form method="post" action="/retry">
-    <div class="row" style="margin-bottom:10px">
-      <label>启用自动重试 <input type="number" name="enabled" min="0" max="1" value="{{ 1 if retry.enabled else 0 }}"></label>
-      <label>最多尝试 <input type="number" name="max_attempts" min="1" max="5" value="{{ retry.maxAttempts }}"></label>
-      <label>首次验证延迟(ms) <input type="number" name="first_verify_delay_ms" min="500" max="10000" value="{{ retry.firstVerifyDelayMs }}"></label>
-      <label>验证窗口(ms) <input type="number" name="verify_window_ms" min="2000" max="30000" value="{{ retry.verifyWindowMs }}"></label>
-    </div>
-    <div class="row" style="margin-bottom:10px">
-      <label>重试间隔(ms,逗号分隔) <input type="text" name="retry_delays" value="{{ retry.retryDelaysMs|join(',') }}" style="width:170px"></label>
-      <label>总时限(ms) <input type="number" name="total_timeout_ms" min="10000" max="600000" value="{{ retry.totalTimeoutMs }}"></label>
-      <label>失败通知 <input type="number" name="notify_on_failure" min="0" max="1" value="{{ 1 if retry.notifyOnFailure else 0 }}"></label>
-      <label>允许手动重试 <input type="number" name="allow_manual_retry" min="0" max="1" value="{{ 1 if retry.allowManualRetry else 0 }}"></label>
-      <button type="submit">保存并发布</button>
-    </div>
-    <p class="hint">
-      这些参数会覆盖手机本地的同名设置。手机端仍保留「是否启用」的最终决定权（关闭后后台完全不跑重试）。
+{# ═══ 规则卡片（结构对齐 Android 的 item_automation） ═══ #}
+{% if not rules %}
+  <div class="card">
+    <p class="muted" style="margin:0">
+      还没有规则。在手机 App 上创建一条，保存后它会自动出现在这里。
     </p>
-  </form>
+  </div>
+{% endif %}
+
+{% for r in rules %}
+<div class="rule-card">
+  <div class="rule-head">
+    <span class="dot {{ 'on' if r.enabled else '' }}"></span>
+    <span class="rule-name">{{ r.title }}</span>
+    <form method="post" action="/rules/{{ r.id }}/toggle" style="margin:0">
+      {# 目标值是「当前取反」，用隐藏字段传：checkbox 未勾选时不会提交自己的值 #}
+      <input type="hidden" name="enabled" value="{{ 0 if r.enabled else 1 }}">
+      <label class="sw">
+        <input type="checkbox" {{ 'checked' if r.enabled else '' }}
+               onchange="this.form.submit()">
+        <span></span>
+      </label>
+    </form>
+  </div>
+
+  <div class="rule-tags">
+    <span class="tag {{ 'on' if r.enabled else 'off' }}">{{ r.label }}</span>
+    {% if r.get('shiftAnchor', 0) != 0 %}
+      <span class="tag">班表</span>
+    {% elif r.get('randomWindow') %}
+      <span class="tag">随机 {{ r.win_start_text }}–{{ r.win_end_text }}</span>
+    {% endif %}
+    {% if r.id in conflicts %}
+      <span class="tag off">待裁决</span>
+    {% endif %}
+  </div>
+
+  <div class="rule-desc">{{ r.desc }}</div>
+
+  <div class="rule-actions">
+    <a class="primary" href="/rules/{{ r.id }}">编辑</a>
+    <form method="post" action="/rules/{{ r.id }}/delete" style="margin:0;flex:1;display:flex"
+          onsubmit="return confirm('删除「{{ r.title }}」？\n\n这条规则会从手机上也一起删掉，只保留在版本历史里。')">
+      <button type="submit" style="flex:1;background:transparent;border:1px solid #4a1e1e;color:var(--bad)">
+        删除
+      </button>
+    </form>
+  </div>
 </div>
+{% endfor %}
 
 {% endblock %}

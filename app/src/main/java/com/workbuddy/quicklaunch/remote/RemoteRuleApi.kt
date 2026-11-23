@@ -215,6 +215,21 @@ class RemoteRuleApi(
     // ── 写入 ────────────────────────────────────────────────────────
 
     /** 改排程字段（时刻 / 星期 / 跳过节假日 / 随机窗口 / 启停）。 */
+    /**
+     * 删除一条规则（响应网页看板下发的删除指令）。
+     *
+     * 顺序与 patch 一致：先取消闹钟，再删库 —— 反过来的话，闹钟会在删除后
+     * 仍然被触发，LauncherProxy 拿着一个不存在的规则什么也做不了。
+     */
+    fun delete(id: Long): WriteResult {
+        val old = store.getById(id) ?: return notFound(id)
+        backup(old)
+        hook.cancel(old)
+        hook.cancelActiveAttempts(id)
+        store.delete(old)
+        return WriteResult.Ok(old, null, emptySet())
+    }
+
     fun patch(id: Long, body: JSONObject): WriteResult {
         val old = store.getById(id) ?: return notFound(id)
         val merged = when (val r = RemoteProtocol.mergePatch(old, body)) {

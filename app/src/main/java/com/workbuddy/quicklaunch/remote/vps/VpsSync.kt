@@ -13,6 +13,7 @@ import com.workbuddy.quicklaunch.launch.LaunchPolicy
 import com.workbuddy.quicklaunch.launch.LaunchSettings
 import com.workbuddy.quicklaunch.receiver.VpsSyncReceiver
 import com.workbuddy.quicklaunch.remote.RemoteBindings
+import com.workbuddy.quicklaunch.remote.RemoteAuth
 import com.workbuddy.quicklaunch.remote.RemoteRuleApi
 import org.json.JSONArray
 import org.json.JSONObject
@@ -52,7 +53,16 @@ object VpsSync {
         val app = context.applicationContext
         val settings = VpsSettings.load(app)
         if (!settings.ready()) return Outcome.NotConfigured
+        return try {
+            pullAndApply(app, settings)
+        } finally {
+            // 本地改了规则也要让看板看到。放在 finally：即使这轮「拉」失败，
+            // 手机上的改动也应该照常「推」上去 —— 两者互不依赖。
+            runCatching { reportRulesIfChanged(app, settings) }
+        }
+    }
 
+    private fun pullAndApply(app: Context, settings: VpsSettings.Data): Outcome {
         val since = settings.appliedVersion
         val appliedHash = VpsSettings.appliedHash(app)
 
@@ -130,6 +140,18 @@ object VpsSync {
         var changed = 0
         var failed = 0
         val failures = mutableListOf<String>()
+
+        // 先执行删除，再应用修改：同一版里既删又改同一条规则时，
+        // 如果顺序反了，刚 patch 好的规则会被紧随其后的 delete 抹掉。
+        parsed.deleted.forEach { id ->
+            when (val d = api.delete(id)) {
+                is RemoteRuleApi.WriteResult.Ok -> changed++
+                is RemoteRuleApi.WriteResult.Err -> {
+                    failed++
+                    failures += "#$id 删除失败 ${d.error}"
+                }
+            }
+        }
 
         parsed.rules.forEach { rule ->
             val id = rule.optLong("id", -1L)
@@ -240,25 +262,21 @@ object VpsSync {
      * 设备身份信息。让看板能区分「哪台手机」「跑的哪个版本」，
      * 也方便排查「新策略在旧 APK 上不支持 unlock 字段」这类兼容性问题。
      */
-    internal fun deviceInfo(context: Context): org.json.JSONObject = org.json.JSONObject().apply {
-        put("model", android.os.Build.MODEL)
-        put("manufacturer", android.os.Build.MANUFACTURER)
-        put("androidVersion", android.os.Build.VERSION.RELEASE)
-        put("sdkInt", android.os.Build.VERSION.SDK_INT)
-        put("appVersion", com.workbuddy.quicklaunch.BuildConfig.VERSION_NAME)
-        put("appVersionCode", com.workbuddy.quicklaunch.BuildConfig.VERSION_CODE)
-
-        // 规则清单：服务端要靠它建立「可以编辑哪些规则」的列表。
-        //
-        // 手机是权威方 —— 下发的规则 id 若在本地不存在，`RemoteRuleApi.patch`
-        // 会直接返回 notFound。所以服务端必须先知道手机上有哪些规则，
-        // 否则网页上根本无从编辑（新部署时规则表是空的）。
-        // 只上报定位与展示字段；不含任何凭据、不含 PIN。
+    /**
+     * 当前规则清单快照。
+     *
+     * 手机是权威方 —— 下发的规则 id 若在本地不存在，`RemoteRuleApi.patch`
+     * 会直接返回 notFound。所以服务端必须先知道手机上有哪些规则，
+     * 否则网页上根本无从编辑（新部署时规则表是空的）。
+     *
+     * 字段与 Android 规则实体对齐（含蓝牙/WiFi 名称与班表锚点），
+     * 这样看板才能像 App 一样把规则讲清楚。**不含任何凭据、不含 PIN。**
+     */
+    internal fun rulesSnapshot(context: Context): JSONArray = JSONArray().apply {
         runCatching {
-            val all = com.workbuddy.quicklaunch.data.AppDatabase.get(context)
+            com.workbuddy.quicklaunch.data.AppDatabase.get(context)
                 .automationDao().getAll()
-            put("rules", JSONArray().apply {
-                all.forEach { a ->
+                .forEach { a ->
                     put(org.json.JSONObject().apply {
                         put("id", a.id)
                         put("name", a.name)
@@ -274,9 +292,51 @@ object VpsSync {
                         put("randomWindow", a.randomWindow)
                         put("windowStartMin", a.windowStartMin)
                         put("windowEndMin", a.windowEndMin)
+                        put("bluetoothName", a.bluetoothName)
+                        put("wifiName", a.wifiName)
+                        put("shiftAnchor", a.shiftAnchor)
+                        put("shiftOffsetMin", a.shiftOffsetMin)
                     })
                 }
-            })
+        }
+    }
+
+    internal fun deviceInfo(context: Context): org.json.JSONObject = org.json.JSONObject().apply {
+        put("model", android.os.Build.MODEL)
+        put("manufacturer", android.os.Build.MANUFACTURER)
+        put("androidVersion", android.os.Build.VERSION.RELEASE)
+        put("sdkInt", android.os.Build.VERSION.SDK_INT)
+        put("appVersion", com.workbuddy.quicklaunch.BuildConfig.VERSION_NAME)
+        put("appVersionCode", com.workbuddy.quicklaunch.BuildConfig.VERSION_CODE)
+        put("rules", rulesSnapshot(context))
+    }
+
+    /**
+     * 本地规则变了就上报给看板。
+     *
+     * 没有这一步，「在手机上改规则」在看板上永远看不到 —— 原来的上报只挂在
+     * 「应用了服务端新版本」之后，手机自己的修改根本没有触发点。
+     *
+     * 用指纹判断是否真的变了：不变就一个请求都不发，避免每分钟往服务器推
+     * 一份完全相同的清单。
+     */
+    private fun reportRulesIfChanged(app: Context, settings: VpsSettings.Data) {
+        val snapshot = rulesSnapshot(app)
+        val fp = RemoteAuth.sha256Hex(snapshot.toString().toByteArray(Charsets.UTF_8))
+        if (fp == VpsSettings.ruleFingerprint(app)) return
+
+        val sent = VpsClient.report(
+            settings,
+            version = settings.appliedVersion,
+            ok = true,
+            detail = "本地规则已同步到看板（${snapshot.length()} 条）",
+            deviceInfo = deviceInfo(app),
+            unlockStatus = AutoUnlockStatus.snapshot(app),
+            baseUrl = VpsSettings.lastGoodUrl(app).ifBlank { settings.baseUrl }
+        )
+        if (sent) {
+            VpsSettings.setRuleFingerprint(app, fp)
+            Log.i(TAG, "规则清单已上报（${snapshot.length()} 条）")
         }
     }
 

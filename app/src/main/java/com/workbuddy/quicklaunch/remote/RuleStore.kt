@@ -17,6 +17,9 @@ interface RuleStore {
     fun getById(id: Long): Automation?
     fun update(a: Automation)
 
+    /** 删除一条规则（远程下发的删除指令会走到这里）。 */
+    fun delete(a: Automation)
+
     fun exceptionsOf(ruleId: Long): List<RuleException>
     fun addException(e: RuleException)
     fun removeException(ruleId: Long, date: String)

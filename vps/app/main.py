@@ -39,7 +39,7 @@ from fastapi import FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from . import auth, db
+from . import auth, db, ruleview
 
 BASE_DIR = os.path.dirname(__file__)
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
@@ -275,13 +275,48 @@ def logout():
 def rules_page(request: Request):
     if not _require(request):
         return RedirectResponse("/login", status_code=302)
+
+    rules = [ruleview.rule_view(r) for r in db.list_rules()]
+    raw_conflicts = db.list_conflicts()
+    conflicts = {c["rule_id"]: c for c in raw_conflicts}
+    # 冲突行也要有可读标签：用户不可能靠 #7 这个数字判断该保留哪一版
+    conflict_views = []
+    for c in raw_conflicts:
+        server = ruleview.rule_view(c["server_payload"]) if c["server_payload"] else None
+        device = ruleview.rule_view(c["device_payload"]) if c["device_payload"] else None
+        conflict_views.append({"raw": c, "server": server, "device": device})
+
     return templates.TemplateResponse(
         request,
         "rules.html",
         {
-            "rules": db.list_rules(),
+            "rules": rules,
             "retry": db.retry_policy(),
             "version": db.current_version(),
+            "conflicts": conflicts,
+            "conflict_views": conflict_views,
+            "device": (db.list_devices() or [None])[0],
+        },
+    )
+
+
+@app.get("/rules/{rule_id}", response_class=HTMLResponse)
+def rule_edit_page(request: Request, rule_id: int):
+    if not _require(request):
+        return RedirectResponse("/login", status_code=302)
+    raw = next((r for r in db.list_rules() if r["id"] == rule_id), None)
+    if raw is None:
+        raise HTTPException(status_code=404, detail="规则不存在")
+
+    conflict = next((c for c in db.list_conflicts() if c["rule_id"] == rule_id), None)
+    return templates.TemplateResponse(
+        request,
+        "rule_edit.html",
+        {
+            "r": ruleview.rule_view(raw),
+            "version": db.current_version(),
+            "conflict": conflict,
+            "days": ruleview.DAYS,
         },
     )
 
@@ -295,8 +330,13 @@ def edit_rule(
     repeat_mode: str = Form("daily"),
     repeat_days: int = Form(0),
     skip_holidays: int = Form(0),
-    enabled: int = Form(1),
-    publish: int = Form(1),
+    enabled: int = Form(0),
+    random_window: int = Form(0),
+    window_start_min: int = Form(0),
+    window_end_min: int = Form(0),
+    shift_anchor: int = Form(0),
+    shift_offset_min: int = Form(0),
+    publish: int = Form(0),
 ):
     if not _require(request):
         return RedirectResponse("/login", status_code=302)
@@ -310,20 +350,72 @@ def edit_rule(
         "repeatDays": repeat_days & 0x7F,
         "skipHolidays": bool(skip_holidays),
         "enabled": bool(enabled),
+        "randomWindow": bool(random_window),
+        "windowStartMin": max(0, min(24 * 60 - 1, window_start_min)),
+        "windowEndMin": max(0, min(24 * 60 - 1, window_end_min)),
+        "shiftAnchor": max(0, min(2, shift_anchor)),
+        "shiftOffsetMin": max(-720, min(720, shift_offset_min)),
     }
-    # 保留表单里没有的字段（randomWindow / windowStartMin / shiftAnchor …）。
+
+    # 保留表单里没有的字段（triggerType / name / targetPackage / 蓝牙名 …）。
     #
-    # 直接用只有 6 个字段的 body 覆盖，会把服务端记录里的这些字段抹掉：
-    # 网页上从此看不到「随机窗口」，用户再也没法确认它是否还在。
-    # 手机端不受影响（mergePatch 只改报文里给出的字段），但服务端的记录必须完整。
+    # 直接用局部 body 覆盖会把服务端记录里的这些字段抹掉，网页上从此
+    # 看不到「这是哪条规则」。手机端不受影响（mergePatch 只改报文里给出的字段），
+    # 但服务端的记录必须完整。
     existing = next((r for r in db.list_rules() if r["id"] == rule_id), None)
     merged: dict = {}
     if existing:
         merged = {k: v for k, v in existing.items() if not k.startswith("_") and k != "id"}
     merged.update(body)
     db.upsert_rule(rule_id, merged)
+
     if publish:
         db.publish(f"改规则 #{rule_id}")
+        return RedirectResponse("/rules", status_code=302)
+    return RedirectResponse(f"/rules/{rule_id}?saved=1", status_code=302)
+
+
+@app.post("/conflicts/{rule_id}/resolve")
+def resolve_conflict(request: Request, rule_id: int, keep: str = Form("server"),
+                     publish: int = Form(0)):
+    """裁决一条双端冲突：保留网页版或手机版。裁决本身就是一次明确的人工选择。"""
+    if not _require(request):
+        return RedirectResponse("/login", status_code=302)
+    if keep not in ("server", "device"):
+        raise HTTPException(status_code=400, detail="keep 只能是 server 或 device")
+    db.resolve_conflict(rule_id, keep)
+    if publish:
+        db.publish(f"裁决冲突 #{rule_id}（采用{'网页' if keep == 'server' else '手机'}版）")
+    return RedirectResponse("/rules", status_code=302)
+
+
+@app.post("/rules/{rule_id}/toggle")
+def toggle_rule(request: Request, rule_id: int, enabled: int = Form(0)):
+    """
+    列表页开关：只改 enabled 并**立即发布**。
+
+    与 Android 一致 —— 那里拨开关就是马上生效，用户不会想到「还差一次发布」。
+    """
+    if not _require(request):
+        return RedirectResponse("/login", status_code=302)
+
+    existing = next((r for r in db.list_rules() if r["id"] == rule_id), None)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="规则不存在")
+
+    merged = {k: v for k, v in existing.items() if not k.startswith("_") and k != "id"}
+    merged["enabled"] = bool(enabled)
+    db.upsert_rule(rule_id, merged)
+    db.publish(f"{'启用' if enabled else '停用'}规则 #{rule_id}")
+    return RedirectResponse("/rules", status_code=302)
+
+
+@app.post("/rules/{rule_id}/delete")
+def delete_rule_route(request: Request, rule_id: int):
+    if not _require(request):
+        return RedirectResponse("/login", status_code=302)
+    db.delete_rule(rule_id)
+    db.publish(f"删除规则 #{rule_id}")
     return RedirectResponse("/rules", status_code=302)
 
 

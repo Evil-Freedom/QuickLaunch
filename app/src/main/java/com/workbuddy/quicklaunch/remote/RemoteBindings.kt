@@ -26,6 +26,8 @@ class RoomRuleStore(private val context: Context) : RuleStore {
 
     override fun update(a: Automation) = db.automationDao().update(a)
 
+    override fun delete(a: Automation) = db.automationDao().delete(a)
+
     override fun exceptionsOf(ruleId: Long): List<RuleException> =
         db.ruleExceptionDao().getByRule(ruleId)
 

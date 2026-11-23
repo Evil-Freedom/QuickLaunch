@@ -36,7 +36,31 @@ CREATE TABLE IF NOT EXISTS devices (
 CREATE TABLE IF NOT EXISTS rules (
     id          INTEGER PRIMARY KEY,
     payload     TEXT NOT NULL,
+    -- 上一次「设备确认已应用」的那份值。三方合并的基线：
+    -- payload == baseline 表示网页没改过，device != baseline 表示手机改过。
+    baseline    TEXT NOT NULL DEFAULT '',
     updated_at  INTEGER NOT NULL
+);
+
+-- 待下发的删除指令。
+--
+-- 为什么不能直接 DELETE FROM rules 就完事：手机才是权威方，它下次上报规则清单时
+-- 会把这条规则又带回来（服务端看到「本地没有 → 建档」），删了等于没删。
+-- 所以删除必须作为一条指令下发给设备，等设备确认应用过含这条指令的版本后再清理。
+CREATE TABLE IF NOT EXISTS deletions (
+    rule_id     INTEGER PRIMARY KEY,
+    created_at  INTEGER NOT NULL
+);
+
+-- 双端改了同一条规则时的待裁决记录。
+-- 存在的意义：**不静默覆盖**。谁改得更晚并不代表谁更对，
+-- 用户必须自己看一眼两边的差异再决定。
+CREATE TABLE IF NOT EXISTS conflicts (
+    rule_id         INTEGER PRIMARY KEY,
+    server_payload  TEXT NOT NULL,
+    device_payload  TEXT NOT NULL,
+    baseline        TEXT NOT NULL,
+    detected_at     INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS config_versions (
@@ -122,6 +146,13 @@ DEFAULT_UNLOCK_POLICY = {"enabled": False, "chargingOnly": False}
 
 def _migrate(c: sqlite3.Connection) -> None:
     """幂等迁移：给已有库补新列。全部是 ADD COLUMN，存量数据零丢失。"""
+    rcols = {r[1] for r in c.execute("PRAGMA table_info(rules)")}
+    if "baseline" not in rcols:
+        # 老库补列：已有规则视为「网页与设备一致」，即 baseline = payload。
+        # 这样升级后第一次手机上报不会把所有规则都误判成冲突。
+        c.execute("ALTER TABLE rules ADD COLUMN baseline TEXT NOT NULL DEFAULT ''")
+        c.execute("UPDATE rules SET baseline = payload WHERE baseline = ''")
+
     cols = {r[1] for r in c.execute("PRAGMA table_info(devices)")}
     for name, ddl in [
         ("model", "ALTER TABLE devices ADD COLUMN model TEXT NOT NULL DEFAULT ''"),
@@ -261,7 +292,14 @@ def build_payload() -> dict[str, Any]:
         body = {k: v for k, v in body.items() if k in RULE_EDITABLE_FIELDS}
         body["id"] = r["id"]
         rules.append(body)
+    with conn() as c:
+        deleted = [r["rule_id"] for r in c.execute("SELECT rule_id FROM deletions")]
+
     payload: dict[str, Any] = {"rules": rules, "retry": retry_policy()}
+    if deleted:
+        # 与 rules 同级：客户端把它当「指令」而不是规则本身。
+        # 没有这条，网页上的删除在手机下次上报后会被原样复活。
+        payload["deleted"] = deleted
     # 没被托管就不带这个字段：客户端对「缺 unlock」的语义是「不动本地」
     if unlock_managed():
         payload["unlock"] = unlock_policy()
@@ -364,6 +402,266 @@ def get_rule(rule_id: int) -> dict[str, Any] | None:
     return body
 
 
+# 只用于「看板展示」的字段：需要存下来（否则网页上只能看到 #7 看不到「飞书」），
+# 但**不参与下发**（客户端白名单里没有它们，带上就 409）。
+DISPLAY_FIELDS = {"name", "targetPackage", "targetAppName"}
+
+
+def _rule_for_storage(raw: dict[str, Any]) -> dict[str, Any]:
+    """存库形态 = 可编辑字段 + 展示字段。"""
+    keep = RULE_EDITABLE_FIELDS | DISPLAY_FIELDS
+    return {k: raw[k] for k in keep if k in raw}
+
+
+# 可编辑字段的默认值，与 Android `Automation` 的构造默认值一致。
+# 用途见 [_normalize_rule]：缺字段必须按默认值参与比较，而不是「缺了就跳过」。
+RULE_DEFAULTS: dict[str, Any] = {
+    "timeHour": 0,
+    "timeMinute": 0,
+    "repeatMode": "daily",
+    "repeatDays": 0,
+    "skipHolidays": False,
+    "enabled": True,
+    "randomWindow": False,
+    "windowStartMin": 0,
+    "windowEndMin": 0,
+    "shiftAnchor": 0,
+    "shiftOffsetMin": 0,
+}
+
+
+def _normalize_rule(body: dict[str, Any]) -> dict[str, Any]:
+    """
+    取规则里「参与比较」的部分：可编辑字段，**缺失的按默认值补齐**。
+
+    为什么必须补齐：老记录里可能只存过 6 个字段（早期版本），
+    而 baseline 是完整 11 个字段。如果比较时「有什么取什么」，
+    这两份永远不相等 —— 于是每次同步都判「网页改过」，
+    手机上的真实修改全部变成假冲突。真机踩过一次，四条规则全被误判。
+    """
+    return {k: body.get(k, RULE_DEFAULTS.get(k)) for k in RULE_EDITABLE_FIELDS}
+
+
+def sync_device_rules(
+    device_rules: list[dict[str, Any]] | None,
+    applied_version: int,
+    actor: str = "device",
+) -> dict[str, int]:
+    """
+    设备上报规则清单 → 与本地做**三方合并**（server / device / baseline）。
+
+    为什么需要 baseline：只看「server 与 device 是否相同」无法区分
+    「手机改了」「网页改了」「两边都改了」。加上「上次确认下发的值」这个基线，
+    三种情况才可判：
+
+    | device vs baseline | server vs baseline | 结论 |
+    | --- | --- | --- |
+    | 相同 | 相同 | 一致，无事 |
+    | 不同 | 相同 | 只有手机改了 → 采纳手机 |
+    | 相同 | 不同 | 只有网页改了 → 保留网页（等设备下次同步） |
+    | 不同 | 不同 | **两边都改了 → 记冲突，不覆盖** |
+
+    安全边界：
+    - 不存在于上报里的规则**一律不删**（设备可能只是还没同步到，删了就是数据丢失）
+    - 冲突时不写 payload，只记一条待裁决记录
+    - 本地没有的 id 视为「手机上新建的」，直接建档
+
+    @return {"added": n, "adopted": n, "conflicts": n, "ignored": n}
+    """
+    stats = {"added": 0, "adopted": 0, "conflicts": 0, "ignored": 0}
+    if not device_rules:
+        return stats
+
+    now = int(time.time() * 1000)
+    with conn() as c:
+        # 设备还没拉到最新发布时，它上报的是旧值 —— 拿旧值做三方比较
+        # 只会把「还没同步」误判成「两边都改了」。
+        cur = c.execute("SELECT value FROM meta WHERE key='current_version'").fetchone()
+        cur_version = int(cur["value"]) if cur else 0
+        if applied_version < cur_version:
+            stats["ignored"] = len(device_rules)
+            return stats
+
+        for r in device_rules:
+            if not isinstance(r, dict):
+                continue
+            try:
+                rid = int(r.get("id", 0))
+            except (TypeError, ValueError):
+                continue
+            if rid <= 0:
+                continue
+
+            dev = _normalize_rule(r)
+            row = c.execute("SELECT payload, baseline FROM rules WHERE id=?", (rid,)).fetchone()
+
+            if row is None:
+                # 服务端从未见过 → 手机上新建的规则，建档（baseline 同值，视为已对齐）
+                stored = _rule_for_storage(r)
+                c.execute(
+                    "INSERT INTO rules(id, payload, baseline, updated_at) VALUES(?,?,?,?)",
+                    (rid, json.dumps(stored, ensure_ascii=False),
+                     json.dumps(dev, ensure_ascii=False), now),
+                )
+                stats["added"] += 1
+                continue
+
+            try:
+                server = _normalize_rule(json.loads(row["payload"]))
+            except Exception:
+                server = {}
+            try:
+                base = _normalize_rule(json.loads(row["baseline"])) if row["baseline"] else None
+            except Exception:
+                base = None
+
+            if dev == server:
+                # 可编辑字段一致，但可能缺展示字段（早期记录只存了白名单，
+                # 看板上只能看到「规则 #2」看不到「飞书」）。
+                # 补上展示字段，不算变更、不影响 baseline。
+                stored_now = _rule_for_storage(r)
+                try:
+                    existing_payload = json.loads(row["payload"])
+                except Exception:
+                    existing_payload = {}
+                if existing_payload != stored_now:
+                    missing = any(k in stored_now and k not in existing_payload
+                                  for k in DISPLAY_FIELDS)
+                    if missing:
+                        c.execute(
+                            "UPDATE rules SET payload=? WHERE id=?",
+                            (json.dumps(stored_now, ensure_ascii=False), rid),
+                        )
+                continue
+
+            if base is None or server == base:
+                # 只有手机改了 → 采纳（存完整形态，比较用白名单形态）
+                stored = _rule_for_storage(r)
+                c.execute(
+                    "UPDATE rules SET payload=?, baseline=?, updated_at=? WHERE id=?",
+                    (json.dumps(stored, ensure_ascii=False),
+                     json.dumps(dev, ensure_ascii=False), now, rid),
+                )
+                c.execute("DELETE FROM conflicts WHERE rule_id=?", (rid,))
+                stats["adopted"] += 1
+                continue
+
+            if dev == base:
+                continue  # 只有网页改了，等设备下次同步
+
+            # 两边都改了 → 记录冲突，**不动 payload**
+            c.execute(
+                "INSERT INTO conflicts(rule_id, server_payload, device_payload, baseline, detected_at) "
+                "VALUES(?,?,?,?,?) ON CONFLICT(rule_id) DO UPDATE SET "
+                "server_payload=excluded.server_payload, device_payload=excluded.device_payload, "
+                "baseline=excluded.baseline, detected_at=excluded.detected_at",
+                (rid, json.dumps(server, ensure_ascii=False),
+                 json.dumps(dev, ensure_ascii=False),
+                 json.dumps(base or {}, ensure_ascii=False), now),
+            )
+            stats["conflicts"] += 1
+
+    if stats["added"] or stats["adopted"] or stats["conflicts"]:
+        log_audit(
+            actor, "rule.sync",
+            f"新增 {stats['added']} / 采纳设备 {stats['adopted']} / 冲突 {stats['conflicts']}"
+            + (f" / 跳过 {stats['ignored']}" if stats["ignored"] else ""),
+        )
+    return stats
+
+
+def list_conflicts() -> list[dict[str, Any]]:
+    """所有待裁决的规则冲突。"""
+    with conn() as c:
+        rows = c.execute(
+            "SELECT rule_id, server_payload, device_payload, baseline, detected_at "
+            "FROM conflicts ORDER BY detected_at DESC"
+        ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        for k in ("server_payload", "device_payload", "baseline"):
+            try:
+                d[k] = json.loads(d[k])
+            except Exception:
+                d[k] = {}
+        out.append(d)
+    return out
+
+
+def resolve_conflict(rule_id: int, keep: str, actor: str = "admin") -> bool:
+    """
+    裁决一条冲突。keep="server" 保留网页版，"device" 保留手机版。
+
+    两种选择都要把 baseline 对齐到最终采用的那份 —— 否则下一轮同步会
+    立刻又判出同一个冲突。
+    """
+    with conn() as c:
+        row = c.execute(
+            "SELECT server_payload, device_payload FROM conflicts WHERE rule_id=?", (rule_id,)
+        ).fetchone()
+        if row is None:
+            return False
+        chosen = row["server_payload"] if keep == "server" else row["device_payload"]
+        # 保留原记录的展示字段（name / targetPackage / targetAppName）：
+        # 冲突记录里只存可编辑字段，直接覆盖会让看板上的「飞书」变回「规则 #2」。
+        existing = c.execute("SELECT payload FROM rules WHERE id=?", (rule_id,)).fetchone()
+        stored: dict[str, Any] = {}
+        if existing:
+            try:
+                stored = json.loads(existing["payload"])
+            except Exception:
+                stored = {}
+        try:
+            chosen_body = json.loads(chosen) if isinstance(chosen, str) else chosen
+        except Exception:
+            chosen_body = {}
+        merged = {k: v for k, v in stored.items() if k in DISPLAY_FIELDS}
+        merged.update(_normalize_rule(chosen_body))
+        c.execute(
+            "UPDATE rules SET payload=?, baseline=?, updated_at=? WHERE id=?",
+            (json.dumps(merged, ensure_ascii=False),
+             json.dumps(_normalize_rule(chosen_body), ensure_ascii=False),
+             int(time.time() * 1000), rule_id),
+        )
+        c.execute("DELETE FROM conflicts WHERE rule_id=?", (rule_id,))
+    log_audit(actor, "rule.resolve", f"#{rule_id} 采用{'网页' if keep == 'server' else '手机'}版本")
+    return True
+
+
+def mark_baseline_applied(version: int) -> None:
+    """
+    设备确认应用了 [version] 后，把那一版下发的规则值记为新的基线。
+
+    只有设备真正确认过，baseline 才代表「两边看到的同一份值」；
+    在设备拉取之前就改 baseline，会让「还没同步」被误判成「一致」。
+    """
+    with conn() as c:
+        row = c.execute("SELECT payload FROM config_versions WHERE version=?", (version,)).fetchone()
+        if row is None:
+            return
+        try:
+            rules = json.loads(row["payload"]).get("rules", [])
+        except Exception:
+            return
+        for r in rules:
+            rid = r.get("id")
+            if not isinstance(rid, int) or rid <= 0:
+                continue
+            body = _normalize_rule(r)
+            c.execute(
+                "UPDATE rules SET baseline=? WHERE id=?",
+                (json.dumps(body, ensure_ascii=False), rid),
+            )
+        # 这一版里的删除指令已经在设备上执行过了，可以从待办里清掉
+        try:
+            deleted = json.loads(row["payload"]).get("deleted") or []
+        except Exception:
+            deleted = []
+        for rid in deleted:
+            c.execute("DELETE FROM deletions WHERE rule_id=?", (rid,))
+
+
 def upsert_rule(rule_id: int, body: dict[str, Any], actor: str = "admin") -> None:
     body = {k: v for k, v in body.items() if k != "id"}
     with conn() as c:
@@ -376,8 +674,20 @@ def upsert_rule(rule_id: int, body: dict[str, Any], actor: str = "admin") -> Non
 
 
 def delete_rule(rule_id: int, actor: str = "admin") -> None:
+    """
+    删除一条规则。
+
+    不是简单的 DELETE：还要记一条待下发的删除指令，否则手机下次上报规则清单时
+    会把它当「服务端没有的新规则」重新建档，删除形同虚设。
+    """
     with conn() as c:
         c.execute("DELETE FROM rules WHERE id=?", (rule_id,))
+        c.execute(
+            "INSERT INTO deletions(rule_id, created_at) VALUES(?,?) "
+            "ON CONFLICT(rule_id) DO NOTHING",
+            (rule_id, int(time.time() * 1000)),
+        )
+        c.execute("DELETE FROM conflicts WHERE rule_id=?", (rule_id,))
     log_audit(actor, "rule.delete", f"#{rule_id}")
 
 
@@ -528,9 +838,13 @@ def add_report(
                 device_id,
             ),
         )
-    # 规则清单随回报一起上来：新部署时本地规则表为空，靠这一步才能让
-    # 网页上出现「可以编辑的规则」。放在事务外，避免导入失败影响回报落库。
-    import_device_rules((device_info or {}).get("rules"))
+    # 规则清单随回报一起上来。放在事务外：导入/合并失败不应该回滚回报本身。
+    #
+    # 顺序有讲究：先把这一版下发值记为基线，再做三方比较。
+    # 反过来的话，刚应用完的那版会被自己判成「两边都改了」。
+    if ok:
+        mark_baseline_applied(version)
+    sync_device_rules((device_info or {}).get("rules"), version)
 
 
 def recent_reports(limit: int = 100) -> list[dict[str, Any]]:

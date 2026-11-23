@@ -45,6 +45,74 @@
             padding: 10px 12px; margin-top: 10px; word-break: break-all; }
   .secret b { color: var(--warn); }
   footer { color: var(--dim); font-size: 12px; text-align: center; padding: 24px 0; }
+
+  /* ═══ 规则卡片（对齐 Android 的 item_automation） ═══
+     层级与 App 一致：状态点 → 名称+开关 → 触发标签 → 描述 → 操作按钮。 */
+  .rule-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+               padding: 14px 16px; margin-bottom: 12px; }
+  .rule-head { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); flex: none; }
+  .dot.on { background: var(--ok); box-shadow: 0 0 8px rgba(62,207,142,.55); }
+  .rule-name { font-size: 15px; font-weight: 600; flex: 1; min-width: 0;
+               overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rule-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .rule-desc { color: var(--dim); font-size: 12px; margin-top: 6px; }
+  .rule-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .rule-actions a, .rule-actions button { flex: 1; text-align: center; text-decoration: none;
+      padding: 7px 0; font-size: 13px; border-radius: 8px; border: 1px solid var(--line);
+      background: transparent; color: var(--text); font-weight: 500; }
+  .rule-actions .primary { border-color: var(--accent); color: var(--accent); }
+
+  /* ═══ 开关（仿 Android Switch） ═══ */
+  .sw { position: relative; display: inline-block; width: 42px; height: 24px; flex: none; }
+  .sw input { opacity: 0; width: 0; height: 0; }
+  .sw span { position: absolute; inset: 0; background: #2c333d; border-radius: 999px;
+             transition: background .18s; cursor: pointer; }
+  .sw span::after { content: ""; position: absolute; width: 18px; height: 18px; left: 3px;
+             top: 3px; background: #96a0ae; border-radius: 50%; transition: all .18s; }
+  .sw input:checked + span { background: rgba(74,158,255,.35); }
+  .sw input:checked + span::after { left: 21px; background: var(--accent); }
+
+  /* ═══ 分段 / 胶囊选择（触发条件、重复） ═══ */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .chip label { display: inline-block; padding: 7px 14px; border-radius: 999px;
+      border: 1px solid var(--line); color: var(--dim); font-size: 13px; cursor: pointer;
+      user-select: none; }
+  .chip input:checked + label { background: rgba(74,158,255,.16); border-color: var(--accent);
+      color: var(--accent); font-weight: 600; }
+
+  /* ═══ 星期多选（星期日一二三四五六） ═══ */
+  .days { display: flex; gap: 8px; }
+  .day { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line);
+         background: transparent; color: var(--dim); font-size: 13px; cursor: pointer;
+         display: flex; align-items: center; justify-content: center; }
+  .day.on { background: rgba(74,158,255,.18); border-color: var(--accent); color: var(--accent);
+            font-weight: 600; }
+
+  /* ═══ 表单 ═══ */
+  .field { margin-bottom: 18px; }
+  .field > .lbl { display: block; color: var(--dim); font-size: 12px; margin-bottom: 8px;
+                  text-transform: none; letter-spacing: .2px; }
+  .field input[type=text], .field input[type=time], .field select {
+      width: 100%; padding: 10px 12px; font-size: 14px; }
+  .pick { display: flex; align-items: center; gap: 10px; }
+  .pick .big { font-size: 22px; font-variant-numeric: tabular-nums; }
+  .opt { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .opt .txt { font-size: 13px; line-height: 1.45; }
+  .opt .sub { color: var(--dim); font-size: 12px; }
+  .hidden { display: none !important; }
+  .banner { border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; }
+  .banner.warn { background: rgba(255,176,32,.12); border: 1px solid rgba(255,176,32,.4); color: #ffd27a; }
+  .banner.bad { background: rgba(255,90,90,.12); border: 1px solid rgba(255,90,90,.4); color: #ff9c9c; }
+  .save-bar { position: sticky; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%);
+              padding: 16px 0 8px; }
+  .save-bar button { width: 100%; padding: 12px; font-size: 15px; border-radius: 10px; }
+  @media (max-width: 520px) {
+    main { padding: 16px 14px 40px; }
+    .day { width: 34px; height: 34px; }
+  }
 </style>
 </head>
 <body>

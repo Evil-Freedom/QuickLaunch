@@ -56,6 +56,11 @@ class RemoteRelayTest {
             ops += "update:${a.id}"
             rules[a.id] = a
         }
+
+        override fun delete(a: Automation) {
+            ops += "delete:${a.id}"
+            rules.remove(a.id)
+        }
         override fun exceptionsOf(ruleId: Long): List<RuleException> =
             exceptions.filter { it.ruleId == ruleId }.sortedBy { it.date }
         override fun addException(e: RuleException) {
