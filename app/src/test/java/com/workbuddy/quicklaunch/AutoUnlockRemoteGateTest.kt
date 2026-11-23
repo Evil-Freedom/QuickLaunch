@@ -103,4 +103,44 @@ class AutoUnlockRemoteGateTest {
         assertEquals(false, AutoUnlockDecision.validPin(null))
         assertEquals(false, AutoUnlockDecision.validPin(""))
     }
+
+    // ── 注入命令的 -d 策略（真机踩过的根因）────────────────────────
+
+    @Test
+    fun `内屏注入带 -d 0`() {
+        val cmd = AutoUnlockDecision.injectCommand(0, 1080, 2640, "123456")
+        assertTrue("内屏必须显式指定 display：$cmd", cmd.contains("input -d 0 swipe"))
+        assertTrue("text 也要带 -d：$cmd", cmd.contains("input -d 0 text"))
+    }
+
+    @Test
+    fun `外屏注入不能带 -d`() {
+        // 2026-11-23 合盖真机：`input -d 1 swipe` 抛
+        // IllegalArgumentException: Invalid arguments for display ID.
+        // 命令完全不执行，却被计成一次失败尝试 —— 两次就把功能停用。
+        val cmd = AutoUnlockDecision.injectCommand(1, 1056, 1066, "123456")
+        assertEquals(
+            "外屏注入不得出现 -d（input 不支持 display 1）：$cmd",
+            false,
+            cmd.contains("-d")
+        )
+        assertTrue("仍然要先上滑叫出 bouncer：$cmd", cmd.contains("input swipe"))
+    }
+
+    @Test
+    fun `滑动坐标随屏幕尺寸变化`() {
+        // 内屏 1080x2640 → y 876 / 739（0.82 / 0.28）
+        val inner = AutoUnlockDecision.injectCommand(0, 1080, 2640, "1")
+        assertTrue("内屏滑动起点按高度算：$inner", inner.contains("swipe 540 2164"))
+        // 外屏 1056x1066 → 近方形，必须用外屏自己的高度，不能沿用内屏坐标
+        val outer = AutoUnlockDecision.injectCommand(1, 1056, 1066, "1")
+        assertTrue("外屏滑动起点按外屏高度算：$outer", outer.contains("swipe 528 874 528 298"))
+    }
+
+    @Test
+    fun `注入命令里密码被单引号包裹`() {
+        val cmd = AutoUnlockDecision.injectCommand(0, 1080, 2640, "9876")
+        assertTrue("密码必须被引号包住：$cmd", cmd.contains("text '9876'"))
+        assertTrue("提交要回车：$cmd", cmd.contains("input keyevent 66"))
+    }
 }

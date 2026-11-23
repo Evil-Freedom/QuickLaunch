@@ -12,6 +12,7 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
 import android.view.Display
@@ -78,6 +79,12 @@ object AutoUnlock {
     /** 一次「锁屏事件」内的观察窗口：展开/亮屏后 keyguard 出现可能有延迟。 */
     private const val WATCH_WINDOW_MS = 12_000L
     private const val TICK_MS = 600L
+
+    /** bouncer 巡检的超时。dumpsys 一次约 300ms，给足余量但不允许拖住观察窗口。 */
+    private const val BOUNCER_PROBE_TIMEOUT_MS = 3_000L
+
+    /** 触摸设备枚举的超时。getevent -pl 要遍历 /dev/input，慢一些。 */
+    private const val GETEVENT_TIMEOUT_MS = 4_000L
 
     private const val CHANNEL = "quicklaunch_alert_v1"
     private const val NOTIF_ID = 1003
@@ -209,9 +216,17 @@ object AutoUnlock {
      */
     fun watch(ctx: Context) {
         val app = ctx.applicationContext
-        if (!isEnabled(app) || !hasPin(app)) return
+        val enabled = isEnabled(app)
+        val hasPin = hasPin(app)
+        if (!enabled || !hasPin) {
+            // 这两项是「为什么没解锁」的第一现场。只记布尔值，不含密码内容。
+            // 真机排查时没有这条日志，就只能看到「什么都没发生」。
+            Log.i(TAG, "watch 不启动 enabled=$enabled hasPin=$hasPin")
+            return
+        }
         appCtx = app
         watchEnd = SystemClock.elapsedRealtime() + WATCH_WINDOW_MS
+        Log.i(TAG, "watch 启动 窗口=${WATCH_WINDOW_MS}ms 亮屏=${litDisplay(app)?.displayId ?: -1}")
         if (watching) return
         watching = true
         handler.removeCallbacks(tick)
@@ -250,8 +265,21 @@ object AutoUnlock {
             )
             when (action) {
                 AutoUnlockAction.GIVE_UP -> giveUp(app)
-                AutoUnlockAction.ATTEMPT -> attempt(app)
-                AutoUnlockAction.SKIP -> Unit
+                AutoUnlockAction.ATTEMPT -> {
+                    Log.i(TAG, "判定 ATTEMPT locked=$locked 屏=${litDisplay(app)?.displayId} 失败=${failures(app)}")
+                    attempt(app)
+                }
+                AutoUnlockAction.SKIP -> {
+                    val lit = litDisplay(app)
+                    // 只在「有屏亮着但没动」时记一行：黑屏轮询期间刷屏没意义。
+                    if (lit != null && locked) {
+                        Log.i(
+                            TAG,
+                            "判定 SKIP 有屏亮且锁屏但未尝试：chargingOnly=${isChargingOnly(app)} " +
+                                "charging=${isCharging(app)} failures=${failures(app)}"
+                        )
+                    }
+                }
             }
             // 已经解锁（或本来就没锁）就没必要继续轮询
             if (watching && !locked) stopWatch()
@@ -271,12 +299,43 @@ object AutoUnlock {
     private fun litDisplay(ctx: Context): Display? = runCatching {
         val dm = ctx.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
             ?: return@runCatching null
+        val inner = dm.getDisplay(Display.DEFAULT_DISPLAY)
+        val outer = dm.getDisplay(com.workbuddy.quicklaunch.launch.EXTERNAL_DISPLAY_ID)
         val candidates = buildList {
             addAll(dm.displays)
-            dm.getDisplay(1)?.let { ext -> if (none { d -> d.displayId == ext.displayId }) add(ext) }
+            outer?.let { ext -> if (none { d -> d.displayId == ext.displayId }) add(ext) }
         }
         candidates.filter { it.state == Display.STATE_ON }.maxByOrNull { it.displayId }
+            ?: fallbackLitDisplay(ctx, inner, outer)
     }.getOrNull()
+
+    /**
+     * `Display.state` 读不到 ON 时的兜底。
+     *
+     * 真机实测：锁屏亮屏时 `Display.state` 不一定报 ON（读出来是空集合）。
+     * 这时按物理形态判断：**内屏明确 OFF = 合盖**，用外屏；否则用内屏。
+     *
+     * 判错的代价是可控的：bouncer 不会出现在选错的那块屏上，上层走
+     * [UnlockOutcome.NOT_READY]，不计入失败额度。
+     */
+    private fun fallbackLitDisplay(ctx: Context, inner: Display?, outer: Display?): Display? {
+        val pm = ctx.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        if (pm?.isInteractive != true) return null
+        return if (inner != null && inner.state == Display.STATE_OFF && outer != null && outer.isValid) {
+            outer
+        } else {
+            inner ?: outer?.takeIf { it.isValid }
+        }
+    }
+
+    /**
+     * 一次注入的结果。
+     *
+     * 必须把 [NOT_READY] 与 [WRONG_PIN] 分开：前者是「环境没准备好」（bouncer 没弹出、
+     * 找不到触摸设备），后者才是「密码不对」。混在一起的结果是 —— 一次环境抖动就
+     * 消耗掉用户一半的重试额度，两次抖动直接把功能停用。
+     */
+    private enum class UnlockOutcome { UNLOCKED, WRONG_PIN, NOT_READY }
 
     private fun attempt(ctx: Context) {
         if (!busy.compareAndSet(false, true)) return
@@ -284,48 +343,56 @@ object AutoUnlock {
         val pin = pin(ctx)
         val display = litDisplay(ctx)
         if (pin == null || display == null) {
+            // 解密失败（KeyStore key 失效）与「没有亮屏」都在这里被拦下。
+            // 不记密码内容，只记两项各自的结果 —— 否则这两种完全不同的
+            // 故障在日志里长得一模一样。
+            Log.i(
+                TAG,
+                "放弃本次尝试 密码=${if (pin == null) "读取失败" else "已取得"} " +
+                    "亮屏=${display?.displayId?.toString() ?: "无"}"
+            )
             busy.set(false)
             return
         }
-        // 外屏（display 1）跳过注入。
-        //
-        // 2026-11-23 合盖实测：外屏 1056x1066（近方形），Keyguard 的 bouncer 布局与
-        // 内屏 1080x2640（长条形）完全不同 —— 现有滑动比例（0.82h→0.28h）与 PIN
-        // 键盘位置只在内屏验证过。盲试的结果是连续两次失败直接触发安全停用
-        // （failures 2/2），把用户的额度耗在一个已知不可靠的路径上。
-        //
-        // 在拿到外屏实测参数之前，宁可不动作：合盖时目标 App 由 root 跨屏启动
-        // 已经在锁屏后（见 RootDisplayLauncher），用户解锁即可看到，不是死局。
-        if (display.displayId == com.workbuddy.quicklaunch.launch.EXTERNAL_DISPLAY_ID) {
-            busy.set(false)
-            if (BuildConfig.DEBUG) Log.i(TAG, "跳过：当前只亮外屏，注入参数未在外屏验证")
-            return
-        }
+        // 外屏（display 1）已实测可注入，见 [injectAndVerify] 里的 -d 说明。
+        // 之前这里有一道「只亮外屏就跳过」的保护，是在没找到根因前的保守选择：
+        // 当时以为外屏 bouncer 布局不同，实际原因是 `input -d 1` 命令本身会失败。
         // 「上次解锁时间」记的是注入开始时刻：这是用户语义里的
         // 「手机是什么时候尝试解锁的」，与验证结果（完成时刻）差不到 3 秒。
         sp(ctx).edit().putLong(KEY_LAST_ATTEMPT_AT, System.currentTimeMillis()).apply()
         QuickLaunchExecutors.io.execute {
-            var unlocked = false
+            var outcome = UnlockOutcome.NOT_READY
             try {
-                unlocked = injectAndVerify(ctx, display, pin)
+                outcome = injectAndVerify(ctx, display, pin)
             } catch (t: Throwable) {
-                if (BuildConfig.DEBUG) Log.e(TAG, "自动解锁异常", t)
+                Log.e(TAG, "自动解锁异常（不计失败）", t)
             } finally {
                 busy.set(false)
-                // 结果先落盘再走分支：即使后续通知/停用异常，状态也不丢
-                sp(ctx).edit()
-                    .putString(KEY_LAST_RESULT, if (unlocked) RESULT_SUCCESS else RESULT_FAILED)
-                    .apply()
-                if (unlocked) {
-                    resetFailures(ctx)
-                    stopWatch()
-                    if (BuildConfig.DEBUG) Log.i(TAG, "自动解锁成功")
-                } else {
-                    val n = failures(ctx) + 1
-                    sp(ctx).edit().putInt(KEY_FAILURES, n).apply()
-                    if (BuildConfig.DEBUG) Log.w(TAG, "自动解锁失败，累计 $n/$MAX_FAILURES")
-                    if (notifyOnFailure(ctx)) notifyFailure(ctx, n)
-                    if (n >= MAX_FAILURES) handler.post { giveUp(ctx) }
+                when (outcome) {
+                    UnlockOutcome.UNLOCKED -> {
+                        sp(ctx).edit().putString(KEY_LAST_RESULT, RESULT_SUCCESS).apply()
+                        resetFailures(ctx)
+                        stopWatch()
+                        Log.i(TAG, "自动解锁成功 display=${display.displayId}")
+                    }
+                    UnlockOutcome.WRONG_PIN -> {
+                        val n = failures(ctx) + 1
+                        sp(ctx).edit()
+                            .putString(KEY_LAST_RESULT, RESULT_FAILED)
+                            .putInt(KEY_FAILURES, n)
+                            .apply()
+                        Log.w(TAG, "自动解锁失败（密码不符或提交未生效），累计 $n/$MAX_FAILURES")
+                        if (notifyOnFailure(ctx)) notifyFailure(ctx, n)
+                        if (n >= MAX_FAILURES) handler.post { giveUp(ctx) }
+                    }
+                    UnlockOutcome.NOT_READY -> {
+                        // 环境没准备好（bouncer 没弹出 / 找不到触摸设备）不是密码错，
+                        // **绝不能计进失败次数** —— 否则一次误判就吃掉用户一半额度
+                        // （2026-11-23 真机就是这样两次归零的）。
+                        // 但必须收手：本次观察窗口不再尝试，等下一次亮屏。
+                        stopWatch()
+                        Log.w(TAG, "本次未注入（环境未就绪），不计失败")
+                    }
                 }
             }
         }
@@ -362,39 +429,126 @@ object AutoUnlock {
      * input 命令成功返回只代表事件发出去了，不代表密码对。
      */
     @Suppress("DEPRECATION")
-    private fun injectAndVerify(ctx: Context, display: Display, pin: String): Boolean {
+    private fun injectAndVerify(ctx: Context, display: Display, pin: String): UnlockOutcome {
         // 纵深防御：setPin 时校验过格式，但这里是**从存储读回**的字符串，且下面直接拼进
-        // shell 命令字面量（无引号包裹）。若不在这里再校验一次，被篡改的 SharedPreferences
-        // 就能注入任意命令片段。校验失败按「解锁失败」处理，不抛异常。
-        if (!AutoUnlockDecision.validPin(pin)) return false
+        // shell 命令字面量（只有单引号包裹）。若不在这里再校验一次，被篡改的
+        // SharedPreferences 就能注入任意命令片段。校验失败不注入、按密码问题处理。
+        if (!AutoUnlockDecision.validPin(pin)) return UnlockOutcome.WRONG_PIN
 
         val p = Point()
         runCatching { display.getRealSize(p) }
         val w = if (p.x > 0) p.x else display.mode.physicalWidth
         val h = if (p.y > 0) p.y else display.mode.physicalHeight
         val id = display.displayId
+
+        // 1) 确保 bouncer（密码键盘）已经出现。
+        //    没出现就输入 = 密码打空 = 白白消耗一次额度，这是真机上两次归零的直接原因。
+        if (!bouncerVisible()) {
+            if (!swipeUp(id, w, h)) return UnlockOutcome.NOT_READY
+            var shown = false
+            for (i in 0 until 6) {
+                SystemClock.sleep(180)
+                if (bouncerVisible()) {
+                    shown = true
+                    break
+                }
+            }
+            if (!shown) {
+                Log.w(TAG, "上滑后 bouncer 仍未出现（display=$id），放弃注入")
+                return UnlockOutcome.NOT_READY
+            }
+        } else {
+            Log.i(TAG, "bouncer 已就绪，跳过上滑（display=$id）")
+        }
+
+        // 2) 输入密码。PIN 键盘在输满位数时会**自动提交**，所以先看自动提交的结果。
+        val typed = RootUtils.runAsRoot("input text '$pin'")
+        Log.i(TAG, "输入密码 display=$id 命令执行=$typed（内容不记录）")
+
+        repeat(5) {
+            SystemClock.sleep(200)
+            if (!deviceLocked(ctx)) {
+                Log.i(TAG, "Keyguard 已解除 display=$id（自动提交）")
+                return UnlockOutcome.UNLOCKED
+            }
+        }
+
+        // 3) 部分 ROM 不自动提交，补一个回车
+        RootUtils.runAsRoot("input keyevent 66")
+        repeat(8) {
+            SystemClock.sleep(200)
+            if (!deviceLocked(ctx)) {
+                Log.i(TAG, "Keyguard 已解除 display=$id（回车提交）")
+                return UnlockOutcome.UNLOCKED
+            }
+        }
+
+        Log.w(TAG, "Keyguard 未解除 display=$id，判定为密码不符")
+        return UnlockOutcome.WRONG_PIN
+    }
+
+    /**
+     * 上滑叫出 bouncer。
+     *
+     * 优先 sendevent 直接写触摸设备：`input swipe` 的事件标注 displayId=0，
+     * 而合盖时内屏 powerMode=Off，事件会被 InputDispatcher 丢弃 ——
+     * 外屏一个触摸都收不到（真机两个命令的截图逐字节对比证实）。
+     */
+    private fun swipeUp(displayId: Int, w: Int, h: Int): Boolean {
         val swipe = AutoUnlockDecision.swipeFromSize(w, h)
         val x = swipe[0]
         val y1 = swipe[1]
         val y2 = swipe[3]
 
-        // 一条 su 里跑完：每次 fork `input` 都要起一个 app_process，分开调用会慢一倍以上。
-        // pin 用单引号包住，与上面的格式校验构成双保险。
-        val cmd = "input -d $id swipe $x $y1 $x $y2 250; " +
-            "sleep 0.45; input -d $id text '$pin'; sleep 0.25; input keyevent 66"
-        RootUtils.runAsRoot(cmd)
-
-        // keyguard 消失是异步的，给 1.4s；期间每 200ms 读一次真实状态
-        repeat(7) {
-            SystemClock.sleep(200)
-            if (!deviceLocked(ctx)) return true
+        val touch = findTouchDevice(w, h)
+        return if (touch != null) {
+            val (path, scale) = touch
+            val ok = RootUtils.runAsRoot(AutoUnlockDecision.swipeScript(path, scale, x, y1, y2))
+            Log.i(TAG, "上滑 display=$displayId 设备=$path 缩放=$scale 执行=$ok")
+            ok
+        } else {
+            // 拿不到设备节点（API < 29 或没有匹配的触摸设备）→ 退回 input 命令。
+            // 只对默认屏可靠；非默认屏可能整条命令都无效，由 bouncer 巡检兜底。
+            val d = if (displayId == Display.DEFAULT_DISPLAY) "-d $displayId " else ""
+            val ok = RootUtils.runAsRoot("input ${d}swipe $x $y1 $x $y2 250")
+            Log.i(TAG, "上滑 display=$displayId 无设备节点，退回 input 命令 执行=$ok")
+            ok
         }
-        return false
+    }
+
+    /** bouncer（PIN 键盘）当前是否显示。SystemUI 的 `mBouncerVisible` 是唯一实测可靠的信号。 */
+    private fun bouncerVisible(): Boolean {
+        // `|| true` 必须有：grep -c 零匹配时退出码是 1，capture 会把输出吞掉当失败。
+        val out = RootUtils.capture(
+            "dumpsys activity service com.android.systemui/.SystemUIService 2>/dev/null " +
+                "| grep -c 'mBouncerVisible=true' || true",
+            BOUNCER_PROBE_TIMEOUT_MS
+        ) ?: return false
+        return (out.trim().toIntOrNull() ?: 0) > 0
+    }
+
+    /**
+     * 找到与目标屏匹配的触摸设备，返回（设备节点, 坐标缩放比）。
+     *
+     * 用 `getevent -pl` 的文本而不是 [InputDevice]：后者拿设备节点的方法是
+     * `getPath()`，那是 SystemApi，普通应用编译期就解析不到。
+     *
+     * 匹配依据见 [AutoUnlockDecision.pickTouchDevice]。
+     */
+    private fun findTouchDevice(width: Int, height: Int): Pair<String, Float>? {
+        val dump = RootUtils.capture("getevent -pl 2>/dev/null", GETEVENT_TIMEOUT_MS) ?: return null
+        return AutoUnlockDecision.pickTouchDevice(dump, width, height)
     }
 
     /** 连续失败到达上限：关闭功能 + 通知，绝不继续重试。 */
     private fun giveUp(ctx: Context) {
         stopWatch()
+        // 先落标记再关开关：[setEnabled] 在 false 分支不清标记，
+        // 但反过来若先关后标，中间任何一次 setEnabled(true) 都会越过保护。
+        sp(ctx).edit()
+            .putBoolean(KEY_AUTO_DISABLED, true)
+            .putString(KEY_AUTO_DISABLED_REASON, DISABLED_BY_FAILURES)
+            .apply()
         setEnabled(ctx, false)
         notifyGiveUp(ctx)
     }
