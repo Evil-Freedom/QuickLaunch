@@ -109,10 +109,20 @@
   .save-bar { position: sticky; bottom: 0; background: linear-gradient(transparent, var(--bg) 30%);
               padding: 16px 0 8px; }
   .save-bar button { width: 100%; padding: 12px; font-size: 15px; border-radius: 10px; }
+  /* 窄屏：顶栏的导航必须换到第二行。
+     否则「QuickLaunch 远程 + 5 个链接 + 退出」总宽超过手机视口，
+     整页被撑宽 —— 卡片右侧的开关和按钮会被挤出屏幕。 */
+  @media (max-width: 700px) {
+    header { padding: 12px 14px; gap: 10px; }
+    header nav { margin-left: 0; width: 100%; gap: 12px; }
+  }
   @media (max-width: 520px) {
     main { padding: 16px 14px 40px; }
     .day { width: 34px; height: 34px; }
   }
+  /* 兜底：任何意外溢出都不产生横向滚动（手机上横向滚动条比裁切更烦人） */
+  body { overflow-x: hidden; }
+  main { overflow-x: hidden; }
 </style>
 </head>
 <body>
