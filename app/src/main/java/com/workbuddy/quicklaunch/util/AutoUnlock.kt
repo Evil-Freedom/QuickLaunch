@@ -51,11 +51,29 @@ object AutoUnlock {
     private const val KEY_PIN = "auto_unlock_pin_v1"
     private const val KEY_FAILURES = "auto_unlock_failures"
 
+    // ── v1.4.1 新增：状态记录与安全停用标记 ──
+    /** 上次尝试的绝对时间。0 = 从未尝试。 */
+    private const val KEY_LAST_ATTEMPT_AT = "auto_unlock_last_attempt_at"
+    /** 上次尝试结果。取值见 [RESULT_*]。 */
+    private const val KEY_LAST_RESULT = "auto_unlock_last_result"
+    /** 因失败保护自动停用的标记。与「用户手动关」区分：前者远程不能重新打开。 */
+    private const val KEY_AUTO_DISABLED = "auto_unlock_auto_disabled"
+    private const val KEY_AUTO_DISABLED_REASON = "auto_unlock_auto_disabled_reason"
+    /** 每次解锁失败时是否发通知。安全停用通知不受此开关控制（始终发）。 */
+    private const val KEY_NOTIFY = "auto_unlock_notify_on_failure"
+
     /** 两次尝试之间的最小间隔，给 keyguard 动画留时间。 */
     const val MIN_INTERVAL_MS = AutoUnlockDecision.MIN_INTERVAL_MS
 
     /** 连续失败上限。达到即关闭功能，避免撞上系统 5 次清除数据的红线。 */
     const val MAX_FAILURES = AutoUnlockDecision.MAX_FAILURES
+
+    /** 上次尝试结果取值。 */
+    const val RESULT_SUCCESS = "SUCCESS"
+    const val RESULT_FAILED = "FAILED"
+
+    /** 安全停用原因。 */
+    const val DISABLED_BY_FAILURES = "MAX_FAILURES_REACHED"
 
     /** 一次「锁屏事件」内的观察窗口：展开/亮屏后 keyguard 出现可能有延迟。 */
     private const val WATCH_WINDOW_MS = 12_000L
@@ -73,7 +91,17 @@ object AutoUnlock {
 
     fun setEnabled(ctx: Context, enabled: Boolean) {
         sp(ctx).edit().putBoolean(KEY_ENABLED, enabled).apply()
-        if (!enabled) stopWatch()
+        if (enabled) {
+            // 本地显式开启 = 用户在手机上确认过。
+            // 只有这条路径能清除安全停用标记；远程下发的启用走
+            // [applyRemotePolicy]，它会被 [isSecurityLocked] 拦住。
+            sp(ctx).edit()
+                .putBoolean(KEY_AUTO_DISABLED, false)
+                .putString(KEY_AUTO_DISABLED_REASON, "")
+                .apply()
+        } else {
+            stopWatch()
+        }
     }
 
     fun isChargingOnly(ctx: Context): Boolean =
@@ -106,6 +134,42 @@ object AutoUnlock {
     fun failures(ctx: Context): Int = runCatching { sp(ctx).getInt(KEY_FAILURES, 0) }.getOrDefault(0)
 
     private fun resetFailures(ctx: Context) = sp(ctx).edit().putInt(KEY_FAILURES, 0).apply()
+
+    // ── 状态记录（供界面与远程看板展示，不含任何 PIN 内容） ──
+
+    fun lastAttemptAt(ctx: Context): Long =
+        runCatching { sp(ctx).getLong(KEY_LAST_ATTEMPT_AT, 0L) }.getOrDefault(0L)
+
+    fun lastResult(ctx: Context): String =
+        runCatching { sp(ctx).getString(KEY_LAST_RESULT, "") }.getOrNull().orEmpty()
+
+    /**
+     * 是否处于「因失败保护而停用」状态。
+     *
+     * 两种情况：
+     * 1. [KEY_AUTO_DISABLED] 标记（giveUp 写入）
+     * 2. failures 已达上限但标记丢失（异常路径兜底）
+     * 任一成立都视为安全停用，远程不能重新启用。
+     */
+    fun isSecurityLocked(ctx: Context): Boolean =
+        runCatching { sp(ctx).getBoolean(KEY_AUTO_DISABLED, false) }.getOrDefault(false) ||
+            failures(ctx) >= MAX_FAILURES
+
+    fun autoDisabledReason(ctx: Context): String =
+        runCatching { sp(ctx).getString(KEY_AUTO_DISABLED_REASON, "") }.getOrNull().orEmpty()
+
+    fun notifyOnFailure(ctx: Context): Boolean =
+        runCatching { sp(ctx).getBoolean(KEY_NOTIFY, true) }.getOrDefault(true)
+
+    fun setNotifyOnFailure(ctx: Context, v: Boolean) =
+        sp(ctx).edit().putBoolean(KEY_NOTIFY, v).apply()
+
+    /**
+     * PIN 的存储形态（KEYSTORE / OBFUSCATED / NONE）。
+     * 读的是已保存的 blob 前缀，不触发解密。
+     */
+    fun pinStorageKind(ctx: Context): PinVault.StorageKind =
+        PinVault.storageKindOf(runCatching { sp(ctx).getString(KEY_PIN, null) }.getOrNull())
 
     // ── 纯决策（可单测） ──────────────────────────────────────────
 
@@ -223,6 +287,9 @@ object AutoUnlock {
             busy.set(false)
             return
         }
+        // 「上次解锁时间」记的是注入开始时刻：这是用户语义里的
+        // 「手机是什么时候尝试解锁的」，与验证结果（完成时刻）差不到 3 秒。
+        sp(ctx).edit().putLong(KEY_LAST_ATTEMPT_AT, System.currentTimeMillis()).apply()
         QuickLaunchExecutors.io.execute {
             var unlocked = false
             try {
@@ -231,6 +298,10 @@ object AutoUnlock {
                 if (BuildConfig.DEBUG) Log.e(TAG, "自动解锁异常", t)
             } finally {
                 busy.set(false)
+                // 结果先落盘再走分支：即使后续通知/停用异常，状态也不丢
+                sp(ctx).edit()
+                    .putString(KEY_LAST_RESULT, if (unlocked) RESULT_SUCCESS else RESULT_FAILED)
+                    .apply()
                 if (unlocked) {
                     resetFailures(ctx)
                     stopWatch()
@@ -239,9 +310,36 @@ object AutoUnlock {
                     val n = failures(ctx) + 1
                     sp(ctx).edit().putInt(KEY_FAILURES, n).apply()
                     if (BuildConfig.DEBUG) Log.w(TAG, "自动解锁失败，累计 $n/$MAX_FAILURES")
+                    if (notifyOnFailure(ctx)) notifyFailure(ctx, n)
                     if (n >= MAX_FAILURES) handler.post { giveUp(ctx) }
                 }
             }
+        }
+    }
+
+    /**
+     * 单次解锁失败的通知（安全停用通知见 [notifyGiveUp]，不受开关控制）。
+     * 原因只给「次数」与「可能原因」，**绝不包含 PIN 的任何信息**。
+     */
+    private fun notifyFailure(ctx: Context, count: Int) {
+        runCatching {
+            val nm = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                nm.createNotificationChannel(
+                    NotificationChannel(CHANNEL, "自动解锁提醒", NotificationManager.IMPORTANCE_DEFAULT)
+                )
+            }
+            val pi = PendingIntent.getActivity(
+                ctx, 0, Intent(ctx, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE
+            )
+            val n = NotificationCompat.Builder(ctx, CHANNEL)
+                .setContentTitle(ctx.getString(R.string.auto_unlock_fail_title))
+                .setContentText(ctx.getString(R.string.auto_unlock_fail_text, count, MAX_FAILURES))
+                .setSmallIcon(R.drawable.ic_notification_stat)
+                .setAutoCancel(true)
+                .setContentIntent(pi)
+                .build()
+            nm.notify(NOTIF_ID, n)
         }
     }
 
@@ -307,5 +405,72 @@ object AutoUnlock {
                 .build()
             nm.notify(NOTIF_ID, n)
         }
+    }
+
+    // ── 远程策略应用 ─────────────────────────────────────────────
+
+    /**
+     * 远程（VPS）下发的自动解锁策略。
+     *
+     * 刻意只有两个字段：**没有 PIN、没有失败次数、没有任何时间窗参数。**
+     * PIN 永不出手机；失败保护只在本地（远程重置计数等于拆掉安全网）；
+     * 时间窗需要改动 [AutoUnlockDecision.decide] 的判定链，本轮明确不做。
+     */
+    data class RemotePolicy(
+        val enabled: Boolean,
+        val chargingOnly: Boolean
+    )
+
+    sealed class ApplyResult {
+        data class Applied(val enabled: Boolean, val chargingOnly: Boolean) : ApplyResult()
+        data class Refused(val reason: String, val detail: String) : ApplyResult()
+    }
+
+    /**
+     * 应用远程策略。**阻塞调用**（含 root 检测），必须在后台线程执行。
+     *
+     * 门控顺序（每一条都有明确的拒绝理由，直接写进回报）：
+     * 1. 本地安全停用 → 一律拒绝启用。这是需求里最重要的一条：
+     *    「远程服务器不能重新打开已因失败自动关闭的自动解锁」，
+     *    因为远程无法知道 PIN 为什么会连续错——可能是用户改了锁屏密码，
+     *    此时远程强行打开等于让手机反复输错密码。
+     * 2. 本地无 PIN → 拒绝。PIN 只能在手机本地设置。
+     * 3. PIN 处于降级存储（XOR 混淆）→ 拒绝启用。远程看不到降级状态，
+     *    强行启用等于让一台「密码只是被混淆着」的设备自动开屏。
+     * 4. 无 root → 拒绝（注入需要 su）。
+     * 5. 全部通过 → 应用 chargingOnly 与 enabled。
+     */
+    fun applyRemotePolicy(ctx: Context, policy: RemotePolicy): ApplyResult {
+        if (policy.enabled) {
+            // 门控判定抽成纯函数（AutoUnlockDecision.remoteEnableGate），
+            // 17 个安全场景在 JVM 单测里逐条钉死；这里只负责查本地真实状态并套用。
+            val reason = AutoUnlockDecision.remoteEnableGate(
+                securityLocked = isSecurityLocked(ctx),
+                hasPin = hasPin(ctx),
+                insecureStorage = pinStorageKind(ctx) == PinVault.StorageKind.OBFUSCATED,
+                hasRoot = runCatching { RootUtils.hasRoot() }.getOrDefault(false)
+            )
+            if (reason != null) {
+                return ApplyResult.Refused(reason, gateDetail(reason))
+            }
+        }
+        setChargingOnly(ctx, policy.chargingOnly)
+        if (policy.enabled != isEnabled(ctx)) {
+            setEnabled(ctx, policy.enabled)
+        }
+        return ApplyResult.Applied(isEnabled(ctx), policy.chargingOnly)
+    }
+
+    /** 拒绝原因的人话版本，直接进回报明细，让看板上能看懂为什么没生效。 */
+    private fun gateDetail(reason: String): String = when (reason) {
+        AutoUnlockDecision.GateReason.SECURITY_LOCKED ->
+            "自动解锁因连续失败已停用，必须在手机上手动重新启用"
+        AutoUnlockDecision.GateReason.NO_PIN ->
+            "手机本地尚未配置解锁 PIN"
+        AutoUnlockDecision.GateReason.INSECURE_STORAGE ->
+            "PIN 存储处于降级状态（AndroidKeyStore 不可用），远程不能启用自动解锁"
+        AutoUnlockDecision.GateReason.NO_ROOT ->
+            "设备没有可用的 root 权限"
+        else -> reason
     }
 }

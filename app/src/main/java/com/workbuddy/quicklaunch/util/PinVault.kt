@@ -56,6 +56,41 @@ object PinVault {
         }.getOrNull()?.takeIf { it.isNotEmpty() }
     }
 
+    /**
+     * AndroidKeyStore 是否真的可用。
+     *
+     * 判据是「能拿到或生成那个 AES 密钥」，而不是「类存在」——
+     * 部分定制 ROM 上 `KeyStore.getInstance` 成功但 `generateKey` 抛
+     * `ProviderException`，如果只看前者就会误报可用，然后在真正保存时
+     * 静默退化成 XOR，而界面上仍显示「已加密」。
+     *
+     * 这是 UI 用来提示「当前是安全降级状态」的依据，也是
+     * [AutoUnlock.applyRemotePolicy] 判断能否接受远程启用的输入之一。
+     */
+    fun isKeystoreAvailable(): Boolean = runCatching {
+        secretKey()
+        true
+    }.getOrDefault(false)
+
+    /** 当前 PIN 的存储形态。供界面如实展示，不给用户「看起来加密了」的错觉。 */
+    enum class StorageKind {
+        /** 未设置 PIN。 */
+        NONE,
+
+        /** AndroidKeyStore AES-GCM，密钥不可导出。 */
+        KEYSTORE,
+
+        /** XOR + Base64 混淆 —— **不是加密**，只防肩窥。 */
+        OBFUSCATED
+    }
+
+    fun storageKindOf(blob: String?): StorageKind = when {
+        blob.isNullOrEmpty() -> StorageKind.NONE
+        blob.startsWith(PREFIX_KS) -> StorageKind.KEYSTORE
+        blob.startsWith(PREFIX_XOR) -> StorageKind.OBFUSCATED
+        else -> StorageKind.NONE
+    }
+
     // ── AndroidKeyStore ────────────────────────────────────────────
 
     private fun secretKey(): SecretKey {

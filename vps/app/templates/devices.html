@@ -27,7 +27,7 @@
   <h2>已注册设备</h2>
   {% if not devices %}<p class="muted">还没有设备。</p>{% endif %}
   <table>
-    <thead><tr><th>设备</th><th>状态</th><th>最近同步</th><th>版本</th><th></th></tr></thead>
+    <thead><tr><th>设备</th><th>机型 / 版本</th><th>状态</th><th>最近同步</th><th>配置版本</th><th></th></tr></thead>
     <tbody>
     {% for d in devices %}
       <tr>
@@ -39,8 +39,11 @@
           {% if d.revoked %}<span class="tag off">已撤销</span>
           {% else %}<span class="tag on">正常</span>{% endif %}
         </td>
+        <td class="mono muted">
+          {{ d.model or '-' }}<br>Android {{ d.android_version or '?' }} · App {{ d.app_version or '?' }}
+        </td>
         <td class="mono muted">{{ d.last_seen_at if d.last_seen_at else '-' }}</td>
-        <td class="mono">v{{ d.last_version }}</td>
+        <td class="mono">v{{ d.last_version }}{% if d.get('unlock', {}).get('securityLocked') %}<br><span class="tag off">解锁停用</span>{% endif %}</td>
         <td>
           <div class="row">
             <form method="post" action="/devices/{{ d.id }}/revoke" style="margin:0">

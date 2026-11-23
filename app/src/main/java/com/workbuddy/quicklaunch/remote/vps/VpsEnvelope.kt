@@ -45,7 +45,11 @@ object VpsEnvelope {
             val version: Long,
             val issuedAt: Long,
             val rules: List<JSONObject>,
-            val retry: JSONObject?
+            val retry: JSONObject?,
+            /** 自动解锁策略。null = 本次不下发、不动本地。 */
+            val unlock: JSONObject?,
+            /** 本次配置的内容指纹。应用成功后要存下来，下次请求带回去。 */
+            val hash: String
         ) : Result()
 
         /** 服务端版本没有推进，无事可做。不是错误。 */
@@ -95,8 +99,9 @@ object VpsEnvelope {
         }
 
         val payloadB64 = root.optString("payload")
+        val contentHash = root.optString("hash")
         val sign = root.optString("sign")
-        val expected = signature(secret, alg, version, issuedAt, nonce, payloadB64)
+        val expected = signature(secret, alg, version, issuedAt, nonce, payloadB64, contentHash)
         if (!constantTimeEquals(expected, sign)) {
             return Result.Err("E_SIGN", "响应签名校验失败")
         }
@@ -128,31 +133,39 @@ object VpsEnvelope {
                 arr.optJSONObject(i)?.let { rules += it }
             }
         }
-        return Result.Ok(version, issuedAt, rules, obj.optJSONObject("retry"))
+        return Result.Ok(
+            version, issuedAt, rules,
+            obj.optJSONObject("retry"), obj.optJSONObject("unlock"), contentHash
+        )
     }
 
-    /** 响应签名。`alg` 也进 HMAC 输入，防止降级算法替换。 */
+    /** 响应签名。`alg` 与内容指纹都进 HMAC 输入：前者防降级替换，后者防「跳过更新」。 */
     fun signature(
         secret: ByteArray,
         alg: String,
         version: Long,
         issuedAt: Long,
         nonce: String,
-        payloadB64: String
+        payloadB64: String,
+        contentHash: String = ""
     ): String = RemoteAuth.hmacSha256Hex(
         secret,
-        "$alg\n$version\n$issuedAt\n$nonce\n$payloadB64"
+        "$alg\n$version\n$issuedAt\n$nonce\n$payloadB64\n$contentHash"
     )
 
-    /** 请求签名：GET + path + ts + nonce + device + since。 */
+    /** 请求签名：GET + path（含 query，hash 在其中）+ ts + nonce + device + since。 */
     fun requestSignature(
         secret: ByteArray,
         path: String,
         ts: Long,
         nonce: String,
         deviceId: String,
-        since: Long
-    ): String = RemoteAuth.hmacSha256Hex(secret, "GET\n$path\n$ts\n$nonce\n$deviceId\n$since")
+        since: Long,
+        contentHash: String = ""
+    ): String = RemoteAuth.hmacSha256Hex(
+        secret,
+        "GET\n$path\n$ts\n$nonce\n$deviceId\n$since\n$contentHash"
+    )
 
     /** 结果回报签名。 */
     fun reportSignature(

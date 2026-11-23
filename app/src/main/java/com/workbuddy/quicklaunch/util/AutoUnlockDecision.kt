@@ -40,6 +40,37 @@ object AutoUnlockDecision {
     /** 密码格式：只要数字 PIN（字母密码走的是另一种键盘，`input text` 注入不稳）。 */
     fun validPin(pin: String?): Boolean = pin != null && pin.matches(Regex("^\\d{4,16}$"))
 
+    /** 远程启用被拒的原因码。与 AutoUnlock.ApplyResult.Refused.reason 一一对应。 */
+    object GateReason {
+        const val SECURITY_LOCKED = "SECURITY_LOCKED"
+        const val NO_PIN = "NO_PIN"
+        const val INSECURE_STORAGE = "INSECURE_STORAGE"
+        const val NO_ROOT = "NO_ROOT"
+    }
+
+    /**
+     * 「远程能否启用自动解锁」的门控（纯函数，可单测）。
+     *
+     * 顺序有讲究，与本地判定链的取舍一致：
+     * **安全停用 > 有无凭据 > 凭据质量 > 执行能力**。
+     * 安全停用排第一：即使后来补了 PIN，只要没有本地确认，远程就不能打开 ——
+     * 这是「两次失败自动停用后必须本地恢复」这条硬规则的落点。
+     *
+     * @return null 表示允许启用；非 null 是 [GateReason] 里的原因码。
+     */
+    fun remoteEnableGate(
+        securityLocked: Boolean,
+        hasPin: Boolean,
+        insecureStorage: Boolean,
+        hasRoot: Boolean
+    ): String? = when {
+        securityLocked -> GateReason.SECURITY_LOCKED
+        !hasPin -> GateReason.NO_PIN
+        insecureStorage -> GateReason.INSECURE_STORAGE
+        !hasRoot -> GateReason.NO_ROOT
+        else -> null
+    }
+
     /**
      * 由屏幕尺寸推出上滑手势，用于叫出 keyguard bouncer。
      * 必须先上滑：实测直接 `input text` 打不进密码框（MENU 键 82 在这台机器上也拉不起 bouncer）。

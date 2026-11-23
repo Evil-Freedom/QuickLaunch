@@ -29,6 +29,7 @@ QuickLaunch 远程规则服务。
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 import time
@@ -44,6 +45,13 @@ BASE_DIR = os.path.dirname(__file__)
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 ALG = "HMAC-SHA256"
+
+# 手机上报的解锁状态字段白名单。这些都是「状态与结果」，不存在 PIN 内容；
+# 出现白名单之外的字段一律丢弃，防止未来客户端版本误传敏感数据。
+ALLOWED_UNLOCK_STATUS_FIELDS = {
+    "enabled", "hasPin", "storage", "chargingOnly",
+    "failures", "maxFailures", "securityLocked", "lastAttemptAt", "lastResult",
+}
 
 # 与 Android 侧 `RemoteProtocol.EDITABLE_FIELDS` 保持一致。
 # 注意这里**故意不包含** targetPackage / triggerType / id：
@@ -74,19 +82,26 @@ def ping() -> JSONResponse:
 
 
 def _sign_envelope(
-    secret_b64: str, version: int, issued_at: int, nonce: str, payload_b64: str
+    secret_b64: str, version: int, issued_at: int, nonce: str,
+    payload_b64: str, payload_hash: str = ""
 ) -> dict[str, Any]:
     """
     生成签名信封。签名输入与 Android 侧 `VpsEnvelope.signature` 逐字节一致：
-    `alg \\n version \\n issuedAt \\n nonce \\n payloadB64`
+    `alg \\n version \\n issuedAt \\n nonce \\n payloadB64 \\n payloadHash`
+
+    指纹必须进签名：它决定了客户端「要不要重新应用」，可被伪造的话
+    攻击者就能让设备跳过更新。
     """
     secret = base64.b64decode(secret_b64)
-    sign = auth.hmac_hex(secret, f"{ALG}\n{version}\n{issued_at}\n{nonce}\n{payload_b64}")
+    sign = auth.hmac_hex(
+        secret, f"{ALG}\n{version}\n{issued_at}\n{nonce}\n{payload_b64}\n{payload_hash}"
+    )
     return {
         "alg": ALG,
         "version": version,
         "issuedAt": issued_at,
         "nonce": nonce,
+        "hash": payload_hash,
         "sign": sign,
     }
 
@@ -122,20 +137,28 @@ async def get_config(request: Request, device: str = "", since: int = 0) -> JSON
     nonce = request.headers.get("X-QL-Nonce", "")
     db.touch_device(device)
 
-    if cur_version <= since:
+    payload = db.current_payload()
+    payload_json = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    payload_hash = hashlib.sha256(payload_json.encode("utf-8")).hexdigest()[:16]
+
+    # 无更新判定：版本不高于客户端已应用版本 **且** 内容指纹一致。
+    # 只有版本号是不够的：旧版本 APK 可能拉到了某个版本但（因为不认识新字段）
+    # 没有应用其中的内容，此时版本号已推进、内容却没生效 ——
+    # 指纹让「版本到了、内容没到」的设备仍然能拿到完整配置。
+    client_hash = request.query_params.get("hash", "")
+    if cur_version <= since and client_hash == payload_hash:
         # 无更新也签名：客户端要求「连 NoChange 也必须能验签」，
         # 否则任何人都能伪造一个 NoChange 让手机停止同步。
-        env = _sign_envelope(d["secret"], cur_version, now, nonce, "")
+        env = _sign_envelope(d["secret"], cur_version, now, nonce, "", payload_hash)
         env["updated"] = False
         env["payload"] = ""
         return JSONResponse(env)
 
-    payload = db.current_payload()
-    payload_json = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     payload_b64 = base64.b64encode(payload_json.encode("utf-8")).decode("ascii")
-    env = _sign_envelope(d["secret"], cur_version, now, nonce, payload_b64)
+    env = _sign_envelope(d["secret"], cur_version, now, nonce, payload_b64, payload_hash)
     env["updated"] = True
     env["payload"] = payload_b64
+    env["hash"] = payload_hash
     return JSONResponse(env)
 
 
@@ -168,7 +191,17 @@ async def report(request: Request) -> JSONResponse:
         db.log_audit(device_id or "-", "api.report.denied", why)
         raise HTTPException(status_code=401, detail=why)
 
-    db.add_report(device_id, version, ok, detail)
+    # 设备自报的快照字段：白名单过滤后再入库 —— 就算手机端将来误带了多余字段，
+    # 也不会原样落库（这些数据最终会被渲染到看板上）。
+    device_info = body.get("deviceInfo")
+    unlock_status = body.get("unlock")
+    device_info = device_info if isinstance(device_info, dict) else None
+    if isinstance(unlock_status, dict):
+        unlock_status = {k: unlock_status[k] for k in unlock_status
+                         if k in ALLOWED_UNLOCK_STATUS_FIELDS}
+    else:
+        unlock_status = None
+    db.add_report(device_id, version, ok, detail, device_info, unlock_status)
     return JSONResponse({"ok": True})
 
 
@@ -393,6 +426,45 @@ def delete_device(request: Request, device_id: str):
         return RedirectResponse("/login", status_code=302)
     db.delete_device(device_id)
     return RedirectResponse("/devices", status_code=302)
+
+
+@app.get("/unlock", response_class=HTMLResponse)
+def unlock_page(request: Request):
+    if not _require(request):
+        return RedirectResponse("/login", status_code=302)
+    devices = db.list_devices()
+    for d in devices:
+        u = d.get("unlock") or {}
+        at = u.get("lastAttemptAt") or 0
+        # 看板显示可读时间；0（从未尝试）原样给 "-"
+        u["lastAttemptText"] = (
+            time.strftime("%m-%d %H:%M:%S", time.localtime(at / 1000)) if at else "-"
+        )
+        d["unlock"] = u
+    return templates.TemplateResponse(
+        request,
+        "unlock.html",
+        {
+            "devices": devices,
+            "policy": db.unlock_policy(),
+            "version": db.current_version(),
+        },
+    )
+
+
+@app.post("/unlock/policy")
+def edit_unlock(
+    request: Request,
+    enabled: int = Form(0),
+    charging_only: int = Form(0),
+    publish: int = Form(1),
+):
+    if not _require(request):
+        return RedirectResponse("/login", status_code=302)
+    db.set_unlock_policy({"enabled": bool(enabled), "chargingOnly": bool(charging_only)})
+    if publish:
+        db.publish("改自动解锁策略")
+    return RedirectResponse("/unlock", status_code=302)
 
 
 @app.get("/audit", response_class=HTMLResponse)

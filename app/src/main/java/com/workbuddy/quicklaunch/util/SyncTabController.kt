@@ -21,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.workbuddy.quicklaunch.HolidayManageActivity
 import com.workbuddy.quicklaunch.R
+import com.workbuddy.quicklaunch.AutoUnlockActivity
 import com.workbuddy.quicklaunch.SourceManageActivity
 
 /**
@@ -283,7 +284,13 @@ class SyncTabController(
         } else {
             context.getString(R.string.auto_unlock_pin_unset)
         }
-        views.tvAutoUnlockPin.setOnClickListener { askPin(callbacks) { } }
+        // PIN 的设置 / 修改 / 清除与状态详情集中在独立页面：
+        // 修改前有明确确认步骤（两次输入），且能看到存储方式与失败保护状态
+        views.tvAutoUnlockPin.setOnClickListener {
+            runCatching {
+                context.startActivity(Intent(context, AutoUnlockActivity::class.java))
+            }
+        }
 
         views.swAutoUnlockCharging.setOnCheckedChangeListener(null)
         views.swAutoUnlockCharging.isChecked = AutoUnlock.isChargingOnly(context)

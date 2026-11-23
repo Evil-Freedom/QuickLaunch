@@ -73,6 +73,8 @@
     <string name="auto_unlock_bad_pin">密码格式不对：只能是 4~16 位数字</string>
     <string name="auto_unlock_give_up_title">自动解锁已暂停</string>
     <string name="auto_unlock_give_up_text">连续两次解锁失败（密码可能不对），已自动关闭该功能，请重新设置</string>
+    <string name="auto_unlock_fail_title">自动解锁失败</string>
+    <string name="auto_unlock_fail_text">第 %1$d 次解锁尝试未成功（上限 %2$d 次，达到上限将自动停用）</string>
     <string name="auto_unlock_ok">确定</string>
     <string name="auto_unlock_clear">清除密码</string>
     <string name="auto_unlock_dialog_cancel">取消</string>

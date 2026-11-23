@@ -54,6 +54,13 @@ def hmac_hex(key: bytes, data: str) -> str:
     return hmac.new(key, data.encode(), hashlib.sha256).hexdigest()
 
 
+def req_sign(secret, path, ts, nonce, device_id, since, chash=""):
+    """与 Android 侧 requestSignature / 服务端 auth.request_signature 同一拼接。"""
+    return hmac_hex(
+        secret, "GET\n%s\n%d\n%s\n%s\n%d\n%s" % (path, ts, nonce, device_id, since, chash)
+    )
+
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *a, **k):
         return None
@@ -165,13 +172,13 @@ def main() -> int:
     check("无签名被拒", code == 401, f"实际 {code}")
 
     nonce = "n" + str(ts)
-    bad = hmac_hex(b"\x00" * 32, f"GET\n{path}\n{ts}\n{nonce}\n{device_id}\n{since}")
+    bad = req_sign(b"\x00" * 32, path, ts, nonce, device_id, since)
     code, _, _ = request("GET", path, headers={
         "X-QL-Ts": str(ts), "X-QL-Nonce": nonce, "X-QL-Sign": bad})
     check("错签名被拒", code == 401, f"实际 {code}")
 
     old_ts = ts - 20 * 60 * 1000
-    sig = hmac_hex(secret, f"GET\n{path}\n{old_ts}\n{nonce}\n{device_id}\n{since}")
+    sig = req_sign(secret, path, old_ts, nonce, device_id, since)
     code, _, _ = request("GET", path, headers={
         "X-QL-Ts": str(old_ts), "X-QL-Nonce": nonce, "X-QL-Sign": sig})
     check("过期时间戳被拒", code == 401, f"实际 {code}")
@@ -181,7 +188,7 @@ def main() -> int:
     qldb.upsert_rule(2, {"timeHour": 8, "timeMinute": 30, "repeatMode": "weekdays", "enabled": True})
     ver = qldb.publish("e2e 初始配置")
     nonce = "n" + str(ts) + "a"
-    sig = hmac_hex(secret, f"GET\n{path}\n{ts}\n{nonce}\n{device_id}\n{since}")
+    sig = req_sign(secret, path, ts, nonce, device_id, since)
     code, body, _ = request("GET", path, headers={
         "X-QL-Ts": str(ts), "X-QL-Nonce": nonce, "X-QL-Sign": sig})
     check("拉取成功", code == 200, f"实际 {code} {body[:120]}")
@@ -189,21 +196,23 @@ def main() -> int:
     check("信封含 alg", env.get("alg") == "HMAC-SHA256")
     check("信封 version 正确", env.get("version") == ver, f"{env.get('version')} vs {ver}")
     check("updated=true", env.get("updated") is True)
-    # 客户端视角验签
-    expect = hmac_hex(secret, f"{env['alg']}\n{env['version']}\n{env['issuedAt']}\n"
-                              f"{env['nonce']}\n{env['payload']}")
-    check("响应签名正确", hmac_hex(secret, f"{env['alg']}\n{env['version']}\n{env['issuedAt']}\n"
-                                    f"{env['nonce']}\n{env['payload']}") == env["sign"], expect)
+    check("信封含内容指纹", bool(env.get("hash")), f"hash={env.get('hash')}")
+    # 客户端视角验签（指纹在签名输入末尾）
+    expect = hmac_hex(secret, "%s\n%d\n%d\n%s\n%s\n%s" % (
+        env["alg"], env["version"], env["issuedAt"], env["nonce"], env["payload"], env.get("hash", "")))
+    check("响应签名正确", expect == env["sign"])
     payload = json.loads(base64.b64decode(env["payload"]))
     check("payload 含规则", any(r.get("id") == 2 for r in payload.get("rules", [])))
     check("payload 含重试策略", "retry" in payload)
+    check("payload 含解锁策略", "unlock" in payload)
 
     print("\n[7] 已是最新")
     since2 = ver
-    path2 = f"/api/v1/config?device={device_id}&since={since2}"
+    applied_hash = env.get("hash", "")
+    path2 = f"/api/v1/config?device={device_id}&since={since2}&hash={applied_hash}"
     ts2 = int(time.time() * 1000)
     nonce2 = "n" + str(ts2)
-    sig2 = hmac_hex(secret, f"GET\n{path2}\n{ts2}\n{nonce2}\n{device_id}\n{since2}")
+    sig2 = req_sign(secret, path2, ts2, nonce2, device_id, since2, applied_hash)
     code, body, _ = request("GET", path2, headers={
         "X-QL-Ts": str(ts2), "X-QL-Nonce": nonce2, "X-QL-Sign": sig2})
     check("返回 200", code == 200, f"实际 {code}")
@@ -233,10 +242,26 @@ def main() -> int:
     qldb.revoke_device(device_id, True)
     ts3 = int(time.time() * 1000)
     nonce3 = "n" + str(ts3)
-    sig3 = hmac_hex(secret, f"GET\n{path2}\n{ts3}\n{nonce3}\n{device_id}\n{since2}")
+    sig3 = req_sign(secret, path2, ts3, nonce3, device_id, since2, applied_hash)
     code, body, _ = request("GET", path2, headers={
         "X-QL-Ts": str(ts3), "X-QL-Nonce": nonce3, "X-QL-Sign": sig3})
     check("撤销后拉取被拒", code == 401, f"实际 {code} {body[:80]}")
+
+    print("\n[11] 内容指纹（防旧客户端跳版本）")
+    # 恢复设备供本场景使用
+    qldb.revoke_device(device_id, False)
+    ts4 = int(time.time() * 1000)
+    nonce4 = "n" + str(ts4)
+    # 版本号一样，但客户端声明的内容指纹是错的 → 必须下发完整配置
+    wrong_hash = "0" * 16
+    path4 = f"/api/v1/config?device={device_id}&since={since2}&hash={wrong_hash}"
+    sig4 = req_sign(secret, path4, ts4, nonce4, device_id, since2, wrong_hash)
+    code, body, _ = request("GET", path4, headers={
+        "X-QL-Ts": str(ts4), "X-QL-Nonce": nonce4, "X-QL-Sign": sig4})
+    check("指纹不一致时仍下发", code == 200, f"实际 {code}")
+    if code == 200:
+        env4 = json.loads(body)
+        check("指纹不一致时 updated=true", env4.get("updated") is True)
 
     print(f"\n== 通过 {passed} / 失败 {failed} ==")
     return 0 if failed == 0 else 1

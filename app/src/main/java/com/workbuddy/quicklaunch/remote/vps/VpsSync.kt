@@ -1,6 +1,9 @@
 package com.workbuddy.quicklaunch.remote.vps
 
 import android.app.AlarmManager
+import android.os.Build
+import com.workbuddy.quicklaunch.BuildConfig
+import com.workbuddy.quicklaunch.util.AutoUnlock
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -52,7 +55,8 @@ object VpsSync {
 
         val nonce = VpsClient.newNonce()
         val since = settings.appliedVersion
-        when (val fetched = VpsClient.fetch(settings, since, nonce)) {
+        val appliedHash = VpsSettings.appliedHash(app)
+        when (val fetched = VpsClient.fetch(settings, since, nonce, appliedHash)) {
             is FetchOutcome.NotModified -> {
                 VpsSettings.setLastSync(app, System.currentTimeMillis(), "无更新")
                 return Outcome.UpToDate(settings.appliedVersion)
@@ -123,17 +127,43 @@ object VpsSync {
                 .onFailure { failures += "retry: ${it.message}" }
         }
 
+        // 自动解锁策略：payload 里没有 unlock 字段时**什么都不做** ——
+        // 解锁是安全敏感功能，不能被「下发了不含 unlock 的配置」意外关闭。
+        var unlockNote = ""
+        parsed.unlock?.let { u ->
+            val policy = AutoUnlock.RemotePolicy(
+                enabled = u.optBoolean("enabled", AutoUnlock.isEnabled(app)),
+                chargingOnly = u.optBoolean("chargingOnly", AutoUnlock.isChargingOnly(app))
+            )
+            when (val r = AutoUnlock.applyRemotePolicy(app, policy)) {
+                is AutoUnlock.ApplyResult.Applied ->
+                    unlockNote = "解锁策略已应用（enabled=${r.enabled}, chargingOnly=${r.chargingOnly}）"
+                is AutoUnlock.ApplyResult.Refused -> {
+                    failures += "unlock: ${r.reason}"
+                    unlockNote = "解锁策略被拒绝：${r.reason}（${r.detail}）"
+                }
+            }
+        }
+
         VpsSettings.setAppliedVersion(app, parsed.version)
+        VpsSettings.setAppliedHash(app, parsed.hash)
         val detail = buildString {
             append("v").append(parsed.version)
             append(" 应用 ").append(changed).append(" 条")
             if (failed > 0) append("，失败 ").append(failed).append(" 条：").append(failures.joinToString(","))
+            if (unlockNote.isNotEmpty()) append("；").append(unlockNote)
         }
         VpsSettings.setLastSync(app, System.currentTimeMillis(), detail)
         Log.i(TAG, detail)
 
-        // 回报失败不影响已生效的配置
-        runCatching { VpsClient.report(settings, parsed.version, failed == 0, detail) }
+        // 回报失败不影响已生效的配置；回报里附带设备信息与解锁状态，供看板展示
+        runCatching {
+            VpsClient.report(
+                settings, parsed.version, failed == 0, detail,
+                deviceInfo = deviceInfo(app),
+                unlockStatus = AutoUnlockStatus.snapshot(app)
+            )
+        }
 
         return Outcome.Applied(parsed.version, changed, failed, detail)
     }
@@ -171,6 +201,19 @@ object VpsSync {
             } else cur.allowManualRetry
         )
         LaunchSettings.savePolicy(context, merged)
+    }
+
+    /**
+     * 设备身份信息。让看板能区分「哪台手机」「跑的哪个版本」，
+     * 也方便排查「新策略在旧 APK 上不支持 unlock 字段」这类兼容性问题。
+     */
+    internal fun deviceInfo(context: Context): org.json.JSONObject = org.json.JSONObject().apply {
+        put("model", android.os.Build.MODEL)
+        put("manufacturer", android.os.Build.MANUFACTURER)
+        put("androidVersion", android.os.Build.VERSION.RELEASE)
+        put("sdkInt", android.os.Build.VERSION.SDK_INT)
+        put("appVersion", com.workbuddy.quicklaunch.BuildConfig.VERSION_NAME)
+        put("appVersionCode", com.workbuddy.quicklaunch.BuildConfig.VERSION_CODE)
     }
 
     private fun parseDelays(arr: JSONArray?): List<Long>? {

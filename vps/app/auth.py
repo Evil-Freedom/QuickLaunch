@@ -60,9 +60,13 @@ def hmac_hex(key: bytes, data: str) -> str:
     return hmac.new(key, data.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
-def request_signature(secret: bytes, path: str, ts: int, nonce: str, device_id: str, since: int) -> str:
+def request_signature(
+    secret: bytes, path: str, ts: int, nonce: str, device_id: str, since: int, content_hash: str = ""
+) -> str:
     """与 Android 侧 `VpsEnvelope.requestSignature` 逐字节一致。"""
-    return hmac_hex(secret, f"GET\n{path}\n{ts}\n{nonce}\n{device_id}\n{since}")
+    return hmac_hex(
+        secret, f"GET\n{path}\n{ts}\n{nonce}\n{device_id}\n{since}\n{content_hash}"
+    )
 
 
 def report_signature(
@@ -124,7 +128,15 @@ def verify_device(
     else:
         secret_bytes = secret
 
-    expected = request_signature(secret_bytes, path, ts, nonce, device["id"], since)
+    # hash 是 query 的一部分（已包含在 path 里）；单独取出来进 canonical，
+    # 与客户端的拼接顺序保持一致
+    content_hash = ""
+    for seg in path.split("?", 1)[-1].split("&"):
+        if seg.startswith("hash="):
+            content_hash = seg[5:]
+            break
+
+    expected = request_signature(secret_bytes, path, ts, nonce, device["id"], since, content_hash)
     if not constant_time_equals(expected, sign):
         return False, "签名不匹配"
     return True, ""

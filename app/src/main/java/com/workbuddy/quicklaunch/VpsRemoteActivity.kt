@@ -101,6 +101,7 @@ class VpsRemoteActivity : AppCompatActivity() {
         // 换了地址/身份之后，旧的已应用版本没有意义了：清掉让下一次拉取拿全量
         if (existing.deviceId != deviceId || existing.baseUrl != urlRaw.trim().trimEnd('/')) {
             VpsSettings.setAppliedVersion(this, 0L)
+            VpsSettings.setAppliedHash(this, "")
         }
         binding.etVpsSecret.setText("")
 

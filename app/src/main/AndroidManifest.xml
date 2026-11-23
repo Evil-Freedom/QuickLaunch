@@ -147,6 +147,12 @@
             android:exported="false"
             android:theme="@style/Theme.QuickLaunch.Dark" />
 
+        <!-- 锁屏自动解锁的本地配置与状态页。所有 PIN 操作只在本机完成。 -->
+        <activity
+            android:name=".AutoUnlockActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QuickLaunch.Dark" />
+
         <!-- 定时触发（显式 PendingIntent，无需导出） -->
         <receiver
             android:name=".receiver.AlarmReceiver"

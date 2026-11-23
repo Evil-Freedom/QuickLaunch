@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% set page = 'unlock' %}
+{% block title %}自动解锁 · QuickLaunch{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>自动解锁策略</h2>
+  <p class="hint" style="margin-top:0">
+    这里只能改「开关与条件」。密码只存在于手机本地，服务器永远看不到、改不了、重置不了。
+    手机本地因连续失败自动停用后，这里的启用开关不会生效 —— 必须在手机上重新启用。
+  </p>
+  <form method="post" action="/unlock/policy">
+    <div class="row">
+      <label>启用自动解锁
+        <input type="number" name="enabled" min="0" max="1"
+               value="{{ 1 if policy.enabled else 0 }}">
+      </label>
+      <label>仅充电时解锁
+        <input type="number" name="charging_only" min="0" max="1"
+               value="{{ 1 if policy.chargingOnly else 0 }}">
+      </label>
+      <input type="hidden" name="publish" value="1">
+      <button type="submit">保存并发布</button>
+    </div>
+  </form>
+  <p class="hint">
+    当前版本 v{{ version }}。手机侧校验通过才会应用；被拒绝时会在下方「状态」里显示原因
+    （如 SECURITY_LOCKED / NO_PIN / INSECURE_STORAGE / NO_ROOT）。
+  </p>
+</div>
+
+<div class="card">
+  <h2>各设备解锁状态（设备自报）</h2>
+  {% if not devices %}<p class="muted">还没有设备。</p>{% endif %}
+  <table>
+    <thead>
+      <tr><th>设备</th><th>机型 / 版本</th><th>状态</th><th>失败</th><th>上次尝试</th><th>上次结果</th></tr>
+    </thead>
+    <tbody>
+    {% for d in devices %}
+      {% set u = d.unlock or {} %}
+      <tr>
+        <td>
+          <div>{{ d.name }}</div>
+          <div class="mono muted">{{ d.id }}</div>
+        </td>
+        <td class="mono muted">
+          {{ d.model or '-' }}<br>Android {{ d.android_version or '?' }} · App {{ d.app_version or '?' }}
+        </td>
+        <td>
+          {% if u.get('securityLocked') %}
+            <span class="tag off">安全停用</span>
+          {% elif u.get('enabled') %}
+            <span class="tag on">已启用</span>
+          {% else %}
+            <span class="tag">未启用</span>
+          {% endif %}
+          {% if u.get('storage') == 'OBFUSCATED' %}
+            <div class="muted" style="font-size:11px">⚠ PIN 为降级存储</div>
+          {% endif %}
+        </td>
+        <td class="mono">{{ u.get('failures', '-') }}/{{ u.get('maxFailures', 2) }}</td>
+        <td class="mono muted">
+          {% if u.get('lastAttemptAt') %}{{ u.get('lastAttemptAt') }}{% else %}-{% endif %}
+        </td>
+        <td>
+          {% if u.get('lastResult') == 'SUCCESS' %}
+            <span class="tag on">成功</span>
+          {% elif u.get('lastResult') == 'FAILED' %}
+            <span class="tag off">失败</span>
+          {% else %}
+            <span class="tag">无记录</span>
+          {% endif %}
+          {% if u.get('chargingOnly') %}<div class="muted" style="font-size:11px">仅充电时</div>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="hint">
+    状态由手机在每次同步后回报。这里永远不会出现密码内容 —— 上报的只有布尔值、计数与结果。
+  </p>
+</div>
+
+{% endblock %}

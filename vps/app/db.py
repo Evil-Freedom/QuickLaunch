@@ -112,9 +112,34 @@ def conn() -> Iterator[sqlite3.Connection]:
         c.close()
 
 
+# 自动解锁策略的字段白名单：只有这两个开关。
+# 永远不允许出现 pin / failures / lastResult 这类字段 ——
+# 前者远程不能设置，后者是设备上报的状态（下发侧写进去只会造成「看起来改成功了」）。
+UNLOCK_POLICY_FIELDS = {"enabled", "chargingOnly"}
+
+DEFAULT_UNLOCK_POLICY = {"enabled": False, "chargingOnly": False}
+
+
+def _migrate(c: sqlite3.Connection) -> None:
+    """幂等迁移：给已有库补新列。全部是 ADD COLUMN，存量数据零丢失。"""
+    cols = {r[1] for r in c.execute("PRAGMA table_info(devices)")}
+    for name, ddl in [
+        ("model", "ALTER TABLE devices ADD COLUMN model TEXT NOT NULL DEFAULT ''"),
+        ("android_version", "ALTER TABLE devices ADD COLUMN android_version TEXT NOT NULL DEFAULT ''"),
+        ("app_version", "ALTER TABLE devices ADD COLUMN app_version TEXT NOT NULL DEFAULT ''"),
+        ("unlock_json", "ALTER TABLE devices ADD COLUMN unlock_json TEXT NOT NULL DEFAULT ''"),
+    ]:
+        if name not in cols:
+            c.execute(ddl)
+    if not c.execute("SELECT 1 FROM meta WHERE key='unlock'").fetchone():
+        c.execute("INSERT INTO meta(key,value) VALUES('unlock',?)",
+                  (json.dumps(DEFAULT_UNLOCK_POLICY),))
+
+
 def init_db() -> None:
     with conn() as c:
         c.executescript(SCHEMA)
+        _migrate(c)
         # 首次启动写入默认策略，避免「配置里没有 retry 字段 → 手机用默认值」
         # 这种两边不一致的隐性状态
         row = c.execute("SELECT value FROM meta WHERE key='retry'").fetchone()
@@ -158,6 +183,27 @@ def set_retry_policy(policy: dict[str, Any], actor: str = "admin") -> None:
     log_audit(actor, "retry.update", json.dumps(policy, ensure_ascii=False))
 
 
+def unlock_policy() -> dict[str, Any]:
+    with conn() as c:
+        row = c.execute("SELECT value FROM meta WHERE key='unlock'").fetchone()
+    if not row:
+        return dict(DEFAULT_UNLOCK_POLICY)
+    try:
+        merged = dict(DEFAULT_UNLOCK_POLICY)
+        merged.update(json.loads(row["value"]))
+        # 只保留白名单字段：防御「数据库被手工塞进 pin 字段后下发出去」
+        return {k: bool(v) for k, v in merged.items() if k in UNLOCK_POLICY_FIELDS}
+    except Exception:
+        return dict(DEFAULT_UNLOCK_POLICY)
+
+
+def set_unlock_policy(policy: dict[str, Any], actor: str = "admin") -> None:
+    cleaned = {k: bool(v) for k, v in policy.items() if k in UNLOCK_POLICY_FIELDS}
+    with conn() as c:
+        c.execute("UPDATE meta SET value=? WHERE key='unlock'", (json.dumps(cleaned),))
+    log_audit(actor, "unlock.update", json.dumps(cleaned))
+
+
 def build_payload() -> dict[str, Any]:
     """把当前所有规则与重试策略装配成下发给手机的 payload。"""
     with conn() as c:
@@ -170,7 +216,7 @@ def build_payload() -> dict[str, Any]:
             continue
         body["id"] = r["id"]
         rules.append(body)
-    return {"rules": rules, "retry": retry_policy()}
+    return {"rules": rules, "retry": retry_policy(), "unlock": unlock_policy()}
 
 
 def publish(note: str, actor: str = "admin") -> int:
@@ -310,10 +356,20 @@ def import_rules(items: list[dict[str, Any]], actor: str = "admin") -> int:
 def list_devices() -> list[dict[str, Any]]:
     with conn() as c:
         rows = c.execute(
-            "SELECT id, name, created_at, revoked, last_seen_at, last_version, last_note "
+            "SELECT id, name, created_at, revoked, last_seen_at, last_version, last_note, "
+            "model, android_version, app_version, unlock_json "
             "FROM devices ORDER BY created_at DESC"
         ).fetchall()
-    return [dict(r) for r in rows]
+    out = []
+    for r in rows:
+        d = dict(r)
+        raw = d.pop("unlock_json", "") or ""
+        try:
+            d["unlock"] = json.loads(raw) if raw else {}
+        except Exception:
+            d["unlock"] = {}
+        out.append(d)
+    return out
 
 
 def create_device(name: str, actor: str = "admin") -> dict[str, Any]:
@@ -357,15 +413,34 @@ def touch_device(device_id: str, note: str = "") -> None:
 # ── 回报与审计 ──────────────────────────────────────────────────────
 
 
-def add_report(device_id: str, version: int, ok: bool, detail: str) -> None:
+def add_report(
+    device_id: str,
+    version: int,
+    ok: bool,
+    detail: str,
+    device_info: dict[str, Any] | None = None,
+    unlock_status: dict[str, Any] | None = None,
+) -> None:
     with conn() as c:
         c.execute(
             "INSERT INTO reports(device_id, version, ok, detail, at) VALUES(?,?,?,?,?)",
             (device_id, version, 1 if ok else 0, detail[:500], int(time.time() * 1000)),
         )
+        # 设备信息与解锁状态都是设备自报的快照：远程只能看，不能改。
+        # unlock_json 里存的是策略与结果（含失败计数），不存在任何 PIN 内容。
         c.execute(
-            "UPDATE devices SET last_version=?, last_note=?, last_seen_at=? WHERE id=?",
-            (version, detail[:300], int(time.time() * 1000), device_id),
+            "UPDATE devices SET last_version=?, last_note=?, last_seen_at=?, "
+            "model=?, android_version=?, app_version=?, unlock_json=? WHERE id=?",
+            (
+                version,
+                detail[:300],
+                int(time.time() * 1000),
+                str((device_info or {}).get("model", ""))[:40],
+                str((device_info or {}).get("androidVersion", ""))[:20],
+                str((device_info or {}).get("appVersion", ""))[:20],
+                json.dumps(unlock_status or {}, ensure_ascii=False)[:2000],
+                device_id,
+            ),
         )
 
 

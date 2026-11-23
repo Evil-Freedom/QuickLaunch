@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  自动解锁的本地配置与状态页。
+  所有 PIN 操作都在这台手机上完成；本页任何内容都不会通过网络上传。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_dark_root"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="48dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="锁屏自动解锁"
+            android:textColor="@color/dark_text_primary"
+            android:textSize="22sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:lineSpacingExtra="2dp"
+            android:text="屏幕亮起且处于锁屏时，用 root 注入密码自动解锁。密码只保存在这台手机上，任何远程端都看不到。"
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="12sp" />
+
+        <!-- ═══ 状态 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="当前状态"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvUnlockState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:lineSpacingExtra="3dp"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvStorageWarning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="2dp"
+                android:textColor="#FFB020"
+                android:textSize="12sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- ═══ PIN 管理 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="解锁密码（4~16 位纯数字）"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSetPin"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="10dp"
+                android:text="设置 / 修改密码"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearPin"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="8dp"
+                android:text="清除已保存的密码"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="2dp"
+                android:text="修改或清除都会先弹出确认框。密码保存在本机（AndroidKeyStore 加密），无法从任何远程端读取或重置。"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- ═══ 策略 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="仅充电时解锁"
+                        android:textColor="@color/dark_text_primary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="拔掉充电器后不再自动解锁"
+                        android:textColor="@color/dark_text_tertiary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/swChargingOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="解锁失败时通知"
+                        android:textColor="@color/dark_text_primary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="连续 2 次失败会自动停用并强制通知"
+                        android:textColor="@color/dark_text_tertiary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/swNotify"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ═══ 安全边界说明 ═══ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:lineSpacingExtra="3dp"
+            android:text="安全边界\n• 连续 2 次解锁失败会自动停用，防止触发系统的「5 次错误清除数据」。\n• 停用后只能在这台手机上手动重新启用，远程无法恢复。\n• 密码用 AndroidKeyStore 加密保存；若设备不支持会明确提示降级，绝不静默。\n• 服务器只能改「是否启用 / 仅充电时」这两个策略，碰不到密码本身。"
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>

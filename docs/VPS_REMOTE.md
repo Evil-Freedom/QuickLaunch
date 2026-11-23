@@ -42,7 +42,17 @@ sudo apt update && sudo apt install -y docker.io docker-compose-plugin
 sudo systemctl enable --now docker
 ```
 
-### 2.2 上传并配置
+### 2.2 DuckDNS 核查（部署前在 VPS 上执行）
+
+```bash
+dig +short qlhub.duckdns.org @8.8.8.8   # 应返回 VPS 公网 IP
+curl -s ifconfig.me; echo                # 与上一行一致 → 固定 IP，无需 DDNS 更新
+```
+
+IP 若会变化，加 cron 自动更新（Token 存 `/opt/quicklaunch/.secrets/duckdns.env`，权限 600，
+**不进任何仓库**）：`*/5 * * * * curl -s "https://www.duckdns.org/update?domains=qlhub&token=$TOKEN&ip=" >/dev/null`
+
+### 2.3 上传并配置
 
 ```bash
 # 在本地
@@ -57,16 +67,16 @@ cp .env.example .env
 
 | 变量 | 填什么 |
 | --- | --- |
-| `QL_DOMAIN` | 你的域名，如 `ql.example.com` |
+| `QL_DOMAIN` | `qlhub.duckdns.org`（唯一固定域名，禁止更换） |
 | `QL_ADMIN_PASSWORD_SHA256` | `printf '%s' '你的口令' \| sha256sum \| cut -d' ' -f1` |
 | `QL_SESSION_SECRET` | `openssl rand -hex 32` |
 
-### 2.3 启动
+### 2.4 启动
 
 ```bash
 docker compose up -d
 docker compose logs -f caddy    # 等日志出现 certificate obtained
-curl https://<你的域名>/api/v1/ping
+curl https://qlhub.duckdns.org/api/v1/ping
 # {"ok":true,"version":0}
 ```
 
@@ -78,7 +88,7 @@ curl https://<你的域名>/api/v1/ping
 
 ### 3.1 生成设备凭据
 
-1. 浏览器打开 `https://<域名>/devices`
+1. 浏览器打开 `https://qlhub.duckdns.org/devices`
 2. 输入管理员口令登录
 3. 填设备名 → 点「生成设备凭据」
 4. 页面会显示 **设备 ID** 与 **密钥**（密钥只显示这一次）

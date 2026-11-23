@@ -68,6 +68,13 @@ object VpsSettings {
     fun setAppliedVersion(context: Context, version: Long) =
         prefs(context).edit().putLong("applied_version", version).apply()
 
+    /** 上次成功应用的配置内容指纹。空串 = 从未应用过（首次同步必拿全量）。 */
+    fun appliedHash(context: Context): String =
+        prefs(context).getString("applied_hash", "").orEmpty()
+
+    fun setAppliedHash(context: Context, hash: String) =
+        prefs(context).edit().putString("applied_hash", hash.take(32)).apply()
+
     fun setInterval(context: Context, sec: Int) =
         prefs(context).edit().putInt("interval", sec.coerceIn(MIN_INTERVAL_SEC, MAX_INTERVAL_SEC)).apply()
 
@@ -162,14 +169,19 @@ object VpsClient {
      * 任何异常都转成 [FetchOutcome.Fail]，绝不让网络问题冒泡到调用方 ——
      * 调用方是广播接收器，抛异常等于「同步静默失败且没有任何记录」。
      */
-    fun fetch(settings: VpsSettings.Data, since: Long, nonce: String): FetchOutcome {
+    fun fetch(
+        settings: VpsSettings.Data,
+        since: Long,
+        nonce: String,
+        appliedHash: String = ""
+    ): FetchOutcome {
         val secret = settings.secret()
             ?: return FetchOutcome.Fail(-1, "设备密钥不是合法 Base64")
         val ts = System.currentTimeMillis()
-        val query = "?device=${encode(settings.deviceId)}&since=$since"
+        val query = "?device=${encode(settings.deviceId)}&since=$since&hash=${encode(appliedHash)}"
         val path = CONFIG_PATH + query
         val sign = VpsEnvelope.requestSignature(
-            secret, path, ts, nonce, settings.deviceId, since
+            secret, path, ts, nonce, settings.deviceId, since, appliedHash
         )
 
         var conn: HttpURLConnection? = null
@@ -216,13 +228,25 @@ object VpsClient {
         settings: VpsSettings.Data,
         version: Long,
         ok: Boolean,
-        detail: String
+        detail: String,
+        deviceInfo: org.json.JSONObject? = null,
+        unlockStatus: org.json.JSONObject? = null
     ): Boolean {
         val secret = settings.secret() ?: return false
         val ts = System.currentTimeMillis()
-        val sign = VpsEnvelope.reportSignature(secret, settings.deviceId, version, ts, ok, detail)
-        val body = """{"device":"${escape(settings.deviceId)}","version":$version,""" +
-            """"ok":$ok,"detail":"${escape(detail.take(200))}"}"""
+        // detail 在签名之前先截断：签名必须与 body 里的字符串逐字节一致，
+        // 「签名用原文、body 用截断版」会让服务端校验永远失败（且只在长明细时触发）
+        val trimmed = detail.take(200)
+        val sign = VpsEnvelope.reportSignature(secret, settings.deviceId, version, ts, ok, trimmed)
+        // 回报体是「状态 + 结果」
+        val body = org.json.JSONObject().apply {
+            put("device", settings.deviceId)
+            put("version", version)
+            put("ok", ok)
+            put("detail", trimmed)
+            if (deviceInfo != null) put("deviceInfo", deviceInfo)
+            if (unlockStatus != null) put("unlock", unlockStatus)
+        }.toString()
         var conn: HttpURLConnection? = null
         return try {
             conn = (URL(settings.baseUrl + "/api/v1/report").openConnection() as HttpURLConnection).apply {
