@@ -1,5 +1,8 @@
 # Caddy 自动申请并续期 Let's Encrypt 证书。
 # 只要域名 A 记录指向本机、且 80/443 可达，就不需要任何手工证书步骤。
+# 第二个域名是为验证「家里路由器拦截 *.duckdns.org」而加的临时别名：
+# sslip.io 把 IP 嵌在域名里，解析到同一台机器，但域名不同，绕开域名黑名单。
+# 主入口仍是 qlhub.duckdns.org；网络放行后可只保留主域名。
 {$QL_DOMAIN} {
 	encode zstd gzip
 	reverse_proxy api:8000

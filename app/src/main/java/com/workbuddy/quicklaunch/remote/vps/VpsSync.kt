@@ -214,6 +214,37 @@ object VpsSync {
         put("sdkInt", android.os.Build.VERSION.SDK_INT)
         put("appVersion", com.workbuddy.quicklaunch.BuildConfig.VERSION_NAME)
         put("appVersionCode", com.workbuddy.quicklaunch.BuildConfig.VERSION_CODE)
+
+        // 规则清单：服务端要靠它建立「可以编辑哪些规则」的列表。
+        //
+        // 手机是权威方 —— 下发的规则 id 若在本地不存在，`RemoteRuleApi.patch`
+        // 会直接返回 notFound。所以服务端必须先知道手机上有哪些规则，
+        // 否则网页上根本无从编辑（新部署时规则表是空的）。
+        // 只上报定位与展示字段；不含任何凭据、不含 PIN。
+        runCatching {
+            val all = com.workbuddy.quicklaunch.data.AppDatabase.get(context)
+                .automationDao().getAll()
+            put("rules", JSONArray().apply {
+                all.forEach { a ->
+                    put(org.json.JSONObject().apply {
+                        put("id", a.id)
+                        put("name", a.name)
+                        put("targetPackage", a.targetPackage)
+                        put("targetAppName", a.targetAppName)
+                        put("triggerType", a.triggerType)
+                        put("timeHour", a.timeHour)
+                        put("timeMinute", a.timeMinute)
+                        put("repeatMode", a.repeatMode)
+                        put("repeatDays", a.repeatDays)
+                        put("skipHolidays", a.skipHolidays)
+                        put("enabled", a.enabled)
+                        put("randomWindow", a.randomWindow)
+                        put("windowStartMin", a.windowStartMin)
+                        put("windowEndMin", a.windowEndMin)
+                    })
+                }
+            })
+        }
     }
 
     private fun parseDelays(arr: JSONArray?): List<Long>? {

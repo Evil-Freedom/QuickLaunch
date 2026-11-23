@@ -9,11 +9,21 @@
 #   3. docker compose up -d
 #   4. 浏览器打开 https://<你的域名>/devices 生成设备凭据
 
+# v1.29（Debian 包的 docker-compose）要求显式版本号；v2 会提示 obsolete，无害
+version: "3.8"
+
 services:
   api:
     build: .
     restart: unless-stopped
     env_file: .env
+    # 日志上限：json-file 默认无上限，长期会吃满磁盘。
+    # 只给本项目的容器加，不改全局 daemon.json —— 那会重启 RustDesk。
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       # SQLite 落在宿主机 ./data，方便直接备份（拷走这个目录就是全量备份）
       - ./data:/data
@@ -26,6 +36,11 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "80:80"
       - "443:443"

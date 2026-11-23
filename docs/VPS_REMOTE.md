@@ -285,3 +285,130 @@ docker compose restart
 ```
 
 `.env` 里有会话密钥与口令摘要，**不要提交到任何仓库**（`vps/.gitignore` 已排除）。
+
+---
+
+## 9. 正式部署实录（2026-11-23，阿里云上海）
+
+这一节记录**实际部署到真实服务器时踩到的坑**。上面的教程是理想路径，
+以下是它在中国大陆一台 2 核 2G、与 RustDesk 共存的 Debian 12 上的真实偏差。
+
+### 9.1 环境实况
+
+| 项 | 值 |
+| --- | --- |
+| 系统 | Debian 12 (bookworm)，kernel 6.1.0-33 |
+| 规格 | 2 核 / 1.6 GiB 可用内存 / 40 GB 磁盘（用了 10%） |
+| 公网 IP | `47.100.162.254`，域名 A 记录一致（固定 IP，无需 DDNS 更新） |
+| 既有服务 | **RustDesk**（`hbbs`/`hbbr`，占 21115-21119）；阿里云监控 agent |
+| 80 / 443 | 部署前完全空闲 |
+| Docker | 20.10.24（Debian 源），**无 compose 插件** |
+
+### 9.2 六个真实坑
+
+**① compose 插件装不上 → 用 Debian 源的 v1**
+
+GitHub 到阿里云的速度只有 ~14 KB/s，61 MB 的 compose 二进制要下一小时。
+直接用 `apt install docker-compose`（v1.29.2）。
+
+v1 要求 compose 文件里有显式 `version` 字段，否则直接报错。
+现在文件里加了 `version: "3.8"`（v2 会提示 obsolete，无害）。
+
+**② pip 从官方源装依赖会卡住**
+
+`uvicorn[standard]` 带 uvloop/httptools/watchfiles，PyPI 只有 97 KB/s，
+四分钟没装完。Dockerfile 改为：
+
+```dockerfile
+ARG PIP_INDEX=https://mirrors.aliyun.com/pypi/simple/
+RUN pip install --no-cache-dir -i ${PIP_INDEX} -r requirements.txt
+```
+
+阿里云内网 PyPI：**1.5 MB/s**，快 16 倍。构建从「数分钟未完成」变成 40 秒。
+
+**③ Caddy 镜像拉不下来**
+
+Docker Hub 直连超时。`daemon.json` 里已配了几个加速源，但 `docker pull caddy:2-alpine`
+仍然卡住。用加速源前缀直连可行：
+
+```bash
+docker pull docker.m.daocloud.io/library/caddy:2-alpine
+docker tag docker.m.daocloud.io/library/caddy:2-alpine caddy:2-alpine
+```
+
+**④ bind mount 覆盖了 Dockerfile 里的 chown**
+
+`sqlite3.OperationalError: unable to open database file` —— 容器内 `ql`（uid 10001）
+写不进宿主机 `./data`（属主 root）。镜像里的 `chown /data` 被挂载覆盖了。
+
+```bash
+mkdir -p /opt/quicklaunch-vps/data
+chown -R 10001:10001 /opt/quicklaunch-vps/data
+```
+
+`deploy.sh` 已补这一步。
+
+**⑤ 改代码必须 rebuild，`scp` 到宿主机没用**
+
+`/app` 是构建时 `COPY` 进镜像的，不是挂载。改了 `app/*.py` 后只 `scp`
+宿主机文件，容器里还是旧代码 —— 表现为「明明改了却没生效，日志里连新函数都没有」。
+正确做法：`docker-compose up -d --build api`。
+
+**⑥ `restart` 不重读 `.env`**
+
+改了 `.env` 后 `docker-compose restart caddy`，容器内的环境变量还是旧值。
+必须 `docker-compose up -d`（重建容器）。
+
+### 9.3 本次一并修复的三个服务端缺陷
+
+| 缺陷 | 现象 | 修复 |
+| --- | --- | --- |
+| 全新部署没有可下发的版本 | 手机同步永远 `E_VERSION`（客户端要求 `version > 0`），表现为「配对成功但拉不到配置」 | `init_db` 在 `current_version == 0` 时自动发布「初始配置」 |
+| 服务端不知道手机有哪些规则 | 网页规则列表为空，无可编辑项（客户端对不存在的 id 返回 `notFound`，不能凭空塞） | 设备 `report` 附带规则清单，服务端 `import_device_rules` 只补不改 |
+| 下发规则带越权字段 | 发布后 `N-1` 条报 `E_FORBIDDEN_FIELD`（设备上报的完整对象含 `createdAt`/`targetPackage`） | `build_payload` 按客户端白名单裁剪字段 |
+
+还有一个**行为**问题：默认策略 `unlock: {enabled: false}` 若无条件下发，
+首次部署会把用户在手机上手开的自动解锁关掉。现在加 `unlock_managed` 标志 ——
+没在网页上保存过策略就不下发这个字段。
+
+### 9.4 一个必须知道的网络限制
+
+**家里的路由器会拦截所有 `*.duckdns.org`。**
+
+实测（本机与手机在同一 WiFi 下都复现）：
+
+```
+Host: abc.duckdns.org    → 403  Server: Beaver   ← 任意 duckdns 域名
+Host: qlhub.duckdns.org  → 403  Server: Beaver
+Host: example.com        → 308  Server: Caddy    ← 其他域名正常到服务器
+```
+
+- ICMP 直通（ping 正常），TCP 80/443 被按域名接管
+- HTTPS 的 ClientHello 发出后直接被 reset
+- 手机访问 baidu 正常（200），所以不是全局代理
+
+后果：手机在这个 WiFi 下**无法用主域名同步**。
+服务器侧完全正常（`curl https://qlhub.duckdns.org/healthz` → 200，证书 89 天有效）。
+
+绕过方案（已部署）：`.env` 里 `QL_DOMAIN` 支持逗号分隔，同时挂一个
+`sslip.io` 别名（把 IP 嵌进域名，不走 duckdns）。手机当前用别名同步。
+
+**根治**需要在家里路由器（`192.168.110.1`）上把 `duckdns.org` 从
+URL 过滤/家长控制/安全防护里放行，或者关闭该功能。
+
+### 9.5 监控与备份
+
+```bash
+# 每天 3:00 备份（SQLite 用 .backup 做一致性快照，不是 cp）
+0 3 * * * /opt/quicklaunch-vps/backup.sh >> /var/log/ql-backup.log 2>&1
+# 每 30 分钟巡检（容器 / HTTPS / 证书天数 / 磁盘 / 内存）
+*/30 * * * * /opt/quicklaunch-vps/healthcheck.sh
+```
+
+- 保留 7 份日备 + 4 份周备，自动清理；备份文件 `600`（含 `.env`）
+- 容器日志限制 `max-size=10m, max-file=3`（只配本项目的容器，不动全局
+  `daemon.json` —— 那会重启 RustDesk）
+- `/etc/logrotate.d/quicklaunch` 管理 `ql-*.log`
+
+**刻意不装** Prometheus / Uptime Kuma：2 核 2G 上多一个常驻服务换来的只是更漂亮的图，
+这里需要的只是「出问题能查到」。

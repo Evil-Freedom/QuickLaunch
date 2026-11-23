@@ -22,8 +22,8 @@ android {
         applicationId "com.workbuddy.quicklaunch"
         minSdk 24
         targetSdk 36          // Android 16
-        versionCode 25
-        versionName "1.4.2"
+        versionCode 26
+        versionName "1.4.3"
         // 桌面名称用占位符注入，让 sig2 包能和正式版区分开
         manifestPlaceholders = [appLabel: "@string/app_name"]
     }

@@ -7,7 +7,9 @@ WORKDIR /app
 
 # 先只拷 requirements：依赖层可复用，改业务代码不必重装依赖
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 国内部署默认走阿里云镜像；海外可 --build-arg PIP_INDEX=https://pypi.org/simple/
+ARG PIP_INDEX=https://mirrors.aliyun.com/pypi/simple/
+RUN pip install --no-cache-dir -i ${PIP_INDEX} -r requirements.txt
 
 COPY app ./app
 

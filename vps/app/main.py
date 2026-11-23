@@ -311,7 +311,17 @@ def edit_rule(
         "skipHolidays": bool(skip_holidays),
         "enabled": bool(enabled),
     }
-    db.upsert_rule(rule_id, body)
+    # 保留表单里没有的字段（randomWindow / windowStartMin / shiftAnchor …）。
+    #
+    # 直接用只有 6 个字段的 body 覆盖，会把服务端记录里的这些字段抹掉：
+    # 网页上从此看不到「随机窗口」，用户再也没法确认它是否还在。
+    # 手机端不受影响（mergePatch 只改报文里给出的字段），但服务端的记录必须完整。
+    existing = next((r for r in db.list_rules() if r["id"] == rule_id), None)
+    merged: dict = {}
+    if existing:
+        merged = {k: v for k, v in existing.items() if not k.startswith("_") and k != "id"}
+    merged.update(body)
+    db.upsert_rule(rule_id, merged)
     if publish:
         db.publish(f"改规则 #{rule_id}")
     return RedirectResponse("/rules", status_code=302)

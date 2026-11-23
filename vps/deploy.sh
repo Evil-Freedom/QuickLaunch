@@ -29,10 +29,21 @@ say "检查 Docker"
 if ! command -v docker >/dev/null 2>&1; then
     echo "未安装 docker，正在安装…"
     apt-get update -qq
-    apt-get install -y -qq docker.io docker-compose-plugin
+    # Debian 12 源里 compose 是 v1 的 docker-compose 包，没有 docker-compose-plugin
+    apt-get install -y -qq docker.io docker-compose
     systemctl enable --now docker
 fi
-docker compose version >/dev/null 2>&1 || die "缺少 docker compose 插件：apt install docker-compose-plugin"
+# 兼容两种形态：v2 插件（docker compose）与 Debian 包的 v1（docker-compose）
+if docker compose version >/dev/null 2>&1; then
+    DC="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+    DC="docker-compose"
+else
+    echo "未找到 compose，正在安装 Debian 源版本（v1）…"
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-compose
+    DC="docker-compose"
+fi
+echo "  使用: $DC ($($DC version 2>&1 | head -1))"
 
 # ── 2. 域名解析 ────────────────────────────────────────────────────
 say "校验 $DOMAIN 的解析"
@@ -72,7 +83,7 @@ mkdir -p data
 
 # ── 4. 启动 ───────────────────────────────────────────────────────
 say "构建并启动容器"
-docker compose up -d --build
+$DC up -d --build
 
 # ── 5. 等证书与健康检查 ────────────────────────────────────────────
 say "等待 HTTPS 证书签发（最多 90 秒）"
@@ -84,8 +95,8 @@ for i in $(seq 1 18); do
     fi
     if [ "$i" = "18" ]; then
         echo "  ✗ 仍不可用。查看日志定位："
-        echo "    docker compose logs --tail=40 caddy"
-        echo "    docker compose logs --tail=40 api"
+        echo "    $DC logs --tail=40 caddy"
+        echo "    $DC logs --tail=40 api"
         exit 1
     fi
 done
@@ -103,8 +114,8 @@ cat <<EOF
   4. 回到 /devices 看 last_seen_at 是否更新，确认手机已连上
 
 排障：
-  docker compose logs -f caddy     # 证书问题
-  docker compose ps                # 容器是否在跑
+  $DC logs -f caddy     # 证书问题
+  $DC ps                # 容器是否在跑
   curl -s https://$DOMAIN/healthz  # 健康检查
 备份：整个 data/ 目录拷走即可（SQLite）。
 EOF

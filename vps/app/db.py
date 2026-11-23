@@ -134,6 +134,16 @@ def _migrate(c: sqlite3.Connection) -> None:
     if not c.execute("SELECT 1 FROM meta WHERE key='unlock'").fetchone():
         c.execute("INSERT INTO meta(key,value) VALUES('unlock',?)",
                   (json.dumps(DEFAULT_UNLOCK_POLICY),))
+    # 「自动解锁策略是否已被本控制台托管」。
+    #
+    # 0 = 从未在网页上设置过 → payload 里**不带** unlock 字段，手机保持本地设置。
+    # 1 = 用户点过保存 → 开始下发。
+    #
+    # 为什么必须有这个标志：默认策略是 enabled=false，若无条件下发，
+    # 首次部署就会把用户在手机上手动开启的自动解锁关掉 ——
+    # 真机实测发生过，用户只会看到「功能莫名其妙没了」。
+    if not c.execute("SELECT 1 FROM meta WHERE key='unlock_managed'").fetchone():
+        c.execute("INSERT INTO meta(key,value) VALUES('unlock_managed','0')")
 
 
 def init_db() -> None:
@@ -151,6 +161,15 @@ def init_db() -> None:
         v = c.execute("SELECT value FROM meta WHERE key='current_version'").fetchone()
         if v is None:
             c.execute("INSERT INTO meta(key, value) VALUES('current_version','0')")
+
+    # 全新部署必须有一个可下发的版本。
+    #
+    # 客户端 `VpsEnvelope.parse` 要求 `version > 0`（0 是「非法/未发布」的哨兵），
+    # 而刚建好的库里就是 0 —— 新手机第一次同步会永远收到 E_VERSION，
+    # 表现为「配对成功但拉不到配置」。这里自动做一次初始发布，
+    # 让「部署完成」等价于「存在 v1 空配置」。
+    if current_version() == 0:
+        publish("初始配置（部署自动发布）", actor="system")
 
 
 # ── 配置版本 ────────────────────────────────────────────────────────
@@ -197,11 +216,36 @@ def unlock_policy() -> dict[str, Any]:
         return dict(DEFAULT_UNLOCK_POLICY)
 
 
+def unlock_managed() -> bool:
+    """自动解锁策略是否已被本控制台接管（用户在网页上保存过）。"""
+    with conn() as c:
+        row = c.execute("SELECT value FROM meta WHERE key='unlock_managed'").fetchone()
+    return bool(row) and row["value"] == "1"
+
+
 def set_unlock_policy(policy: dict[str, Any], actor: str = "admin") -> None:
     cleaned = {k: bool(v) for k, v in policy.items() if k in UNLOCK_POLICY_FIELDS}
     with conn() as c:
         c.execute("UPDATE meta SET value=? WHERE key='unlock'", (json.dumps(cleaned),))
+        # 一旦在这里保存过，就视为「用户接管了策略」，之后每次都下发
+        c.execute(
+            "INSERT INTO meta(key,value) VALUES('unlock_managed','1') "
+            "ON CONFLICT(key) DO UPDATE SET value='1'"
+        )
     log_audit(actor, "unlock.update", json.dumps(cleaned))
+
+
+# 与 Android 侧 `RemoteProtocol.EDITABLE_FIELDS` **逐字一致**。
+#
+# 下发的规则只允许含这些字段：客户端对越权字段直接返回 409（E_FORBIDDEN_FIELD），
+# 一条规则只要带上 `createdAt` 或 `targetPackage`，整条下发就会失败。
+# 设备上报的规则清单是完整对象，必须在这里裁掉多余字段 ——
+# 真机踩过：导入 4 条后发布，3 条报 E_FORBIDDEN_FIELD，只有被网页改过的那条成功。
+RULE_EDITABLE_FIELDS = {
+    "timeHour", "timeMinute", "repeatMode", "repeatDays",
+    "skipHolidays", "randomWindow", "windowStartMin", "windowEndMin", "enabled",
+    "shiftAnchor", "shiftOffsetMin",
+}
 
 
 def build_payload() -> dict[str, Any]:
@@ -214,9 +258,14 @@ def build_payload() -> dict[str, Any]:
             body = json.loads(r["payload"])
         except Exception:
             continue
+        body = {k: v for k, v in body.items() if k in RULE_EDITABLE_FIELDS}
         body["id"] = r["id"]
         rules.append(body)
-    return {"rules": rules, "retry": retry_policy(), "unlock": unlock_policy()}
+    payload: dict[str, Any] = {"rules": rules, "retry": retry_policy()}
+    # 没被托管就不带这个字段：客户端对「缺 unlock」的语义是「不动本地」
+    if unlock_managed():
+        payload["unlock"] = unlock_policy()
+    return payload
 
 
 def publish(note: str, actor: str = "admin") -> int:
@@ -413,6 +462,43 @@ def touch_device(device_id: str, note: str = "") -> None:
 # ── 回报与审计 ──────────────────────────────────────────────────────
 
 
+def import_device_rules(rules: list[dict[str, Any]] | None, actor: str = "device") -> int:
+    """
+    把设备上报的规则清单补进本地表，返回新增条数。
+
+    **只在 id 不存在时插入**。已存在的条目可能是网页上正在编辑的草稿 ——
+    用设备上报的旧值覆盖它，等于把用户的修改悄悄回滚掉。
+    设备新增了规则则会在下一次上报时自动补进来。
+
+    这是「规则从哪来」的唯一正确来源：手机是权威方，
+    下发的 id 若在本地不存在，客户端 `patch` 会返回 notFound。
+    """
+    if not rules:
+        return 0
+    added = 0
+    with conn() as c:
+        for r in rules:
+            if not isinstance(r, dict):
+                continue
+            try:
+                rid = int(r.get("id", 0))
+            except (TypeError, ValueError):
+                continue
+            if rid <= 0:
+                continue
+            if c.execute("SELECT 1 FROM rules WHERE id=?", (rid,)).fetchone():
+                continue
+            body = {k: v for k, v in r.items() if k != "id"}
+            c.execute(
+                "INSERT INTO rules(id, payload, updated_at) VALUES(?,?,?)",
+                (rid, json.dumps(body, ensure_ascii=False), int(time.time() * 1000)),
+            )
+            added += 1
+    if added:
+        log_audit(actor, "rule.import", f"从设备导入 {added} 条规则")
+    return added
+
+
 def add_report(
     device_id: str,
     version: int,
@@ -442,6 +528,9 @@ def add_report(
                 device_id,
             ),
         )
+    # 规则清单随回报一起上来：新部署时本地规则表为空，靠这一步才能让
+    # 网页上出现「可以编辑的规则」。放在事务外，避免导入失败影响回报落库。
+    import_device_rules((device_info or {}).get("rules"))
 
 
 def recent_reports(limit: int = 100) -> list[dict[str, Any]]:
