@@ -52,18 +52,31 @@ def shift_label(rule: dict[str, Any]) -> str:
     return f"{base} · {'提前' if off < 0 else '延后'} {abs(off)} 分钟"
 
 
+def clock_of(minutes_of_day: int) -> str:
+    """当天分钟数 → HH:mm，与 Android 一样对越界值夹紧而不是抛异常。"""
+    m = max(0, min(1439, int(minutes_of_day or 0)))
+    return f"{m // 60:02d}:{m % 60:02d}"
+
+
+def random_window_label(rule: dict[str, Any]) -> str:
+    """随机窗口 → 「随机 08:45–08:55」。"""
+    return f"随机 {clock_of(rule.get('windowStartMin'))}–{clock_of(rule.get('windowEndMin'))}"
+
+
 def trigger_label(rule: dict[str, Any]) -> str:
     tt = rule.get("triggerType", "TIME")
     if tt == "TIME":
         if int(rule.get("shiftAnchor", 0) or 0) != ANCHOR_FIXED:
             return f"班表 {shift_label(rule)}"
-        hour = int(rule.get("timeHour", 0) or 0)
-        minute = int(rule.get("timeMinute", 0) or 0)
-        label = f"定时 {hour:02d}:{minute:02d}（{repeat_label(rule)}）"
+        # randomWindow=true 时 timeHour/timeMinute 不参与调度，不能印成「定时 10:23」
+        if rule.get("randomWindow"):
+            label = f"{random_window_label(rule)}（{repeat_label(rule)}）"
+        else:
+            hour = int(rule.get("timeHour", 0) or 0)
+            minute = int(rule.get("timeMinute", 0) or 0)
+            label = f"定时 {hour:02d}:{minute:02d}（{repeat_label(rule)}）"
         if rule.get("skipHolidays"):
             label += "·跳假"
-        if rule.get("randomWindow"):
-            label += "·随机"
         return label
     if tt == "CHARGING":
         return "充电时"

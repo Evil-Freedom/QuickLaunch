@@ -14,14 +14,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.workbuddy.quicklaunch.R
 import com.workbuddy.quicklaunch.data.Automation
-import com.workbuddy.quicklaunch.data.RepeatMode
-import com.workbuddy.quicklaunch.data.ShiftAnchor
-import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.ItemAutomationBinding
 import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
+import com.workbuddy.quicklaunch.util.TriggerText
 import java.util.Calendar
-import java.util.Locale
 
 /**
  * 主界面列表适配器：展示每条自动化，支持启用开关、编辑与删除。
@@ -147,39 +144,7 @@ class AutomationAdapter(
         tag.setOnClickListener { onExceptions(a) }
     }
 
-    private fun triggerLabel(a: Automation): String = when {
-        // 班表模式单独一条分支：用户看到「定时 08:30（每天）」会以为每天固定 8:30，
-        // 而实际是由当天班次算出来的，必须把锚点语义显示出来。
-        a.triggerType == TriggerType.TIME && a.shiftAnchor != ShiftAnchor.FIXED ->
-            "班表 ${ShiftAnchor.describe(a.shiftAnchor, a.shiftOffsetMin)}"
-        a.triggerType == TriggerType.TIME ->
-            // 显式给 Locale，避免依赖系统默认 locale 产生非预期数字形态
-            String.format(
-                Locale.US, "定时 %02d:%02d（%s）%s",
-                a.timeHour, a.timeMinute, repeatLabel(a),
-                if (a.skipHolidays) "·跳假" else ""
-            )
-        a.triggerType == TriggerType.CHARGING -> "充电时"
-        a.triggerType == TriggerType.WIFI -> if (a.wifiName.isNotEmpty()) "连接 WiFi:${a.wifiName}" else "连接 WiFi"
-        else -> if (a.bluetoothName.isNotEmpty()) "连接蓝牙:${a.bluetoothName}" else "连接蓝牙"
-    }
-
-    private fun repeatLabel(a: Automation): String = when (a.repeatMode) {
-        RepeatMode.DAILY -> "每天"
-        RepeatMode.WEEKDAYS -> "工作日"
-        RepeatMode.WEEKEND -> "周末"
-        RepeatMode.CUSTOM -> customDaysLabel(a.repeatDays)
-        else -> "一次"
-    }
-
-    private val DAY_LABELS = arrayOf("日", "一", "二", "三", "四", "五", "六")
-
-    /** 自定义星期位图 -> 可读串，例如 自定义(一三五)；mask 异常时回退「自定义」。 */
-    private fun customDaysLabel(mask: Int): String {
-        if (mask == 0) return "自定义"
-        val picks = (0..6).filter { (mask shr it) and 1 == 1 }.joinToString("") { DAY_LABELS[it] }
-        return if (picks.isEmpty()) "自定义" else "自定义($picks)"
-    }
+    private fun triggerLabel(a: Automation): String = TriggerText.of(a)
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Automation>() {
