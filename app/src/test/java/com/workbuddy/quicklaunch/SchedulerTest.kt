@@ -89,22 +89,44 @@ class SchedulerTest {
     }
 
     @Test
-    fun `随机窗口每次重排时刻不同`() {
-        // 重复任务每次重排都重新随机，抽样多次应出现不同分钟
-        val minutes = (1..30).map {
-            calOf(Scheduler.nextTriggerTime(randomRule("daily", 510, 530))).get(Calendar.MINUTE)
-        }.toSet()
-        assertTrue("随机窗口每次都一样，未生效", minutes.size > 1)
+    fun `随机窗口同一天恒定且跨天可变`() {
+        val rule = randomRule("daily", 510, 530)
+        // 同一天多次调用必须一致：界面「下次触发」与 AlarmManager 走同一个函数，
+        // 每次调用都变的话（旧实现）界面只能整条隐藏随机规则。
+        val first = Scheduler.nextTriggerTime(rule)
+        repeat(5) { assertEquals("随机窗口同一天内变了", first, Scheduler.nextTriggerTime(rule)) }
+        // 跨天仍要换时刻，保证「每天不固定打卡」的目的不丢
+        val minutes = (0..9).map { off ->
+            val from = Calendar.getInstance().apply {
+                add(Calendar.DAY_OF_YEAR, off)
+                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            }
+            val c = calOf(
+                Scheduler.nextTriggerTimeFrom(rule, from, shouldSkip = { false }, forceRun = { false })
+            )
+            c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE)
+        }
+        assertTrue("10 天都落在同一分钟，等于退化成固定时刻: $minutes", minutes.toSet().size > 1)
     }
 
     @Test
     fun `随机窗口末边界包含结束时刻`() {
-        // 结束时刻 530(8:50) 在 200 次抽样中应至少出现一次
-        val hit = (1..200).any {
-            val c = calOf(Scheduler.nextTriggerTime(randomRule("daily", 510, 530)))
+        // 逐日取（种子含日期），200 天里应至少有一天抽到结束时刻 530(8:50)
+        val hit = (0 until 200).any { off ->
+            val from = Calendar.getInstance().apply {
+                add(Calendar.DAY_OF_YEAR, off)
+                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            }
+            val c = calOf(
+                Scheduler.nextTriggerTimeFrom(
+                    randomRule("daily", 510, 530), from, shouldSkip = { false }, forceRun = { false }
+                )
+            )
             c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE) == 530
         }
-        assertTrue("随机窗口从未抽到结束时刻 8:50", hit)
+        assertTrue("200 天里从未抽到结束时刻 8:50", hit)
     }
 
     @Test

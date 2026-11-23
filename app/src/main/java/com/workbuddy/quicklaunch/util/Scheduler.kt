@@ -15,6 +15,7 @@ import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.receiver.AlarmReceiver
 import java.util.Calendar
+import java.util.Random
 
 /**
  * 负责把「定时」类自动化注册到系统的 AlarmManager。
@@ -38,9 +39,6 @@ object Scheduler {
      * 扫到明年再触发，等于规则静默失效。
      */
     private const val MAX_SHIFT_DAY_SCAN = 60
-
-    /** 共享 Random，避免每次排程都 new 一个（并减少同一毫秒内种子相同的概率）。 */
-    private val random = java.util.Random()
 
     /**
      * 「恒不跳过」的共享谓词。
@@ -358,16 +356,13 @@ object Scheduler {
             advanceUntilValid(cal, a, now, shouldSkip, forceRun)
 
             val span = (end - start).coerceAtLeast(0)
-            val picked = start + random.nextInt(span + 1)
-            cal.set(Calendar.HOUR_OF_DAY, picked / 60)
-            cal.set(Calendar.MINUTE, picked % 60)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            // 随机取到的时刻可能落在“现在”之前（今天窗口已过大半），推到下一个有效日
+            applyRandomMinute(cal, a, start, end)
+            // 取到的时刻可能落在“现在”之前（今天窗口已过大半），推到下一个有效日并重取
             if (cal.timeInMillis <= now) {
                 cal.add(Calendar.DAY_OF_YEAR, 1)
                 advanceToValidDay(cal, a, forceRun)
                 advanceUntilValid(cal, a, now, shouldSkip, forceRun)
+                applyRandomMinute(cal, a, start, end)
             }
             return cal.timeInMillis
         }
@@ -395,6 +390,32 @@ object Scheduler {
         advanceToValidDay(cal, a, forceRun)
         advanceUntilValid(cal, a, now, shouldSkip, forceRun)
         return cal.timeInMillis
+    }
+
+    /**
+     * 按「规则 + 当天日期 + 窗口」定出当天的随机分钟，写回 [cal]。
+     *
+     * 关键约束是**同一天多次调用必须得到同一时刻**：界面上的「下次触发」和
+     * AlarmManager 里的真实落点走的是同一个函数，如果这里用共享 [Random]，
+     * 每次刷新都会换一个值，界面就只能整条隐藏随机规则（历史做法），
+     * 用户于是看到「已启用 4 条、下次触发却只按 3 条算」。
+     *
+     * 用 id/日期/窗口做种子后：当天恒定、跨天不同，仍然满足「每天不固定打卡」。
+     */
+    private fun applyRandomMinute(cal: Calendar, a: Automation, start: Int, end: Int) {
+        val span = (end - start).coerceAtLeast(0)
+        val picked = if (span == 0) start else start + seededRandom(a, cal, start, end).nextInt(span + 1)
+        cal.set(Calendar.HOUR_OF_DAY, picked / 60)
+        cal.set(Calendar.MINUTE, picked % 60)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+    }
+
+    private fun seededRandom(a: Automation, cal: Calendar, start: Int, end: Int): Random {
+        // 日期用「年 * 1000 + 年内第几天」，避开闰年与跨年的边界歧义
+        val dayKey = cal.get(Calendar.YEAR).toLong() * 1000 + cal.get(Calendar.DAY_OF_YEAR)
+        // 窗口参与种子：用户改了窗口，当天取到的时刻也跟着变，不会「改了没反应」
+        return Random(a.id * 1_000_003L + dayKey * 7_919L + start * 31L + end)
     }
 
     /**

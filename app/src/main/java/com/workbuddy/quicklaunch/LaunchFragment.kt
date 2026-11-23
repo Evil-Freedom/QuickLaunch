@@ -20,7 +20,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.workbuddy.quicklaunch.adapter.BluetoothDeviceAdapter
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
-import com.workbuddy.quicklaunch.data.ShiftAnchor
 import com.workbuddy.quicklaunch.data.TriggerType
 import com.workbuddy.quicklaunch.databinding.DialogBluetoothDevicesBinding
 import com.workbuddy.quicklaunch.databinding.ViewLaunchBinding
@@ -336,15 +335,14 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
      * 旧实现只按「今天还剩哪条规则的固定时刻」取最早，完全不看请假与节假日，
      * 于是出现了「卡片标签写着请假 11-04、仪表盘却显示今天 12:19」这种自相矛盾的状态。
      *
-     * 随机窗口规则不参与精确计算：它每次重排都会重新随机，
-     * 若在这里参与比较，仪表盘会随每次刷新不停跳动，比不精确更糟。
+     * 随机窗口规则曾经被整条跳过（当年每次重排都重新随机，参与比较会让仪表盘不停跳），
+     * 但那样「已启用 4 条」却只按 3 条算下次触发，用户会以为有一条没生效。
+     * 现在 [Scheduler] 对同一规则同一天只取一个固定时刻，展示与真实闹钟一致，无需再跳过。
      */
     private fun computeNextTriggerTime(rules: List<Automation>, ui: RuleUiData): String? {
         if (rules.isEmpty()) return null
         var best = Long.MAX_VALUE
         for (rule in rules) {
-            // 班表模式不受随机窗口影响（它由班次决定时刻），不能跟着跳过
-            if (rule.randomWindow && rule.shiftAnchor == ShiftAnchor.FIXED) continue
             val ex = ui.exceptions[rule.id].orEmpty().toSet()
             val fire = runCatching {
                 Scheduler.peekNextTriggerAt(rule, ui.holidays, ex, ui.shifts)
