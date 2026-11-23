@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% set page = 'versions' %}
+{% block title %}版本 · QuickLaunch{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>配置版本</h2>
+  <p class="hint" style="margin-top:0">
+    回滚不是把版本号改回去，而是「把旧内容作为新版本发布」——
+    手机的判据是「新版本必须高于本地版本」，改号回滚永远不会到达手机。
+  </p>
+  <table>
+    <thead><tr><th>版本</th><th>时间</th><th>说明</th><th></th></tr></thead>
+    <tbody>
+    {% for v in versions %}
+      <tr>
+        <td class="mono">
+          v{{ v.version }}
+          {% if v.version == current %}<span class="tag on">当前</span>{% endif %}
+        </td>
+        <td class="mono muted">{{ v.created_at }}</td>
+        <td>{{ v.note }}</td>
+        <td>
+          {% if v.version != current %}
+          <form method="post" action="/versions/{{ v.version }}/rollback" style="margin:0">
+            <button class="ghost" type="submit">恢复到此版本</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

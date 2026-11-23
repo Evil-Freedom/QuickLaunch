@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  国内服务器（VPS）远程规则设置。
+  与 activity_remote_access 同风格：深色 + 毛玻璃卡片（沿用既有 theme 与 dimen）。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_dark_root"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="国内服务器规则"
+            android:textColor="@color/dark_text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:lineSpacingExtra="2dp"
+            android:text="手机定期主动访问你自己的服务器拉取规则。服务器离线时，手机继续使用本地最后一次生效的配置。"
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="12sp" />
+
+        <!-- ═══ 连接设置 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="启用 VPS 同步"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="15sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/swVpsEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="服务器地址"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <EditText
+                android:id="@+id/etVpsUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="https://ql.example.com"
+                android:importantForAutofill="no"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:textColor="@color/dark_text_primary"
+                android:textColorHint="@color/dark_text_tertiary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="设备 ID"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <EditText
+                android:id="@+id/etVpsDevice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="服务器「设备」页生成"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textColor="@color/dark_text_primary"
+                android:textColorHint="@color/dark_text_tertiary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="设备密钥"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <EditText
+                android:id="@+id/etVpsSecret"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="只显示一次，填完即保存"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:textColor="@color/dark_text_primary"
+                android:textColorHint="@color/dark_text_tertiary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="同步间隔（秒）"
+                android:textColor="@color/dark_text_secondary"
+                android:textSize="13sp" />
+
+            <EditText
+                android:id="@+id/etVpsInterval"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="600"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLines="1"
+                android:textColor="@color/dark_text_primary"
+                android:textColorHint="@color/dark_text_tertiary"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVpsSave"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="12dp"
+                android:text="保存并立即同步"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvVpsStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="monospace"
+                android:lineSpacingExtra="2dp"
+                android:text="未启用"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- ═══ 重试策略 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="自动重试策略"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="目标 App 没能真正打开时，自动重新尝试。服务器下发的策略会覆盖这里的值。"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="最多尝试次数"
+                    android:textColor="@color/dark_text_secondary"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/etRetryMax"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="单次验证窗口（毫秒）"
+                    android:textColor="@color/dark_text_secondary"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/etRetryWindow"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="重试间隔（毫秒，逗号分隔）"
+                    android:textColor="@color/dark_text_secondary"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/etRetryDelays"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="@color/dark_text_primary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="最终失败时通知"
+                    android:textColor="@color/dark_text_secondary"
+                    android:textSize="13sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/swRetryNotify"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRetrySave"
+                style="@style/Widget.QuickLaunch.Dark.Button.Action"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/glass_button_height"
+                android:layout_marginTop="12dp"
+                android:text="保存重试策略"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- ═══ 最近执行记录 ═══ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_dark_card_primary"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="最近启动结果"
+                android:textColor="@color/dark_text_primary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/tvLaunchHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:lineSpacingExtra="2dp"
+                android:text="暂无记录"
+                android:textColor="@color/dark_text_tertiary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- ═══ 安全说明 ═══ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:lineSpacingExtra="3dp"
+            android:text="安全说明\n• 只接受 https 地址（本机调试用的 127.0.0.1 除外）。\n• 每个请求都用设备密钥签名，服务器侧校验时间窗与 nonce，防重放。\n• 远程只能改「什么时候启动」，不能改要启动哪个 App。\n• 密钥保存在手机本地，不上传任何第三方服务。"
+            android:textColor="@color/dark_text_tertiary"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>

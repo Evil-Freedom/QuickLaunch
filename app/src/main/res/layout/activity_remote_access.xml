@@ -296,6 +296,18 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
+        <!-- ═══ 国内服务器（VPS）规则入口 ═══
+             与上面的局域网/中继是两条独立通道：VPS 走「手机主动出站拉取」，
+             不需要手机对外开放任何端口 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVpsRules"
+            style="@style/Widget.QuickLaunch.Dark.Button.Action"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/glass_button_height"
+            android:layout_marginTop="16dp"
+            android:text="国内服务器规则（VPS）"
+            android:textSize="14sp" />
+
         <!-- ═══ 安全说明 ═══ -->
         <TextView
             android:id="@+id/tvSecurityNote"

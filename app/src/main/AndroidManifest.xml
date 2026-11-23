@@ -29,6 +29,14 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <!-- 同步中国法定节假日数据 -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+      启动结果验证（降级路径）：无 root 时用 UsageStats 判断目标 App 是否真的到了前台。
+      该权限由用户在「设置 → 应用 → 特殊权限 → 使用情况访问」手动授予，代码里只读不写。
+      tools:ignore 是因为它属受保护权限，静态检查会提示，但声明本身是必需的。
+    -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
     <!-- 唤醒与忽略电池优化 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -50,6 +58,7 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="${appLabel}"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.QuickLaunch.Dark"
         tools:targetApi="34">
@@ -132,9 +141,27 @@
             android:exported="false"
             android:theme="@style/Theme.QuickLaunch.Dark" />
 
+        <!-- 国内 VPS 远程规则（手机主动出站拉取，不开放任何端口） -->
+        <activity
+            android:name=".VpsRemoteActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QuickLaunch.Dark" />
+
         <!-- 定时触发（显式 PendingIntent，无需导出） -->
         <receiver
             android:name=".receiver.AlarmReceiver"
+            android:exported="false" />
+
+        <!-- 失败通知上的「再次启动」：回到验证状态机，而不是直接拉起目标 App。
+             exported=false —— 只由本应用的 PendingIntent 唤起。 -->
+        <receiver
+            android:name=".receiver.ManualRetryReceiver"
+            android:exported="false" />
+
+        <!-- VPS 配置同步：手机主动出站拉取，无需对外开放任何端口。
+             由 AlarmManager 的显式 PendingIntent 唤起。 -->
+        <receiver
+            android:name=".receiver.VpsSyncReceiver"
             android:exported="false" />
 
         <!-- WiFi 触发：由 registerNetworkCallback 的显式 PendingIntent 唤起，不需要 intent-filter -->

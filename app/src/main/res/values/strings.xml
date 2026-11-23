@@ -130,6 +130,18 @@
     <string name="launch_notification_title">正在启动 %1$s</string>
 
     <!-- ═══════════════════════════════════════════════════════════════
+         启动验证失败 — 通知（独立渠道，可与启动过程通知分开静音）
+         ═══════════════════════════════════════════════════════════════ -->
+    <string name="launch_fail_channel_name">启动失败提醒</string>
+    <string name="launch_fail_title">%1$s 没能打开</string>
+    <string name="launch_fail_text">已尝试 %1$d 次：%2$s。点此再试一次</string>
+    <string name="launch_fail_action_retry">再次启动</string>
+    <string name="launch_fail_reason_verify_timeout">启动后未检测到进入前台</string>
+    <string name="launch_fail_reason_total_timeout">超过总时限，已停止自动重试</string>
+    <string name="launch_fail_reason_interrupted">启动过程被系统中断</string>
+    <string name="launch_fail_reason_rejected">系统拒绝了这个启动请求（检查后台弹出界面权限）</string>
+
+    <!-- ═══════════════════════════════════════════════════════════════
          Glassmorphism UI 重构 — 新增文案
          ═══════════════════════════════════════════════════════════════ -->
     <string name="glass_permission_warning_title">部分权限未全部开启</string>

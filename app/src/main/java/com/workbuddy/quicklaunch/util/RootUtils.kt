@@ -51,6 +51,24 @@ object RootUtils {
     }
 
     /**
+     * 以 root 执行命令并取回 stdout。阻塞调用，勿在主线程用。
+     *
+     * 与 [runAsRoot] 分开而不是改它的签名：既有调用方（自动解锁、防息屏 settings put）
+     * 只关心退出码，多返回一份可能很大的字符串没有意义。
+     *
+     * ⚠️ 安全边界：`cmd` 必须是代码里的常量字面量。本函数不接受外部输入拼接，
+     * 调用方若要带参数，必须在拼之前完成白名单校验（见 [AutoUnlock.injectAndVerify]）。
+     *
+     * @return stdout；命令无法执行、超时、退出码非 0 时返回 null。
+     *         用「退出码非 0 即 null」而不是「返回空串」：dumpsys 失败时会往 stderr
+     *         写 "Permission Denial"，那绝不能被当成「没有前台 Activity」。
+     */
+    fun capture(cmd: String, timeoutMs: Long = DEFAULT_TIMEOUT_MS): String? {
+        val r = exec(arrayOf("su", "-c", cmd), timeoutMs)
+        return if (r != null && r.exitCode == 0) r.stdout else null
+    }
+
+    /**
      * 在后台线程执行 root 命令。主线程调用方（Service/Receiver/Activity）一律走这里，
      * 避免 su 授权弹窗期间 ANR。
      */

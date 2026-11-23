@@ -125,6 +125,17 @@ object RemoteAuth {
         MessageDigest.getInstance("SHA-256").digest(data)
             .joinToString("") { String.format(Locale.US, "%02x", it) }
 
+    /**
+     * 对任意字符串算 HMAC-SHA256 并转十六进制。
+     *
+     * 供 VPS 拉取通道（`remote/vps/`）复用同一套原语：那条通道的报文格式与局域网
+     * 通道不同（手机是出站方），但「用什么算法、怎么转十六进制」必须一致 ——
+     * 两处各写一份实现，迟早会在大小写或左侧补零上分叉。
+     */
+    fun hmacSha256Hex(key: ByteArray, data: String): String =
+        hmacSha256(key, data.toByteArray(Charsets.UTF_8))
+            .joinToString("") { String.format(Locale.US, "%02x", it) }
+
     private fun hmacSha256(key: ByteArray, data: ByteArray): ByteArray {
         val mac = Mac.getInstance("HmacSHA256")
         mac.init(SecretKeySpec(key, "HmacSHA256"))

@@ -230,6 +230,10 @@ class RemoteRuleApi(
         val ex = exceptionSet(id)
         if (updated.enabled && updated.triggerType == TriggerType.TIME) {
             hook.schedule(updated, ex)
+        } else if (!updated.enabled) {
+            // 远程把规则关掉时，正在跑的重试任务必须一起停 ——
+            // 否则用户刚在网页上点了「停用」，手机几秒后又把那个 App 拉起来。
+            hook.cancelActiveAttempts(id)
         }
         return WriteResult.Ok(updated, nextAt(updated, ex), ex)
     }

@@ -1,5 +1,6 @@
 package com.workbuddy.quicklaunch
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -45,6 +46,10 @@ class RemoteAccessActivity : AppCompatActivity() {
         }
         binding.swRelay.setOnCheckedChangeListener { _, checked -> onRelayToggle(checked) }
         binding.btnRelaySave.setOnClickListener { saveRelay() }
+        // 国内 VPS 是另一条独立通道（手机主动出站拉取），入口放在这里便于集中管理
+        binding.btnVpsRules.setOnClickListener {
+            runCatching { startActivity(Intent(this, VpsRemoteActivity::class.java)) }
+        }
         render()
     }
 

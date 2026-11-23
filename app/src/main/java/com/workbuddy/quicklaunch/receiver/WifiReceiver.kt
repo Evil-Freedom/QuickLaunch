@@ -12,7 +12,7 @@ import android.util.Log
 import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.TriggerType
-import com.workbuddy.quicklaunch.service.LaunchService
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 import com.workbuddy.quicklaunch.util.WifiNetworks
 
 /**
@@ -54,7 +54,7 @@ class WifiReceiver : BroadcastReceiver() {
                     }
                 }
                 if (shouldTrigger) {
-                    runCatching { LaunchService.start(app, rule.targetPackage, rule.targetAppName) }
+                    runCatching { LaunchAttemptController.begin(app, rule.id, rule.targetPackage, rule.targetAppName) }
                 }
             }
         }

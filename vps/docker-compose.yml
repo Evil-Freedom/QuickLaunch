@@ -1,0 +1,49 @@
+# QuickLaunch 远程规则服务
+#
+# 两个容器：FastAPI（业务） + Caddy（HTTPS 终结）。
+# 2 核 2GB 足够 —— 这个服务每天只有几十次请求。
+#
+# 部署：
+#   1. cp .env.example .env && 编辑 .env（域名 + 口令摘要 + 会话密钥）
+#   2. 域名 A 记录指向本机公网 IP，且 80/443 已放行（阿里云安全组）
+#   3. docker compose up -d
+#   4. 浏览器打开 https://<你的域名>/devices 生成设备凭据
+
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      # SQLite 落在宿主机 ./data，方便直接备份（拷走这个目录就是全量备份）
+      - ./data:/data
+    expose:
+      - "8000"
+    # 只监听容器网络，不映射到宿主机端口 —— 外部只能经 Caddy 进来
+    networks:
+      - ql
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - QL_DOMAIN=${QL_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    networks:
+      - ql
+
+networks:
+  ql:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

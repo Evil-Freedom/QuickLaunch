@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat
 import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.LaunchProxyActivity
 import com.workbuddy.quicklaunch.R
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 
 /**
  * 前台服务：保证触发瞬间进程存活，并把启动动作交给 LaunchProxyActivity。
@@ -46,6 +47,7 @@ class LaunchService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val pkg = intent?.getStringExtra(EXTRA_PKG).orEmpty()
         val appName = intent?.getStringExtra(EXTRA_APP_NAME).orEmpty()
+        val attemptId = intent?.getStringExtra(EXTRA_ATTEMPT_ID)
         if (pkg.isEmpty()) {
             stopSelf()
             return START_NOT_STICKY
@@ -55,10 +57,15 @@ class LaunchService : Service() {
         runCatching { startForegroundCompat(Notifier.build(this, pkg, appName, ongoing = true)) }
 
         val launched = runCatching { Settings.canDrawOverlays(this) }.getOrDefault(false) &&
-            runCatching { startActivity(LaunchProxyActivity.intent(this, pkg)) }.isSuccess
+            runCatching { startActivity(LaunchProxyActivity.intent(this, pkg, attemptId)) }.isSuccess
 
         // 没有悬浮窗权限时 startActivity 会被系统静默丢弃，统一补一条全屏通知兜底
-        if (!launched) Notifier.fallback(this, pkg, appName)
+        if (!launched) {
+            Notifier.fallback(this, pkg, appName)
+            // 中转页根本没起来 → 不会有它的回调。这里补一条「未派发」，
+            // 让验证链路按「命令没发出去」继续走完自己的重试/告警，而不是永远停在 PENDING。
+            LaunchAttemptController.onProxyLaunched(this, attemptId, accepted = false)
+        }
 
         stopSelf()
         return START_NOT_STICKY
@@ -74,17 +81,24 @@ class LaunchService : Service() {
     companion object {
         private const val EXTRA_PKG = "pkg"
         private const val EXTRA_APP_NAME = "app_name"
+        private const val EXTRA_ATTEMPT_ID = "attempt_id"
 
-        fun start(context: Context, pkg: String, appName: String) {
+        /**
+         * @param attemptId 验证任务的 id。为 null 时表示「不参与启动验证」
+         *        （用户点通知手动打开等旧路径），行为与升级前完全一致。
+         */
+        fun start(context: Context, pkg: String, appName: String, attemptId: String? = null) {
             val intent = Intent(context, LaunchService::class.java).apply {
                 putExtra(EXTRA_PKG, pkg)
                 putExtra(EXTRA_APP_NAME, appName)
+                if (attemptId != null) putExtra(EXTRA_ATTEMPT_ID, attemptId)
             }
             try {
                 ContextCompat.startForegroundService(context, intent)
             } catch (_: Exception) {
                 // Android 12+ 从后台启动前台服务会抛 ForegroundServiceStartNotAllowedException
                 Notifier.fallback(context, pkg, appName)
+                LaunchAttemptController.onProxyLaunched(context, attemptId, accepted = false)
             }
         }
     }

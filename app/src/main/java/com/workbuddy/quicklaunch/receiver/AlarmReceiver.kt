@@ -8,7 +8,7 @@ import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.RepeatMode
 import com.workbuddy.quicklaunch.data.ShiftAnchor
-import com.workbuddy.quicklaunch.service.LaunchService
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 import com.workbuddy.quicklaunch.util.Scheduler
 
 /**
@@ -32,7 +32,11 @@ class AlarmReceiver : BroadcastReceiver() {
     private fun handle(context: Context, id: Long) {
         val dao = runCatching { AppDatabase.get(context).automationDao() }.getOrNull() ?: return
         val a = runCatching { dao.getById(id) }.getOrNull() ?: return
-        if (!a.enabled) return
+        if (!a.enabled) {
+            // 规则被停用/删除：把它名下的重试任务一并清掉，否则任务会继续跑完自己的重试
+            runCatching { LaunchAttemptController.cancelByRule(context, id) }
+            return
+        }
 
         // 班表模式本质是「按天重复」：即使 repeatMode 停在 once，也必须重排，
         // 否则第一次触发后规则会被自动停用，表现为「只启动一次就再没动静」。
@@ -46,7 +50,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 .onFailure { if (BuildConfig.DEBUG) Log.e(TAG, "disable once-task failed id=$id", it) }
         }
 
-        runCatching { LaunchService.start(context, a.targetPackage, a.targetAppName) }
+        runCatching { LaunchAttemptController.begin(context, a.id, a.targetPackage, a.targetAppName) }
             .onFailure { if (BuildConfig.DEBUG) Log.e(TAG, "launch failed pkg=${a.targetPackage}", it) }
     }
 

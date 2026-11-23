@@ -5,6 +5,7 @@ import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.Automation
 import com.workbuddy.quicklaunch.data.DailyShift
 import com.workbuddy.quicklaunch.data.RuleException
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 import com.workbuddy.quicklaunch.util.HolidayChecker
 import com.workbuddy.quicklaunch.util.RuleBackupStore
 import com.workbuddy.quicklaunch.util.Scheduler
@@ -53,6 +54,10 @@ class SchedulerHook(private val context: Context) : ScheduleHook {
      * 这里直接转调 Scheduler 的批量入口，与开机/覆盖安装走同一条路径。
      */
     override fun rescheduleAll() = Scheduler.rescheduleAll(context)
+
+    /** 规则被远程停用后，把它名下的重试任务一并清掉。 */
+    override fun cancelActiveAttempts(ruleId: Long) =
+        LaunchAttemptController.cancelByRule(context, ruleId)
 }
 
 /** 生产实现：班表走 Room。 */

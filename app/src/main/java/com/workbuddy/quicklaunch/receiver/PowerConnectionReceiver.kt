@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.TriggerType
-import com.workbuddy.quicklaunch.service.LaunchService
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 
 /**
  * 充电触发：插入电源（AC / USB / 无线）时拉起目标 App。
@@ -19,7 +19,7 @@ class PowerConnectionReceiver : BroadcastReceiver() {
                 AppDatabase.get(app).automationDao().getEnabledByType(TriggerType.CHARGING)
             }.getOrDefault(emptyList())
             list.forEach {
-                runCatching { LaunchService.start(app, it.targetPackage, it.targetAppName) }
+                runCatching { LaunchAttemptController.begin(app, it.id, it.targetPackage, it.targetAppName) }
             }
         }
     }

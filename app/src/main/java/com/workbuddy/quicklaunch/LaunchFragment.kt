@@ -29,6 +29,7 @@ import com.workbuddy.quicklaunch.util.AutomationFormController
 import com.workbuddy.quicklaunch.util.BluetoothDevices
 import com.workbuddy.quicklaunch.util.DevicePickerBottomSheet
 import com.workbuddy.quicklaunch.util.HolidayChecker
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
 import com.workbuddy.quicklaunch.util.RuleBackupStore
 import com.workbuddy.quicklaunch.util.Scheduler
@@ -389,7 +390,11 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
             runCatching { db.automationDao().update(automation.copy(enabled = checked)) }
             if (automation.triggerType == TriggerType.TIME) {
                 if (checked) Scheduler.schedule(app, automation.copy(enabled = true))
-                else Scheduler.cancel(app, automation)
+                else {
+                    Scheduler.cancel(app, automation)
+                    // 停用即终止它名下的「启动 + 重试」任务，避免关掉后又被自动拉起
+                    LaunchAttemptController.cancelByRule(app, automation.id)
+                }
             }
             activity?.runOnUiThread {
                 if (_binding == null) return@runOnUiThread
@@ -608,6 +613,8 @@ class LaunchFragment : Fragment(), AutomationFormController.FormCallbacks {
         val app = requireContext().applicationContext
         QuickLaunchExecutors.io.execute {
             if (automation.triggerType == TriggerType.TIME) Scheduler.cancel(app, automation)
+            // 删除后任何正在进行的重试都必须停下（非定时规则也可能有任务在跑）
+            LaunchAttemptController.cancelByRule(app, automation.id)
             runCatching { db.automationDao().delete(automation) }
             val automations = runCatching { db.automationDao().getAll() }.getOrDefault(emptyList())
             val ui = loadRuleUiData()

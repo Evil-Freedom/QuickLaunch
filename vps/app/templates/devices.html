@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% set page = 'devices' %}
+{% block title %}设备 · QuickLaunch{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>添加设备</h2>
+  <form method="post" action="/devices/create">
+    <div class="row">
+      <input type="text" name="name" placeholder="设备名称（如 我的 Razr）" style="flex:1;min-width:200px">
+      <button type="submit">生成设备凭据</button>
+    </div>
+  </form>
+  <p class="hint">凭据只显示一次。生成后立刻填到手机的「设置 → 远程规则」里。</p>
+
+  {% if new_device %}
+  <div class="secret">
+    <div><b>设备 ID</b>（填到手机）</div>
+    <div class="mono">{{ new_device.id }}</div>
+    <div style="margin-top:8px"><b>密钥</b>（填到手机，只显示这一次）</div>
+    <div class="mono">{{ new_device.secret }}</div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>已注册设备</h2>
+  {% if not devices %}<p class="muted">还没有设备。</p>{% endif %}
+  <table>
+    <thead><tr><th>设备</th><th>状态</th><th>最近同步</th><th>版本</th><th></th></tr></thead>
+    <tbody>
+    {% for d in devices %}
+      <tr>
+        <td>
+          <div>{{ d.name }}</div>
+          <div class="mono muted">{{ d.id }}</div>
+        </td>
+        <td>
+          {% if d.revoked %}<span class="tag off">已撤销</span>
+          {% else %}<span class="tag on">正常</span>{% endif %}
+        </td>
+        <td class="mono muted">{{ d.last_seen_at if d.last_seen_at else '-' }}</td>
+        <td class="mono">v{{ d.last_version }}</td>
+        <td>
+          <div class="row">
+            <form method="post" action="/devices/{{ d.id }}/revoke" style="margin:0">
+              {% if d.revoked %}
+              <input type="hidden" name="revoked" value="0">
+              <button class="ghost" type="submit">恢复</button>
+              {% else %}
+              <input type="hidden" name="revoked" value="1">
+              <button class="ghost" type="submit">撤销</button>
+              {% endif %}
+            </form>
+            <form method="post" action="/devices/{{ d.id }}/delete" style="margin:0"
+                  onsubmit="return confirm('删除后该设备将无法再拉取配置，确定？')">
+              <button class="bad" type="submit">删除</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>最近同步结果</h2>
+  {% if not reports %}<p class="muted">还没有回报。</p>{% endif %}
+  <table>
+    <thead><tr><th>时间戳</th><th>设备</th><th>版本</th><th>结果</th><th>明细</th></tr></thead>
+    <tbody>
+    {% for r in reports %}
+      <tr>
+        <td class="mono muted">{{ r.at }}</td>
+        <td class="mono">{{ r.device_id }}</td>
+        <td class="mono">v{{ r.version }}</td>
+        <td>{% if r.ok %}<span class="tag on">成功</span>{% else %}<span class="tag off">有失败</span>{% endif %}</td>
+        <td class="muted">{{ r.detail }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

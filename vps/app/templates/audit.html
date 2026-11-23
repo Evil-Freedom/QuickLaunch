@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set page = 'audit' %}
+{% block title %}操作日志 · QuickLaunch{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>操作日志（最近 200 条）</h2>
+  <p class="hint" style="margin-top:0">
+    记录「谁、什么时候、改了什么」。用来回答「这条规则是不是我自己改的」。
+  </p>
+  {% if not entries %}<p class="muted">暂无记录。</p>{% endif %}
+  <table>
+    <thead><tr><th>时间戳</th><th>来源</th><th>动作</th><th>明细</th></tr></thead>
+    <tbody>
+    {% for e in entries %}
+      <tr>
+        <td class="mono muted">{{ e.at }}</td>
+        <td class="mono">{{ e.actor }}</td>
+        <td>{{ e.action }}</td>
+        <td class="muted mono" style="word-break:break-all">{{ e.detail }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

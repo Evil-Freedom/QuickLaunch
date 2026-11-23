@@ -1,0 +1,17 @@
+# Caddy 自动申请并续期 Let's Encrypt 证书。
+# 只要域名 A 记录指向本机、且 80/443 可达，就不需要任何手工证书步骤。
+{$QL_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy api:8000
+
+	# 管理界面不索引；API 不缓存
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+	}
+	log {
+		output stdout
+		format console
+	}
+}

@@ -3,7 +3,9 @@ package com.workbuddy.quicklaunch.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 import com.workbuddy.quicklaunch.remote.RemoteConfig
+import com.workbuddy.quicklaunch.remote.vps.VpsSyncScheduler
 import com.workbuddy.quicklaunch.service.KeepAliveService
 import com.workbuddy.quicklaunch.service.RemoteService
 import com.workbuddy.quicklaunch.util.AntiSleep
@@ -43,6 +45,8 @@ class BootReceiver : BroadcastReceiver() {
             if (RemoteConfig.isEnabled(app)) RemoteService.start(app)
         }
         runCatching { WifiReceiver.register(app) }
+        // VPS 配置同步的周期任务同样会在进程被换掉后丢失，必须重排
+        runCatching { VpsSyncScheduler.schedule(app) }
 
         // 其余都是耗时操作（全表扫描 + 逐条排程 + root 授权等待），
         // 广播主线程只有约 10 秒预算，一律异步。
@@ -52,6 +56,9 @@ class BootReceiver : BroadcastReceiver() {
             // reapplyTimeoutOnly 内部已按「用户是否手动关」自判，开机即补上兜底，
             // 与悬浮窗权限无关（悬浮窗由刚拉起的服务负责），无需等授权。
             runCatching { AntiSleep.reapplyTimeoutOnly(app) }
+            // 上次进程在「启动 + 验证」途中被杀：按总时限判断该继续还是结案。
+            // 放在最后，确保排程与保活先恢复 —— 即使恢复逻辑异常也不影响定时触发。
+            runCatching { LaunchAttemptController.recover(app) }
         }
     }
 }

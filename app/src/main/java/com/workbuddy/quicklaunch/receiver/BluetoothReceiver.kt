@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import com.workbuddy.quicklaunch.BuildConfig
 import com.workbuddy.quicklaunch.data.AppDatabase
 import com.workbuddy.quicklaunch.data.TriggerType
-import com.workbuddy.quicklaunch.service.LaunchService
+import com.workbuddy.quicklaunch.launch.LaunchAttemptController
 
 /**
  * 蓝牙触发：当有蓝牙设备连上时拉起目标 App；
@@ -44,7 +44,7 @@ class BluetoothReceiver : BroadcastReceiver() {
             }.getOrDefault(emptyList())
             list.forEach {
                 if (it.bluetoothName.isEmpty() || it.bluetoothName.equals(name, ignoreCase = true)) {
-                    runCatching { LaunchService.start(app, it.targetPackage, it.targetAppName) }
+                    runCatching { LaunchAttemptController.begin(app, it.id, it.targetPackage, it.targetAppName) }
                 }
             }
         }
