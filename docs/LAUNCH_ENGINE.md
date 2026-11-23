@@ -235,13 +235,79 @@ PENDING ──派发──► LAUNCHING ──首次验证时刻──► VERIFY
 
 ---
 
-## 9. 待补的真机验收
+## 9. 锁屏场景：真机验收与由此发现的缺陷（v1.4.2）
 
-以下两项需要物理操作，本轮未执行：
+2026-11-23 16:00 在真机锁屏状态下做了完整验收，**发现了三个真实缺陷**：
 
-1. **合盖（外屏 display 1）状态下的自动启动**
-2. **锁屏状态下（Keyguard 存在）的自动启动**
+### 9.1 现象
 
-这两项在升级前的版本里是人工验证过的（见 `AUDIT.md` §14），
-本次改动没有修改 `LaunchProxyActivity` 的选屏、点亮、绕锁屏逻辑，
-只在其后追加了「结果回传 + 验证」，因此回归风险低，但仍需实测确认。
+锁屏 + 息屏触发一次启动，结果：
+
+```
+16:00:57 新建任务 ... state=PENDING
+16:00:57 第 1 次发出启动
+16:00:59 ~ 16:01:18 探测 ×14 全部 NOT_VISIBLE src=USAGE_STATS top={} lit=[]
+16:01:10 第 2 次发出启动          ← 无意义的重试开始
+...最终 44 秒后 MANUAL_REQUIRED
+```
+
+屏幕被点亮了（`Dozing → Awake`），但目标 App 始终没有前台。
+
+### 9.2 根因（真机 dump 实证）
+
+锁屏状态下 `dumpsys activity activities` 的结构**完全不同**：
+
+```
+Display #0 (activities from top to bottom):
+  * Task{7e8393c #1283 ... visible=true visibleRequested=false ...}
+    mLastPausedActivity: ActivityRecord{... u0 com.android.settings/.Settings ...}
+    isSleeping=true
+```
+
+- **没有任何 `topResumedActivity`** —— Keyguard 存在时没有 Activity 会进入 resumed
+- 每个 Task 带 `isSleeping=true`
+- 目标 App 只出现在 `mLastPausedActivity`
+
+所以解析器返回空 → UNKNOWN → 降级到 UsageStats → 判 NOT_VISIBLE →
+按普通失败重试 3 次，**每次都点亮一次屏幕**，而锁屏状态不会因为重试而改变。
+
+### 9.3 三个修复
+
+| # | 缺陷 | 修复 |
+| --- | --- | --- |
+| 1 | 睡眠态没有 `topResumedActivity` 时被当成「读不到」 | `DumpsysParser.parseState` 解析 `isSleeping` 与 `mLastPausedActivity`；新增 `dumpState.sleepingWith(pkg)` |
+| 2 | 「目标已在锁屏后」与「目标没启动」混为一谈 | 新增 `ForegroundJudge.Verdict.BLOCKED_BY_KEYGUARD`；状态机在收到它时**立即收手**（`onBlockedByKeyguard`，不重试） |
+| 3 | 亮屏集合读不到（`lit=[]`）导致判定走降级分支 | `litDisplayIds` 增加兜底：`DisplayManager` 全空但 `PowerManager.isInteractive()` 为真时，视为主屏亮着 |
+
+顺带修了第四个问题：`recover()` 会把**刚创建 100ms 的任务**当成遗留任务清掉
+（真机复现：`begin()` 写完快照后，系统的 `MY_PACKAGE_REPLACED` 恰好唤起进程）。
+现在 5 秒内且内存中已有活动任务时跳过恢复。
+
+### 9.4 修复后的真机结果
+
+```
+16:11:59.983 新建任务 63dd6fa7-... pkg=com.android.settings state=PENDING
+16:12:00.080 任务结束 63dd6fa7-... state=MANUAL_REQUIRED attempt=1/3 error=KEYGUARD_BLOCKED
+```
+
+- **97ms 收手**（修复前 44 秒 + 3 次点亮屏幕）
+- 通知文案：`设备处于锁屏状态，目标 App 被挡在锁屏后面（已停止重试，解锁后可手动再试）`
+- 尝试次数 1/3：没有消耗重试额度，也没有反复唤醒屏幕
+- `dumpsys trust` 确认设备仍锁屏
+
+### 9.5 一个必须说明的测量偏差
+
+同一场景下，`adb shell su -c 'am broadcast ...'` 从**命令发出**到
+ActivityManager **收到广播**之间有约 36 秒（真机日志：命令 16:09:42，
+`ActivityManager: Broadcasting` 16:10:18）。这一段发生在 adb/Magisk 侧，
+与 App 无关 —— ActivityManager 收到广播到任务创建只有 **94ms**。
+
+排查过程中一度误以为是 App 阻塞，因此顺手做了一项仍值得保留的优化：
+把「有没有前台探测能力」的判断从广播线程移到探测线程
+（它内部要 fork `su`，不该阻塞广播处理）。
+
+### 9.6 仍未验证
+
+**合盖（外屏 display 1）状态下的自动启动** —— 需要物理合盖，
+本轮未执行。选屏逻辑未改动（`DisplayPicker` 原样保留），
+判定侧已按 `Display #N` 分段，合盖时外屏的 top Activity 会被正确识别。

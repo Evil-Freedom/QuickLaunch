@@ -120,6 +120,8 @@ object LaunchFailureNotifier {
             context.getString(R.string.launch_fail_reason_interrupted)
         LaunchAttemptEngine.REASON_DISPATCH_REJECTED ->
             context.getString(R.string.launch_fail_reason_rejected)
+        LaunchAttemptEngine.REASON_KEYGUARD_BLOCKED ->
+            context.getString(R.string.launch_fail_reason_keyguard)
         else -> reason
     }
 

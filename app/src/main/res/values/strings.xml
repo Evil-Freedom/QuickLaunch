@@ -142,6 +142,7 @@
     <string name="launch_fail_reason_total_timeout">超过总时限，已停止自动重试</string>
     <string name="launch_fail_reason_interrupted">启动过程被系统中断</string>
     <string name="launch_fail_reason_rejected">系统拒绝了这个启动请求（检查后台弹出界面权限）</string>
+    <string name="launch_fail_reason_keyguard">设备处于锁屏状态，目标 App 被挡在锁屏后面（已停止重试，解锁后可手动再试）</string>
 
     <!-- ═══════════════════════════════════════════════════════════════
          Glassmorphism UI 重构 — 新增文案

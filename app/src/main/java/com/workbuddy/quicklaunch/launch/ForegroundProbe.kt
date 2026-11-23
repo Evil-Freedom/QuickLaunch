@@ -4,6 +4,7 @@ import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.hardware.display.DisplayManager
+import android.os.PowerManager
 import android.view.Display
 import com.workbuddy.quicklaunch.util.RootUtils
 
@@ -38,13 +39,20 @@ interface ForegroundProbe {
  *
  * ## 为什么这是首选
  *
- * 2026-11 在目标机实测：450ms/次，返回 `Display #N` 分段 + 每段 `topResumedActivity`，
- * 是唯一能回答「目标 App 到底在哪块屏上」的数据源。折叠屏场景下这一点是必需的。
+ * 2026-11 在目标机实测：450ms/次，返回 `Display #N` 分段 + 每段 `topResumedActivity`
+ * 与 `mLastPausedActivity` + `isSleeping`，是唯一能回答「目标 App 到底在哪块屏上、
+ * 是否被锁屏挡住」的数据源。折叠屏与锁屏两个场景都依赖它。
+ *
+ * ## 失败熔断
+ *
+ * 真机观察到：锁屏状态下 `su` 可能不被 Magisk 放行，于是每次探测都要等满超时。
+ * 一次任务里有 7~20 次探测，这会变成几十秒的空转。所以连续失败后进入
+ * [ROOT_BACKOFF_MS] 的冷却期，期间直接走下一层，不再 fork su。
  *
  * ## 安全与健壮性约束
  *
  * - 命令是**常量字面量**，不拼接任何外部输入（连包名都不进命令）。
- * - [RootUtils.capture] 带 6s 超时，并同时排空 stdout/stderr，不会因 su 弹窗挂死线程。
+ * - [RootUtils.capture] 带超时，并同时排空 stdout/stderr，不会因 su 弹窗挂死线程。
  * - 退出码非 0 视为「读不到」，而不是「没有前台」。
  */
 class RootProbe(
@@ -52,23 +60,55 @@ class RootProbe(
     private val capture: (String) -> String? = { RootUtils.capture(CMD, ROOT_TIMEOUT_MS) }
 ) : ForegroundProbe {
 
-    override fun available(): Boolean = runCatching { RootUtils.hasRoot() }.getOrDefault(false)
+    @Volatile
+    private var backoffUntil = 0L
+
+    private fun inBackoff(now: Long = System.currentTimeMillis()): Boolean = now < backoffUntil
+
+    override fun available(): Boolean {
+        if (inBackoff()) return false
+        val ok = runCatching { RootUtils.hasRoot() }.getOrDefault(false)
+        if (!ok) backoffUntil = System.currentTimeMillis() + ROOT_BACKOFF_MS
+        return ok
+    }
 
     override fun probe(targetPkg: String): ProbeSnapshot {
+        if (inBackoff()) {
+            return ProbeSnapshot(
+                verdict = ForegroundJudge.Verdict.UNKNOWN,
+                source = SOURCE,
+                note = "root 冷却中（上次读取失败）"
+            )
+        }
         val dump = runCatching { capture(CMD) }.getOrNull()
-            ?: return ProbeSnapshot(
+        if (dump == null) {
+            backoffUntil = System.currentTimeMillis() + ROOT_BACKOFF_MS
+            return ProbeSnapshot(
                 verdict = ForegroundJudge.Verdict.UNKNOWN,
                 source = SOURCE,
                 note = "root 读取失败或超时"
             )
-        val top = runCatching { DumpsysParser.parseTopByDisplay(dump) }.getOrDefault(emptyMap())
+        }
+        val state = runCatching { DumpsysParser.parseState(dump) }
+            .getOrDefault(DumpsysParser.DumpState())
         val lit = runCatching { litDisplayIds() }.getOrDefault(emptySet())
+        val sleepingWith = runCatching { state.sleepingWith(targetPkg) }.getOrDefault(false)
         return ProbeSnapshot(
-            verdict = ForegroundJudge.judge(targetPkg, top, lit),
+            verdict = ForegroundJudge.judge(
+                targetPkg = targetPkg,
+                topByDisplay = state.topByDisplay,
+                litDisplays = lit,
+                deviceSleeping = state.anySleeping,
+                sleepingWithTarget = sleepingWith
+            ),
             source = SOURCE,
-            topByDisplay = top,
+            topByDisplay = state.topByDisplay,
             litDisplays = lit,
-            note = if (top.isEmpty()) "dump 中未解析到 topResumedActivity" else ""
+            note = buildString {
+                if (state.anySleeping) append("设备睡眠中; ")
+                if (state.topByDisplay.isEmpty() && !state.anySleeping) append("未解析到 topResumedActivity; ")
+                if (sleepingWith) append("目标已在睡眠屏上被启动; ")
+            }.trim().trimEnd(';').trim()
         )
     }
 
@@ -77,6 +117,9 @@ class RootProbe(
         /** dumpsys 实测 450ms，给到 6s 是为了容忍 su 首次授权弹窗与高负载。 */
         const val ROOT_TIMEOUT_MS = 6_000L
         const val CMD = "dumpsys activity activities"
+
+        /** 失败冷却：这段时间内不再 fork su，直接用下一层探针。 */
+        const val ROOT_BACKOFF_MS = 120_000L
     }
 }
 
@@ -87,9 +130,10 @@ class RootProbe(
  *
  * 1. 需要用户在系统设置里手动授予「使用情况访问权限」，否则 `queryEvents` 永远返回空；
  * 2. 事件入库有 **1~2 秒延迟**，探测立刻读很可能读不到刚发生的前台切换；
- * 3. **不区分 display** —— 只给「最近被 resume 的包」，折叠屏合盖时无法判断在哪块屏。
- *
- * 因此它只作为 Root 不可用时的降级，且判定为 VISIBLE 时把 confidence 写在 note 里。
+ * 3. **不区分 display** —— 只给「最近被 resume 的包」，折叠屏合盖时无法判断在哪块屏；
+ * 4. **看不到锁屏**：锁屏时它仍会报告「最后前台是目标 App」，
+ *    这在 §5.1 的锁屏场景里是**假阳性**（App 在 Keyguard 后面，用户看不到）。
+ *    因此它的 VISIBLE 结论只在 Root 层不可用时采信，且 note 里标明来源。
  */
 class UsageStatsProbe(private val context: Context) : ForegroundProbe {
 
@@ -132,7 +176,7 @@ class UsageStatsProbe(private val context: Context) : ForegroundProbe {
                 verdict = if (visible) ForegroundJudge.Verdict.VISIBLE else ForegroundJudge.Verdict.NOT_VISIBLE,
                 source = SOURCE,
                 topByDisplay = lastForeground?.let { mapOf(Display.DEFAULT_DISPLAY to it) } ?: emptyMap(),
-                note = if (visible) "usage-stats 最近前台=${lastForeground}（不区分屏幕）" else ""
+                note = if (visible) "usage-stats 最近前台=$lastForeground（不区分屏幕、看不到锁屏）" else ""
             )
         }.getOrElse {
             ProbeSnapshot(ForegroundJudge.Verdict.UNKNOWN, SOURCE, note = "查询异常：${it.message}")
@@ -151,21 +195,40 @@ class UsageStatsProbe(private val context: Context) : ForegroundProbe {
 /**
  * 按可靠性串起来的探针：Root → UsageStats → 放弃。
  *
- * 一旦某个数据源给出**确定结论**（VISIBLE / NOT_VISIBLE）就停止；
- * UNKNOWN 才继续往下一层试。这样既有 root 又开了使用情况权限时不至于多跑一次。
+ * 一旦某个数据源给出**确定结论**（VISIBLE / NOT_VISIBLE / BLOCKED_BY_KEYGUARD）就停止；
+ * UNKNOWN 才继续往下一层试。
+ *
+ * `available()` 的结果缓存 [AVAILABILITY_TTL_MS]：它内部要 fork su，
+ * 而 `begin()` 在广播线程里同步调用它 —— 每次触发都等 8 秒授权超时是不可接受的。
  */
 class CompositeProbe(
     private val probes: List<ForegroundProbe>,
     private val litDisplayIds: () -> Set<Int> = { emptySet() }
 ) : ForegroundProbe {
 
-    override fun available(): Boolean = probes.any { runCatching { it.available() }.getOrDefault(false) }
+    @Volatile
+    private var availableCachedAt = 0L
+
+    @Volatile
+    private var availableCached = false
+
+    override fun available(): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - availableCachedAt < AVAILABILITY_TTL_MS) return availableCached
+        val result = probes.any { runCatching { it.available() }.getOrDefault(false) }
+        availableCached = result
+        availableCachedAt = now
+        return result
+    }
 
     override fun probe(targetPkg: String): ProbeSnapshot {
         var last: ProbeSnapshot? = null
         for (p in probes) {
             val snap = runCatching { p.probe(targetPkg) }.getOrElse {
-                ProbeSnapshot(ForegroundJudge.Verdict.UNKNOWN, "ERROR", note = "${it.javaClass.simpleName}: ${it.message}")
+                ProbeSnapshot(
+                    ForegroundJudge.Verdict.UNKNOWN, "ERROR",
+                    note = "${it.javaClass.simpleName}: ${it.message}"
+                )
             }
             if (snap.verdict != ForegroundJudge.Verdict.UNKNOWN) return snap
             last = snap
@@ -178,10 +241,9 @@ class CompositeProbe(
     }
 
     companion object {
-        /**
-         * 生产装配。Root 优先；`Build.VERSION` 判断不需要 —— UsageStatsManager
-         * 从 API 21 开始就有，minSdk 24 覆盖。
-         */
+        /** 可用性缓存时长。锁屏/无 root 时避免每次触发都等一次 su 超时。 */
+        const val AVAILABILITY_TTL_MS = 60_000L
+
         fun create(context: Context): CompositeProbe {
             val lit: () -> Set<Int> = { litDisplayIds(context) }
             return CompositeProbe(
@@ -193,15 +255,29 @@ class CompositeProbe(
             )
         }
 
-        /** 当前亮着的 display。外屏在合盖态可能不被 getDisplays() 枚举，需补查 display 1。 */
+        /**
+         * 当前亮着的 display。
+         *
+         * 两级判据：
+         * 1. `DisplayManager` 里 state == STATE_ON 的屏；
+         * 2. 若一个都读不到但 `PowerManager.isInteractive()` 为真，退化为「主屏亮着」。
+         *
+         * 第 2 条是锁屏场景的兜底：真机锁屏亮屏时 `Display.state` 不一定报 ON，
+         * 而 lit 为空会让 [ForegroundJudge] 走「任一屏命中即成功」的降级分支 ——
+         * 那条分支在锁屏下会误判。先给出一个可信的默认值比让它为空更安全。
+         *
+         * 外屏在合盖态可能不被 getDisplays() 枚举，需补查 display 1。
+         */
         fun litDisplayIds(context: Context): Set<Int> = runCatching {
             val dm = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
-                ?: return@runCatching emptySet<Int>()
             val ids = HashSet<Int>()
-            dm.displays?.forEach { if (it.state == Display.STATE_ON) ids += it.displayId }
-            // razr 外屏是 display 1 且可能不出现在枚举结果里
-            dm.getDisplay(EXTERNAL_DISPLAY_ID)?.let {
+            dm?.displays?.forEach { if (it.state == Display.STATE_ON) ids += it.displayId }
+            dm?.getDisplay(EXTERNAL_DISPLAY_ID)?.let {
                 if (it.state == Display.STATE_ON) ids += it.displayId
+            }
+            if (ids.isEmpty()) {
+                val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+                if (pm?.isInteractive == true) ids += Display.DEFAULT_DISPLAY
             }
             ids
         }.getOrDefault(emptySet())

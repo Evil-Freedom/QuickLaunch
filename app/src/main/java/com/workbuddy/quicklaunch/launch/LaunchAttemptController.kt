@@ -88,34 +88,10 @@ object LaunchAttemptController {
         val now = System.currentTimeMillis()
         val policy = LaunchSettings.loadPolicy(app)
 
-        // 没有任何可用的前台数据源时**不做验证**，直接退化为升级前的行为：
-        // 发一次启动命令，记一条「未验证」记录。
-        //
-        // 为什么不假装成功、也不假装失败：无 root 且未授予「使用情况访问权限」的设备
-        // 永远读不到前台信息，把这种情况判失败会让重试变成纯粹的骚扰；
-        // 而假装成功又违背「不能把命令发出当成 App 已打开」的前提。
-        // 唯一诚实的做法是照常启动 + 在记录里写明「本次未验证」。
-        if (!resolveProbe(app).available()) {
-            Log.i(TAG, "无前台探测能力，退化为单次启动 pkg=$pkg")
-            LaunchService.start(app, pkg, displayName, null)
-            LaunchSettings.record(
-                app,
-                LaunchSettings.Record(
-                    attemptId = "unverified-$now",
-                    ruleId = ruleId,
-                    pkg = pkg,
-                    appName = displayName,
-                    state = LaunchAttemptState.SUCCESS.name,
-                    reason = LaunchAttemptEngine.REASON_NO_PROBE,
-                    startedAt = now,
-                    finishedAt = now,
-                    tries = 1,
-                    detail = "无前台探测能力（无 root 且未授予使用情况访问权限），仅确认命令已发出"
-                )
-            )
-            return
-        }
-
+        // 注意：这里**不能**同步判断「有没有前台探测能力」。
+        // 那个判断内部要 fork `su`，真机实测一次触发到任务创建之间因此出现了
+        // 36 秒空档（广播线程被 su 授权等待占住）。判定统一挪到 [preProbe]
+        // 的探测线程里做，让广播处理立即返回。
         val attemptId = UUID.randomUUID().toString()
         val engine = LaunchAttemptEngine(
             attemptId = attemptId,
@@ -163,6 +139,16 @@ object LaunchAttemptController {
         val active = LaunchSettings.loadActive(app) ?: return
         val policy = LaunchSettings.loadPolicy(app)
         val age = System.currentTimeMillis() - active.startedAt
+
+        // 刚创建的任务不是「遗留任务」。
+        // 真机复现：begin() 刚写完 active 快照的 100ms 内，系统的
+        // MY_PACKAGE_REPLACED 广播唤起了进程 → BootReceiver 调到这里 →
+        // 误把这个进行中的任务当遗留任务清掉，导致它失去「进程被杀后可恢复」的能力。
+        if (age < FRESH_TASK_WINDOW_MS && hasActiveTask()) {
+            Log.i(TAG, "跳过恢复：${active.attemptId} 是 ${age}ms 前刚开始的任务")
+            return
+        }
+
         LaunchSettings.clearActive(app)
 
         if (age > policy.totalTimeoutMs) {
@@ -222,12 +208,59 @@ object LaunchAttemptController {
     private fun preProbe(app: Context, runner: Running) {
         val engine = runner.engine
         probeExecutor.execute {
+            // 能力判定放这里（探测线程），避免阻塞广播线程
+            if (!runCatching { resolveProbe(app).available() }.getOrDefault(false)) {
+                handler.post { launchUnverified(app, runner) }
+                return@execute
+            }
             val snap = runCatching { resolveProbe(app).probe(engine.pkg) }.getOrNull()
             val foreground = snap?.verdict == ForegroundJudge.Verdict.VISIBLE
+            val blocked = snap?.verdict == ForegroundJudge.Verdict.BLOCKED_BY_KEYGUARD
             handler.post {
-                handle(app, runner, engine.start(System.currentTimeMillis(), foreground))
+                val now = System.currentTimeMillis()
+                if (blocked) {
+                    // 启动前就发现「设备锁定且目标已在锁屏后」：
+                    // 记一次尝试后直接按锁屏挡住收手，不再点亮屏幕重试
+                    engine.start(now, alreadyForeground = false)
+                    engine.onLaunchDispatched(now, dispatchAccepted = true)
+                    handle(app, runner, engine.onBlockedByKeyguard(now, snap?.source))
+                } else {
+                    handle(app, runner, engine.start(now, foreground))
+                }
             }
         }
+    }
+
+    /**
+     * 无前台探测能力时的降级：照常发一次启动命令，并如实记一条「未验证」。
+     *
+     * 为什么不假装成功、也不假装失败：无 root 且未授予「使用情况访问权限」的设备
+     * 永远读不到前台信息，把这种情况判失败会让重试变成纯粹的骚扰；
+     * 而假装成功又违背「不能把命令发出当成 App 已打开」的前提。
+     * 唯一诚实的做法是照常启动 + 在记录里写明「本次未验证」。
+     */
+    private fun launchUnverified(app: Context, runner: Running) {
+        val engine = runner.engine
+        inFlight.remove(engine.pkg)
+        LaunchSettings.clearActive(app)
+        val now = System.currentTimeMillis()
+        Log.i(TAG, "无前台探测能力，退化为单次启动 pkg=${engine.pkg}")
+        LaunchService.start(app, engine.pkg, engine.appName, null)
+        LaunchSettings.record(
+            app,
+            LaunchSettings.Record(
+                attemptId = "unverified-$now",
+                ruleId = engine.ruleId,
+                pkg = engine.pkg,
+                appName = engine.appName,
+                state = LaunchAttemptState.SUCCESS.name,
+                reason = LaunchAttemptEngine.REASON_NO_PROBE,
+                startedAt = engine.startedAt,
+                finishedAt = now,
+                tries = 1,
+                detail = "无前台探测能力（无 root 且未授予使用情况访问权限），仅确认命令已发出"
+            )
+        )
     }
 
     private fun handle(app: Context, runner: Running, decision: LaunchAttemptEngine.Decision) {
@@ -272,13 +305,24 @@ object LaunchAttemptController {
                 )
             }
             handler.post {
-                val hit = snap.verdict == ForegroundJudge.Verdict.VISIBLE
+                val now = System.currentTimeMillis()
                 Log.i(
                     TAG,
                     "探测 pkg=${engine.pkg} verdict=${snap.verdict} src=${snap.source} " +
-                        "top=${snap.topByDisplay} lit=${snap.litDisplays}"
+                        "top=${snap.topByDisplay} lit=${snap.litDisplays}" +
+                        (if (snap.note.isNotBlank()) " note=${snap.note}" else "")
                 )
-                handle(app, runner, engine.onProbeResult(System.currentTimeMillis(), hit, snap.source))
+                // 三态分流：被锁屏挡住时立即收手，不按普通失败重试
+                handle(
+                    app, runner,
+                    when (snap.verdict) {
+                        ForegroundJudge.Verdict.VISIBLE ->
+                            engine.onProbeResult(now, hit = true, source = snap.source)
+                        ForegroundJudge.Verdict.BLOCKED_BY_KEYGUARD ->
+                            engine.onBlockedByKeyguard(now, snap.source)
+                        else -> engine.onProbeResult(now, hit = false, source = snap.source)
+                    }
+                )
             }
         }
     }
@@ -340,6 +384,9 @@ object LaunchAttemptController {
             )
         )
     }
+
+    /** 判定「刚创建」的时间窗，见 [recover]。 */
+    private const val FRESH_TASK_WINDOW_MS = 5_000L
 
     private fun resolveProbe(app: Context): ForegroundProbe =
         probe ?: CompositeProbe.create(app).also { probe = it }

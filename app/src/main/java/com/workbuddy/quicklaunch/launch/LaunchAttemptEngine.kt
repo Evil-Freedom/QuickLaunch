@@ -227,6 +227,25 @@ class LaunchAttemptEngine(
         if (lastError.isNotEmpty()) append(" error=").append(lastError)
     }
 
+    /**
+     * 目标已被启动，但设备处于睡眠/锁屏，Keyguard 让它永远拿不到前台。
+     *
+     * **不重试**：锁屏是持续状态，再试 2 次只会再点亮两次屏幕，
+     * 而结果不会变。直接收手并让通知告诉用户「需要解锁」。
+     */
+    fun onBlockedByKeyguard(now: Long, source: String? = null): Decision {
+        if (state.isTerminal) return Decision.Idle
+        if (source != null) attempts.lastOrNull()?.probeSource = source
+        attempts.lastOrNull()?.apply {
+            if (finishedAt == 0L) {
+                outcome = OUTCOME_KEYGUARD_BLOCKED
+                finishedAt = now
+            }
+        }
+        lastError = REASON_KEYGUARD_BLOCKED
+        return finish(now, LaunchAttemptState.MANUAL_REQUIRED, REASON_KEYGUARD_BLOCKED)
+    }
+
     // ── 内部 ────────────────────────────────────────────────────────
 
     private fun failAttempt(
@@ -282,6 +301,7 @@ class LaunchAttemptEngine(
         const val REASON_KILLED = "INTERRUPTED"
         const val REASON_PACKAGE_MISSING = "PACKAGE_MISSING"
         const val REASON_NO_PROBE = "NO_FOREGROUND_PROBE"
+        const val REASON_KEYGUARD_BLOCKED = "KEYGUARD_BLOCKED"
 
         const val OUTCOME_PENDING = "PENDING"
         const val OUTCOME_SUCCESS = "SUCCESS"
@@ -290,5 +310,6 @@ class LaunchAttemptEngine(
         const val OUTCOME_DISPATCH_REJECTED = "DISPATCH_REJECTED"
         const val OUTCOME_CANCELLED = "CANCELLED"
         const val OUTCOME_INTERRUPTED = "INTERRUPTED"
+        const val OUTCOME_KEYGUARD_BLOCKED = "KEYGUARD_BLOCKED"
     }
 }
