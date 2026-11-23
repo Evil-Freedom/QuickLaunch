@@ -568,6 +568,10 @@ object AutoUnlock {
             .apply()
         setEnabled(ctx, false)
         notifyGiveUp(ctx)
+        // 旁路告警：只报状态，不含任何口令信息；发送失败不影响本地停用逻辑
+        runCatching {
+            VpsNotify.onUnlockSecurity(ctx, "连续 ${MAX_FAILURES} 次解锁失败，已停止尝试并关闭功能")
+        }
     }
 
     private fun notifyGiveUp(ctx: Context) {

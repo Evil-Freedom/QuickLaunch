@@ -1,0 +1,33 @@
+[Unit]
+Description=QuickLaunch mail notifications via Tencent Agent Mail
+Documentation=file:/opt/ql-mailer/README.md
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=qlmail
+Group=qlmail
+WorkingDirectory=/opt/ql-mailer
+EnvironmentFile=/etc/qlmail/mailer.env
+ExecStart=/usr/bin/python3 -m mailer.main
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+
+# 最小权限：服务只需要写 /var/lib/qlmail 与 /var/log/qlmail
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/qlmail /var/log/qlmail
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

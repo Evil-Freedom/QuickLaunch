@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.Log
 import com.workbuddy.quicklaunch.service.LaunchFailureNotifier
 import com.workbuddy.quicklaunch.util.AutoUnlock
+import com.workbuddy.quicklaunch.util.VpsNotify
 import com.workbuddy.quicklaunch.service.LaunchService
 import java.util.UUID
 import java.util.concurrent.Executors
@@ -370,6 +371,22 @@ object LaunchAttemptController {
             LaunchFailureNotifier.notifyFailure(
                 app, engine.appName, engine.pkg, decision.reason, engine.attemptIndex,
                 engine.policy.allowManualRetry
+            )
+        }
+
+        // 旁路上报邮件通知：纯附加动作，内部单线程 + 4s 超时 + 吞异常，
+        // 不参与判定、不改变状态、失败只记一行 log。
+        runCatching {
+            VpsNotify.onLaunchFinished(
+                ctx = app,
+                pkg = engine.pkg,
+                appName = engine.appName,
+                success = decision.state == LaunchAttemptState.SUCCESS,
+                reason = decision.reason,
+                tries = engine.attemptIndex.coerceAtLeast(1),
+                displayId = null,
+                startedAt = engine.startedAt,
+                finishedAt = engine.finishedAt
             )
         }
     }

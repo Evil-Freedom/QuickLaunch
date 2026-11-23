@@ -1,0 +1,13 @@
+[Unit]
+Description=Resolve docker bridge gateway for ql-mailer
+After=docker.service network-online.target
+Wants=docker.service
+Before=ql-mailer.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/lib/qlmail/resolve-net.sh
+
+[Install]
+WantedBy=multi-user.target
