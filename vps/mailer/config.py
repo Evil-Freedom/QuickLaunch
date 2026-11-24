@@ -38,6 +38,8 @@ class Config:
     minute_limit: int
     dry_run: bool
     log_path: str
+    verifier_token: str = ""
+    action_ttl_s: int = 1800
 
     @staticmethod
     def from_env() -> "Config":
@@ -53,6 +55,8 @@ class Config:
             cli_config_dir=_env("QLMAIL_CONFIG_DIR", "/var/lib/qlmail/config"),
             cli_home=_env("QLMAIL_HOME", "/var/lib/qlmail"),
             ingest_token=_env("QLMAIL_INGEST_TOKEN"),
+            verifier_token=_env("QLMAIL_VERIFIER_TOKEN"),
+            action_ttl_s=_env_int("QLMAIL_ACTION_TTL", 1800),
             bind_host=_env("QLMAIL_BIND", "127.0.0.1"),
             port=_env_int("QLMAIL_PORT", 8780),
             primary=primary,

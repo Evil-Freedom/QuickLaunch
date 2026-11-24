@@ -21,6 +21,9 @@ SUBJECTS = {
     "unlock_alert": "[QuickLaunch] 自动解锁安全告警",
     "checkin_success": "[QuickLaunch] 打卡成功",
     "checkin_unknown": "[QuickLaunch] 打卡结果待确认",
+    "cleanup_pending": "[QuickLaunch] 飞书清理待执行",
+    "cleanup_success": "[QuickLaunch] 飞书后台已清理",
+    "cleanup_failed": "[QuickLaunch] 飞书清理失败",
 }
 
 # payload 里允许出现的字段（白名单）。任何 PIN/密钥字段都不可能被渲染。
@@ -29,6 +32,7 @@ ALLOWED_FIELDS = {
     "actual_time", "attempts", "display", "unlock_result", "final_state", "last_error",
     "checked_at", "security_state", "auto_disabled", "reason", "suggestion",
     "evidence_source", "evidence_time", "evidence_ref", "note",
+    "task_id", "action_id", "action_type", "detail", "checked_at",
 }
 
 _CTRL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
@@ -104,6 +108,25 @@ def render(notification_type: str, payload: dict[str, Any]) -> tuple[str, str]:
             _line("记录标识", data.get("evidence_ref")),
             _line("任务状态", "已核验"),
         ]
+    elif notification_type == "cleanup_pending":
+        lines = [
+            _line("设备名称", data.get("device_name")),
+            _line("任务", data.get("task_id")),
+            _line("动作", data.get("action_type") or "FORCE_STOP_FEISHU"),
+            _line("创建时间", data.get("checked_at")),
+            "",
+            "说明：考勤已核实成功，等待设备拉取并执行清理指令。",
+        ]
+    elif notification_type in ("cleanup_success", "cleanup_failed"):
+        lines = [
+            _line("设备名称", data.get("device_name")),
+            _line("任务", data.get("task_id")),
+            _line("动作", data.get("action_type") or "FORCE_STOP_FEISHU"),
+            _line("结果", data.get("detail")),
+            _line("完成时间", data.get("checked_at")),
+        ]
+        if notification_type == "cleanup_failed":
+            lines += ["", "注意：飞书可能仍在后台运行，请检查 Root 授权与进程状态。"]
     else:  # checkin_unknown
         lines = [
             _line("设备名称", data.get("device_name")),

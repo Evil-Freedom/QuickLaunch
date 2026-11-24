@@ -37,9 +37,12 @@ FINAL_STATES = (PRIMARY_SENT, FALLBACK_SENT, FAILED, EXPIRED)
 PRIORITY = {
     "unlock_alert": 0,
     "launch_failed": 1,
-    "checkin_unknown": 2,
-    "checkin_success": 3,
-    "launch_success": 4,
+    "cleanup_failed": 2,
+    "checkin_unknown": 3,
+    "cleanup_pending": 4,
+    "checkin_success": 5,
+    "launch_success": 6,
+    "cleanup_success": 7,
 }
 
 SCHEMA = """
@@ -421,3 +424,47 @@ for _name in (
     "stats", "sent_since", "has_due", "recent", "close",
 ):
     setattr(Repository, _name, _thread_safe(getattr(Repository, _name)))
+
+
+# ── 考勤核验与清理动作（第二阶段新增） ──────────────────────────────
+# 与通知队列同库不同表：事件（notification）是「要发什么邮件」，
+# 动作（action）是「要在这台设备上执行什么」，两者生命周期不同。
+
+ACTION_SCHEMA = """
+CREATE TABLE IF NOT EXISTS attendance (
+    task_id          TEXT PRIMARY KEY,
+    device_id        TEXT NOT NULL,
+    attendance_date  TEXT NOT NULL,
+    evidence_source  TEXT NOT NULL,
+    evidence_time    TEXT NOT NULL,
+    evidence_ref     TEXT,
+    verified_at      TEXT NOT NULL,
+    result           TEXT NOT NULL,
+    created_at       TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS actions (
+    action_id    TEXT PRIMARY KEY,
+    device_id    TEXT NOT NULL,
+    task_id      TEXT NOT NULL,
+    action_type  TEXT NOT NULL,
+    nonce        TEXT NOT NULL,
+    status       TEXT NOT NULL,
+    created_at   TEXT NOT NULL,
+    expires_at   TEXT NOT NULL,
+    delivered_at TEXT,
+    result_at    TEXT,
+    result_detail TEXT,
+    UNIQUE(task_id, action_type)
+);
+CREATE INDEX IF NOT EXISTS idx_actions_pending ON actions(device_id, status, expires_at);
+"""
+
+ACTION_PENDING = "PENDING"
+ACTION_DELIVERED = "DELIVERED"
+ACTION_RUNNING = "CLEANUP_RUNNING"
+ACTION_SUCCESS = "CLEANUP_SUCCESS"
+ACTION_FAILED = "CLEANUP_FAILED"
+ACTION_EXPIRED = "EXPIRED"
+ACTION_REJECTED = "REJECTED"
+
+ALLOWED_ACTIONS = {"FORCE_STOP_FEISHU"}

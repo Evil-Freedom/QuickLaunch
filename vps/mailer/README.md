@@ -136,3 +136,37 @@ docker exec $(docker ps -qf name=caddy) caddy reload --config /etc/caddy/Caddyfi
 - 正文只由服务端模板渲染并对字段做清洗（去控制字符、截断），邮件内容不会被当作指令执行；
 - 服务只监听 docker 网桥，无公网管理入口；
 - 邮件失败只影响 `/var/lib/qlmail/notifications.db` 的行状态，`/api/v1/report` 与启动流程不受影响。
+
+## 9. 考勤核验与清理闭环（v1.1）
+
+```
+飞书启动 → launch_success / checkin_unknown
+        → Windows 用 lark-cli 查真实打卡记录（只读）
+        → POST /notify/v1/attendance/verify（核验端令牌）
+        → attendance 落库 + 生成 FORCE_STOP_FEISHU 动作（30 分钟有效、同任务唯一）
+        → 手机 GET /notify/v1/device/actions/pending
+        → begin(带 nonce) → am force-stop --user 0 com.ss.android.lark → 验证进程清零
+        → POST .../result → cleanup_success 邮件
+```
+
+新增接口：
+
+| 方法 | 路径 | 令牌 | 用途 |
+|---|---|---|---|
+| GET | `/notify/v1/attendance/pending` | 核验端 | 近 20h 内、目标为飞书、尚无证据的任务 |
+| POST | `/notify/v1/attendance/verify` | 核验端 | 提交真实打卡证据；缺字段 400，重复幂等 |
+| GET | `/notify/v1/device/actions/pending` | 设备端 | 领取待执行动作（只有 `FORCE_STOP_FEISHU`） |
+| POST | `/notify/v1/device/actions/{id}/begin` | 设备端 | 校验设备/nonce/有效期后进入 CLEANUP_RUNNING |
+| POST | `/notify/v1/device/actions/{id}/result` | 设备端 | 回报 CLEANUP_SUCCESS / CLEANUP_FAILED / REJECTED |
+
+Windows 核验端：`python tools/attendance_verifier.py --once`（或 `--loop 600` 常驻）。
+判据：当天有 records、`check_in_record_id` 非空、`check_in_result` 不是 Todo/Absent、
+打卡时间不早于任务时间 -10 分钟。任一条不满足就不上报成功（保持待确认）。
+
+Android 两个开关（设置页 → 远程同步 → 飞书进程清理）：
+`cleanup_before_launch`（启动前清理遗留进程）与 `cleanup_after_checkin`（考勤成功后彻底关闭）。
+后者是**执行权限的最终裁决**：关闭时收到动作只会回 REJECTED。
+`awaiting_checkin_cleanup` 置位期间禁止启动前清理，避免把还要用来打卡的飞书杀掉。
+
+实测（2026-11-24）：08:55 真实打卡 → 09:5x 核验 → 动作下发 → 手机 force-stop
+（清理前 3 个进程 → 0，245ms）→ cleanup_success 邮件；随后规则重新触发，飞书正常回到前台。

@@ -52,9 +52,11 @@ object VpsNotify {
         tries: Int,
         displayId: Int?,
         startedAt: Long,
-        finishedAt: Long
+        finishedAt: Long,
+        taskId: String
     ) {
         val data = JSONObject()
+            .put("task_id", taskId)
             .put("device_name", android.os.Build.MODEL)
             .put("target_app", appName)
             .put("attempts", tries)

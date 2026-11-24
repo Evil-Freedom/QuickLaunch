@@ -6,6 +6,8 @@ import android.os.Looper
 import android.util.Log
 import com.workbuddy.quicklaunch.service.LaunchFailureNotifier
 import com.workbuddy.quicklaunch.util.AutoUnlock
+import com.workbuddy.quicklaunch.util.CleanupSettings
+import com.workbuddy.quicklaunch.util.FeishuProcessManager
 import com.workbuddy.quicklaunch.util.VpsNotify
 import com.workbuddy.quicklaunch.service.LaunchService
 import java.util.UUID
@@ -75,6 +77,16 @@ object LaunchAttemptController {
         if (pkg.isBlank()) return
         val app = context.applicationContext
         val displayName = appName.ifBlank { pkg }
+
+        // 启动前清理飞书遗留进程（两个独立开关之一）。三种情况坚决不动手：
+        // 1) 目标不是飞书；2) 本地开关关闭；3) 还有未完成的考勤任务（用户可能还要用飞书）。
+        if (pkg == FeishuProcessManager.PKG &&
+            CleanupSettings.beforeLaunch(app) &&
+            !CleanupSettings.awaitingCleanup(app)
+        ) {
+            runCatching { FeishuProcessManager.cleanupIfRunning() }
+                .onFailure { Log.w(TAG, "启动前清理失败：${it.javaClass.simpleName}") }
+        }
 
         // 去重：同一个包已有在跑的任务时直接忽略本次触发。
         // 这是「多条规则指向同一个 App」「重试期间原任务又被 Alarm 触发」的统一解法。
@@ -386,7 +398,8 @@ object LaunchAttemptController {
                 tries = engine.attemptIndex.coerceAtLeast(1),
                 displayId = null,
                 startedAt = engine.startedAt,
-                finishedAt = engine.finishedAt
+                finishedAt = engine.finishedAt,
+                taskId = engine.attemptId
             )
         }
     }

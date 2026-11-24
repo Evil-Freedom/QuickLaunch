@@ -10,6 +10,7 @@ import unittest
 
 from mailer import repository as R
 from mailer.agent_mail import AgentMailClient
+from mailer.actions import ActionStore
 from mailer.api import build_server
 from mailer.config import Config
 from mailer.dispatcher import Dispatcher
@@ -43,13 +44,15 @@ class ApiTest(unittest.TestCase):
         self.repo = R.Repository(self.cfg.db_path)
         self.client = AgentMailClient([sys.executable, FAKE_CLI], self.tmp, self.tmp)
         self.dispatcher = Dispatcher(self.cfg, self.repo, self.client)
-        self.server = build_server(self.cfg, self.repo, self.dispatcher)
+        self.store = ActionStore(self.cfg.db_path)
+        self.server = build_server(self.cfg, self.repo, self.store, self.dispatcher)
         self.port = self.server.server_address[1]
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
     def tearDown(self):
         self.server.shutdown()
         self.repo.close()
+        self.store.close()
 
     def post(self, body, token="secret-token"):
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)

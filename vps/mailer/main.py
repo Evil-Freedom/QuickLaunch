@@ -13,6 +13,7 @@ import sys
 import threading
 from dataclasses import replace
 
+from .actions import ActionStore
 from .agent_mail import AgentMailClient
 from .api import build_server
 from .config import Config
@@ -78,6 +79,7 @@ def main() -> int:
         return 2
 
     repo = Repository(cfg.db_path)
+    store = ActionStore(cfg.db_path)
     client = AgentMailClient(cfg.cli_path, cfg.cli_config_dir, cfg.cli_home, cfg.send_timeout_s)
     dispatcher = Dispatcher(cfg, repo, client)
 
@@ -89,7 +91,7 @@ def main() -> int:
         email = aliases[0].get("email") if aliases else "?"
         log.info("发件身份：%s（授权正常）", email)
 
-    server = build_server(cfg, repo, dispatcher)
+    server = build_server(cfg, repo, store, dispatcher)
     dispatcher.start()
     log.info("ql-mailer 监听 %s:%s，DB=%s", cfg.bind_host, cfg.port, cfg.db_path)
 
@@ -109,6 +111,7 @@ def main() -> int:
     server.shutdown()
     dispatcher.stop()
     repo.close()
+    store.close()
     log.info("已退出")
     return 0
 

@@ -1,10 +1,11 @@
-"""事件接入 HTTP 接口。
+"""事件接入 + 考勤核验 + 清理动作 的 HTTP 接口。
 
-边界（对应需求 §九）：
-* 只接受 `Authorization: Bearer <QLMAIL_INGEST_TOKEN>`，否则 401；
-* **不接受任何收件人字段** —— 地址只来自服务端配置，Android 无法指定发给谁；
-* 只接受固定的事件类型与白名单字段，正文由服务端模板渲染（不会被当成指令执行）；
-* 入队即返回 202，发送在后台线程做，绝不阻塞上报方。
+三类调用方，三套边界：
+* 手机（`QLMAIL_INGEST_TOKEN`）：上报事件、拉取/回报清理动作；
+* Windows 核验端（`QLMAIL_VERIFIER_TOKEN`）：查待核验任务、提交真实考勤证据；
+* 服务内部：只在后台线程发邮件，绝不在此路径里同步发信。
+
+请求体里的收件人、包名、命令、文件路径一律不接受——动作类型只有服务端枚举。
 """
 
 from __future__ import annotations
@@ -16,24 +17,27 @@ from typing import Any
 
 from . import render
 from . import repository as R
+from .actions import ActionStore
 from .config import Config
 from .dispatcher import Dispatcher
 
 log = logging.getLogger("qlmail.api")
 
 MAX_BODY = 64 * 1024
-SUCCESS_TYPES = ("launch_success", "checkin_success")
+SUCCESS_TYPES = ("launch_success", "checkin_success", "cleanup_success")
+REQUIRED_EVIDENCE = ("task_id", "device_id", "attendance_date", "evidence_source", "evidence_time")
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "ql-mailer/1.0"
+    server_version = "ql-mailer/1.1"
     cfg: Config
     repo: R.Repository
+    store: ActionStore
     dispatcher: Dispatcher
 
     # ── 基础 ────────────────────────────────────────────────────────
 
-    def log_message(self, fmt: str, *args: Any) -> None:  # 去掉默认的 stderr 噪音
+    def log_message(self, fmt: str, *args: Any) -> None:
         log.debug("http " + fmt, *args)
 
     def _send(self, code: int, payload: dict[str, Any]) -> None:
@@ -44,12 +48,17 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _authorized(self) -> bool:
-        token = self.cfg.ingest_token
-        if not token:
-            return False
+    def _bearer(self) -> str:
         header = self.headers.get("Authorization", "")
-        return header == f"Bearer {token}"
+        return header[7:] if header.startswith("Bearer ") else ""
+
+    def _device_ok(self) -> bool:
+        token = self.cfg.ingest_token
+        return bool(token) and self._bearer() == token
+
+    def _verifier_ok(self) -> bool:
+        token = self.cfg.verifier_token
+        return bool(token) and self._bearer() == token
 
     def _json_body(self) -> dict[str, Any] | None:
         length = int(self.headers.get("Content-Length") or 0)
@@ -61,43 +70,96 @@ class Handler(BaseHTTPRequestHandler):
             return None
         return data if isinstance(data, dict) else None
 
-    # ── 路由 ────────────────────────────────────────────────────────
+    def _notify(self, event_id: str, type_: str, device_id: str, payload: dict[str, Any]) -> None:
+        subject, body = render.render(type_, payload)
+        self.repo.enqueue(
+            notification_type=type_, device_id=device_id, payload=payload,
+            subject=subject, body=body, primary=self.cfg.primary,
+            fallback=self.cfg.fallback, event_id=event_id,
+        )
+
+    # ── GET ─────────────────────────────────────────────────────────
 
     def do_GET(self) -> None:  # noqa: N802
-        if self.path == "/healthz":
+        path = self.path.split("?", 1)[0]
+
+        if path == "/healthz":
             self._send(200, {
                 "ok": True,
                 "paused": self.dispatcher.paused,
                 "queue": self.repo.stats(),
+                "actions": self.store.stats(),
                 "primary": self.cfg.primary,
                 "fallback": self.cfg.fallback,
             })
             return
-        if self.path.startswith("/v1/events/"):
-            event_id = self.path.rsplit("/", 1)[-1]
+
+        if path == "/v1/attendance/pending":
+            if not self._verifier_ok():
+                self._send(401, {"ok": False, "error": "unauthorized"})
+                return
+            self._send(200, {"ok": True, "tasks": self.store.pending_checkins()})
+            return
+
+        if path == "/v1/device/actions/pending":
+            if not self._device_ok():
+                self._send(401, {"ok": False, "error": "unauthorized"})
+                return
+            device_id = (self.headers.get("X-QL-Device")
+                         or self.path.split("device_id=", 1)[-1].split("&")[0])
+            if not device_id or (self.cfg.device_whitelist and device_id not in self.cfg.device_whitelist):
+                self._send(403, {"ok": False, "error": "device_not_allowed"})
+                return
+            actions = self.store.pending_for_device(device_id)
+            self._send(200, {"ok": True, "actions": [a.as_dict() for a in actions]})
+            return
+
+        if path.startswith("/v1/events/"):
+            event_id = path.rsplit("/", 1)[-1]
             try:
                 row = self.repo.get(event_id)
             except KeyError:
                 self._send(404, {"ok": False, "error": "not_found"})
                 return
             self._send(200, {
-                "ok": True,
-                "event_id": row.event_id,
-                "status": row.status,
-                "recipient": row.current_recipient,
-                "message_id": row.message_id,
-                "attempts": row.attempts,
-                "error_code": row.error_code,
+                "ok": True, "event_id": row.event_id, "status": row.status,
+                "recipient": row.current_recipient, "message_id": row.message_id,
+                "attempts": row.attempts, "error_code": row.error_code,
                 "error": row.error_message,
             })
             return
+
+        if path.startswith("/v1/actions/"):
+            action_id = path.rsplit("/", 1)[-1]
+            action = self.store.get(action_id)
+            if action is None:
+                self._send(404, {"ok": False, "error": "not_found"})
+                return
+            self._send(200, {"ok": True, **action.as_dict(),
+                             "result_at": action.result_at,
+                             "result_detail": action.result_detail})
+            return
+
         self._send(404, {"ok": False, "error": "not_found"})
 
+    # ── POST ────────────────────────────────────────────────────────
+
     def do_POST(self) -> None:  # noqa: N802
-        if self.path != "/v1/events":
+        path = self.path.split("?", 1)[0]
+
+        if path == "/v1/attendance/verify":
+            self._post_verify()
+            return
+
+        if path.startswith("/v1/device/actions/"):
+            self._post_action_result(path)
+            return
+
+        if path != "/v1/events":
             self._send(404, {"ok": False, "error": "not_found"})
             return
-        if not self._authorized():
+
+        if not self._device_ok():
             self._send(401, {"ok": False, "error": "unauthorized"})
             return
         body = self._json_body()
@@ -135,29 +197,122 @@ class Handler(BaseHTTPRequestHandler):
 
         event_id = body.get("event_id")
         created, row = self.repo.enqueue(
-            notification_type=event_type,
-            device_id=device_id,
-            payload=payload,
-            subject=subject,
-            body=text,
-            primary=self.cfg.primary,
-            fallback=self.cfg.fallback,
-            event_id=str(event_id) if event_id else None,
+            notification_type=event_type, device_id=device_id, payload=payload,
+            subject=subject, body=text, primary=self.cfg.primary,
+            fallback=self.cfg.fallback, event_id=str(event_id) if event_id else None,
         )
         log.info("入队 event=%s type=%s new=%s", row.event_id, event_type, created)
-        self._send(202, {
-            "ok": True,
-            "event_id": row.event_id,
-            "status": row.status,
-            "duplicate": not created,
+        self._send(202, {"ok": True, "event_id": row.event_id,
+                         "status": row.status, "duplicate": not created})
+
+    def _post_verify(self) -> None:
+        if not self._verifier_ok():
+            self._send(401, {"ok": False, "error": "unauthorized"})
+            return
+        body = self._json_body()
+        if body is None:
+            self._send(400, {"ok": False, "error": "invalid_json"})
+            return
+        missing = [k for k in REQUIRED_EVIDENCE if not str(body.get(k) or "").strip()]
+        if missing:
+            self._send(400, {"ok": False, "error": "missing_evidence", "fields": missing})
+            return
+        if self.cfg.device_whitelist and str(body["device_id"]) not in self.cfg.device_whitelist:
+            self._send(403, {"ok": False, "error": "device_not_allowed"})
+            return
+
+        task_id = str(body["task_id"])
+        device_id = str(body["device_id"])
+        result = str(body.get("result") or "success")
+        created = self.store.record_attendance(
+            task_id=task_id, device_id=device_id,
+            attendance_date=str(body["attendance_date"]),
+            evidence_source=str(body["evidence_source"]),
+            evidence_time=str(body["evidence_time"]),
+            evidence_ref=str(body.get("evidence_ref") or ""),
+            result=result,
+        )
+
+        if result != "success":
+            self._send(202, {"ok": True, "accepted": True, "verified": False, "duplicate": not created})
+            return
+
+        # 邮件：考勤成功（event_id 由 task 派生 → 天然幂等）
+        self._notify(f"checkin-{task_id}", "checkin_success", device_id, {
+            "device_name": body.get("device_name") or "QuickLaunch 设备",
+            "target_app": "飞书",
+            "evidence_time": str(body["evidence_time"]),
+            "evidence_source": str(body["evidence_source"]),
+            "evidence_ref": str(body.get("evidence_ref") or ""),
+            "task_id": task_id,
         })
 
+        action_created, action = self.store.create_action(
+            device_id=device_id, task_id=task_id,
+            action_type="FORCE_STOP_FEISHU", ttl_s=self.cfg.action_ttl_s,
+        )
+        self._notify(f"cleanup-pending-{task_id}", "cleanup_pending", device_id, {
+            "device_name": body.get("device_name") or "QuickLaunch 设备",
+            "task_id": task_id,
+            "action_type": action.action_type,
+            "checked_at": action.created_at,
+        }) if action_created else None
 
-def build_server(cfg: Config, repo: R.Repository, dispatcher: Dispatcher) -> ThreadingHTTPServer:
-    handler = type("BoundHandler", (Handler,), {"cfg": cfg, "repo": repo, "dispatcher": dispatcher})
+        log.info("考勤核验成功 task=%s action=%s new=%s", task_id, action.action_id, action_created)
+        self._send(202, {
+            "ok": True, "accepted": True, "verified": True,
+            "duplicate": not created,
+            "action_id": action.action_id,
+            "action_status": action.status,
+            "action_created": action_created,
+        })
+
+    def _post_action_result(self, path: str) -> None:
+        if not self._device_ok():
+            self._send(401, {"ok": False, "error": "unauthorized"})
+            return
+        parts = [p for p in path.split("/") if p]
+        # /v1/device/actions/{id}/{begin|result}
+        if len(parts) != 5:
+            self._send(404, {"ok": False, "error": "not_found"})
+            return
+        action_id, verb = parts[3], parts[4]
+        body = self._json_body() or {}
+        device_id = str(body.get("device_id") or self.headers.get("X-QL-Device") or "")
+
+        if verb == "begin":
+            ok, reason, action = self.store.begin(action_id, device_id, str(body.get("nonce") or ""))
+            self._send(200 if ok else 409, {"ok": ok, "reason": reason,
+                                            "action": action.as_dict() if action else None})
+            return
+
+        if verb == "result":
+            status = str(body.get("status") or "")
+            ok, reason, action = self.store.finish(
+                action_id, device_id, status, str(body.get("detail") or "")
+            )
+            if ok and action is not None and action.status in ("CLEANUP_SUCCESS", "CLEANUP_FAILED"):
+                type_ = "cleanup_success" if action.status == "CLEANUP_SUCCESS" else "cleanup_failed"
+                self._notify(f"cleanup-{action.action_id}", type_, device_id, {
+                    "device_name": body.get("device_name") or "QuickLaunch 设备",
+                    "task_id": action.task_id,
+                    "action_type": action.action_type,
+                    "detail": str(body.get("detail") or action.status),
+                    "checked_at": action.result_at or "",
+                })
+            self._send(200 if ok else 409, {"ok": ok, "reason": reason,
+                                            "status": action.status if action else None})
+            return
+
+        self._send(404, {"ok": False, "error": "not_found"})
+
+
+def build_server(cfg: Config, repo: R.Repository, store: ActionStore,
+                 dispatcher: Dispatcher) -> ThreadingHTTPServer:
+    handler = type("BoundHandler", (Handler,),
+                   {"cfg": cfg, "repo": repo, "store": store, "dispatcher": dispatcher})
     try:
         return ThreadingHTTPServer((cfg.bind_host, cfg.port), handler)
     except OSError as exc:
-        # docker 网桥不存在（容器未起）时退回本机回环，服务仍可用但只有本机能上报
         log.error("绑定 %s:%s 失败（%s），退回 127.0.0.1", cfg.bind_host, cfg.port, exc)
         return ThreadingHTTPServer(("127.0.0.1", cfg.port), handler)

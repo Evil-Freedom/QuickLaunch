@@ -8,6 +8,7 @@ import com.workbuddy.quicklaunch.launch.LaunchAttemptState
 import com.workbuddy.quicklaunch.launch.LaunchPolicy
 import com.workbuddy.quicklaunch.launch.LaunchSettings
 import com.workbuddy.quicklaunch.remote.vps.VpsSettings
+import com.workbuddy.quicklaunch.util.CleanupSettings
 import com.workbuddy.quicklaunch.remote.vps.VpsSync
 import com.workbuddy.quicklaunch.remote.vps.VpsSyncScheduler
 import com.workbuddy.quicklaunch.util.QuickLaunchExecutors
@@ -36,6 +37,12 @@ class VpsRemoteActivity : AppCompatActivity() {
 
         binding.btnVpsSave.setOnClickListener { saveAndSync() }
         binding.btnRetrySave.setOnClickListener { saveRetryPolicy() }
+        binding.swCleanupBefore.setOnCheckedChangeListener { _, checked ->
+            CleanupSettings.setBeforeLaunch(this, checked)
+        }
+        binding.swCleanupAfter.setOnCheckedChangeListener { _, checked ->
+            CleanupSettings.setAfterCheckin(this, checked)
+        }
         binding.swVpsEnabled.setOnCheckedChangeListener { _, checked ->
             // 只切开关就立即持久化：用户切完直接退出页面也不该丢
             VpsSettings.setEnabled(this, checked)
@@ -70,6 +77,8 @@ class VpsRemoteActivity : AppCompatActivity() {
         binding.etRetryWindow.setText(p.verifyWindowMs.toString())
         binding.etRetryDelays.setText(p.retryDelaysMs.joinToString(","))
         binding.swRetryNotify.isChecked = p.notifyOnFailure
+        binding.swCleanupBefore.isChecked = CleanupSettings.beforeLaunch(this)
+        binding.swCleanupAfter.isChecked = CleanupSettings.afterCheckin(this)
     }
 
     private fun saveAndSync() {

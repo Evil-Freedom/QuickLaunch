@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.workbuddy.quicklaunch.remote.vps.VpsSync
 import com.workbuddy.quicklaunch.remote.vps.VpsSyncScheduler
+import com.workbuddy.quicklaunch.util.ActionPoller
 import java.util.concurrent.Executors
 
 /**
@@ -42,6 +43,8 @@ class VpsSyncReceiver : BroadcastReceiver() {
         executor.execute {
             try {
                 runCatching { VpsSync.runOnce(app) }
+                // 清理指令走同一次周期唤醒：设备离线时动作留在 VPS 队列直到过期
+                runCatching { ActionPoller.pollOnce(app) }
             } finally {
                 // 无论同步结果如何，下一次都已排上（见上）
             }
