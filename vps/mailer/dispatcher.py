@@ -22,10 +22,13 @@ log = logging.getLogger("qlmail.dispatcher")
 
 
 class Dispatcher:
-    def __init__(self, cfg: Config, repo: R.Repository, client: AgentMailClient):
+    def __init__(self, cfg: Config, repo: R.Repository, client: AgentMailClient,
+                 on_sent=None):
         self.cfg = cfg
         self.repo = repo
         self.client = client
+        # 邮件真正发出后的回调（用于推进「待确认提醒」时间，发信失败不推进）
+        self.on_sent = on_sent
         self._stop = threading.Event()
         self._paused = threading.Event()  # 授权失效时暂停，等人工重新授权
         self._thread: threading.Thread | None = None
@@ -102,6 +105,11 @@ class Dispatcher:
             except Exception:  # 回查失败不影响「已发送」这个结论
                 log.warning("已发送但回查 message_id 失败 event=%s", row.event_id)
             self.repo.mark_sent(row.event_id, message_id)
+            if self.on_sent is not None:
+                try:
+                    self.on_sent(row.event_id)
+                except Exception:
+                    log.exception("on_sent 回调失败 event=%s（不影响发送结果）", row.event_id)
             return
 
         if outcome.kind == C.KIND_UNKNOWN:

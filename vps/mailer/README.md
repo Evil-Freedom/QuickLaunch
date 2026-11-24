@@ -170,3 +170,21 @@ Android 两个开关（设置页 → 远程同步 → 飞书进程清理）：
 
 实测（2026-11-24）：08:55 真实打卡 → 09:5x 核验 → 动作下发 → 手机 force-stop
 （清理前 3 个进程 → 0，245ms）→ cleanup_success 邮件；随后规则重新触发，飞书正常回到前台。
+
+## 10. checkin_unknown 提醒节制（v1.2）
+
+同一设备 + 同一个考勤日 = 一个「待确认窗口」（各表见 `checkin_alerts`）：
+
+| 时机 | 行为 |
+|---|---|
+| 当天第一条 checkin_unknown | 发一封「待确认」，发送成功后写 `first_notified_at` |
+| 30 分钟内再次上报（含反复启动） | 不入队、不回邮件，接口返回 `duplicate=true, reason=suppress` |
+| 满 30 分钟仍未核验 | 允许一条提醒，发送成功后 `last_reminded_at` + `reminder_count+1` |
+| 真实 checkin_success / 清理完成 | 窗口置 CLOSED，之后一律不再提醒 |
+| 邮件发送失败 | 时间戳**不推进**（回调只在 mark_sent 之后触发），下个窗口继续尝试 |
+
+并发安全：提醒邮件的 `event_id` = `unknown-{device}-{date}-{30分钟桶}`，
+同一桶内并发请求命中同一条主键，`INSERT OR IGNORE` 天然去重。
+
+待核验列表按「设备+日期」合并，只保留当天最早那次启动；某天一旦有真实考勤证据，
+该日后续启动不再进入待核验（避免十几次 lark-cli 调用）。

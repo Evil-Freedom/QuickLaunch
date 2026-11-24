@@ -11,6 +11,7 @@ import unittest
 from mailer import repository as R
 from mailer.agent_mail import AgentMailClient
 from mailer.actions import ActionStore
+from mailer.alerts import AlertStore
 from mailer.api import build_server
 from mailer.config import Config
 from mailer.dispatcher import Dispatcher
@@ -47,7 +48,8 @@ class ApiTest(unittest.TestCase):
         self.client = AgentMailClient([sys.executable, FAKE_CLI], self.tmp, self.tmp)
         self.dispatcher = Dispatcher(self.cfg, self.repo, self.client)
         self.store = ActionStore(self.cfg.db_path)
-        self.server = build_server(self.cfg, self.repo, self.store, self.dispatcher)
+        self.alerts = AlertStore(self.cfg.db_path)
+        self.server = build_server(self.cfg, self.repo, self.store, self.alerts, self.dispatcher)
         self.port = self.server.server_address[1]
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
@@ -55,6 +57,7 @@ class ApiTest(unittest.TestCase):
         self.server.shutdown()
         self.repo.close()
         self.store.close()
+        self.alerts.close_conn()
 
     def post(self, body, token="secret-token"):
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
@@ -111,6 +114,30 @@ class ApiTest(unittest.TestCase):
     def test_checkin_success_without_evidence_rejected(self):
         status, _ = self.post(self.event(type="checkin_success", data={"device_name": "R"}))
         self.assertEqual(400, status)
+
+    def test_unknown_is_deduped_in_window(self):
+        body = {"type": "checkin_unknown", "device_id": "dev_ok",
+                "data": {"task_id": "t-9", "device_name": "Razr",
+                         "actual_time": "2026-11-24 08:55:00"}}
+        status, first = self.post(body)
+        self.assertEqual(202, status)
+        self.assertEqual("PENDING", first["status"])
+        status, second = self.post(body)
+        self.assertEqual(202, status)
+        self.assertTrue(second["duplicate"])
+        self.assertEqual(1, self.repo.stats().get("PENDING"))
+
+    def test_unknown_date_falls_back_to_today(self):
+        # 手机上报的 actual_time 是 MM-dd HH:mm:ss，不能被截成非法日期
+        body = {"type": "checkin_unknown", "device_id": "dev_ok",
+                "data": {"task_id": "t-10", "device_name": "Razr",
+                         "actual_time": "11-24 12:42:03"}}
+        status, _ = self.post(body)
+        self.assertEqual(202, status)
+        rows = self.alerts._conn.execute(
+            "select attendance_date from checkin_alerts").fetchall()
+        for row in rows:
+            self.assertRegex(row["attendance_date"], r"^\d{4}-\d{2}-\d{2}$")
 
     def test_status_endpoint(self):
         _, data = self.post(self.event())

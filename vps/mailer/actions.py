@@ -236,23 +236,35 @@ class ActionStore:
                    ORDER BY n.created_at DESC""",
                 (cutoff,),
             ).fetchall()
-        out = []
-        for r in rows:
+        # 同一天同一设备只保留**最早**那次启动：考勤证据是「某天的打卡」，
+        # 不是「某次启动的打卡」；不合并的话，反复启动会把待核验列表撑成十几条，
+        # 每次核验都要多打十几次 lark-cli。
+        grouped: dict[tuple[str, str], dict] = {}
+        for r in sorted(rows, key=lambda x: (x["created_at"], x["event_id"])):
             task_id = r["task_id"]
             if self.attendance(task_id) is not None:
                 continue
             payload = json.loads(r["payload"])
             if str(payload.get("target_app", "")) not in CHECKIN_APPS:
                 continue
-            out.append({
+            slot = (r["device_id"], r["created_at"][:10])
+            # 这一天已经有真实考勤证据了 —— 同一天后续的启动不再需要核验
+            if self._conn.execute(
+                "SELECT 1 FROM attendance WHERE device_id=? AND attendance_date=? LIMIT 1",
+                (r["device_id"], r["created_at"][:10]),
+            ).fetchone() is not None:
+                continue
+            if slot in grouped:      # 已按时间升序，先到的那条就是当天最早的一次启动
+                continue
+            grouped[slot] = {
                 "task_id": task_id,
                 "event_id": r["event_id"],
                 "device_id": r["device_id"],
                 "created_at": r["created_at"],
                 "target_app": payload.get("target_app", ""),
                 "actual_time": payload.get("actual_time", ""),
-            })
-        return out
+            }
+        return list(grouped.values())
 
     @staticmethod
     def _to_model(row: sqlite3.Row) -> Action:

@@ -52,10 +52,22 @@ def load_props() -> dict[str, str]:
     return props
 
 
+class CliAuthError(RuntimeError):
+    """lark-cli 授权失效：必须停下来等人重新登录，不能当成「没查到记录」。"""
+
+
+AUTH_HINTS = ("unauthorized", "not logged in", "login required", "token expired",
+              "invalid token", "auth failed", "please login")
+
+
 def run_lark(args: list[str], timeout: int = 60) -> dict:
     proc = subprocess.run([LARK, *args], capture_output=True, timeout=timeout)
     if proc.returncode != 0:
-        raise RuntimeError(f"lark-cli 退出码 {proc.returncode}: {proc.stderr.decode('utf-8', 'replace')[:300]}")
+        err = proc.stderr.decode("utf-8", "replace")
+        low = err.lower()
+        if any(h in low for h in AUTH_HINTS):
+            raise CliAuthError(f"lark-cli 授权失效：{err[:200]}")
+        raise RuntimeError(f"lark-cli 退出码 {proc.returncode}: {err[:300]}")
     try:
         data = json.loads(proc.stdout.decode("utf-8", "replace"))
     except json.JSONDecodeError as exc:
@@ -138,8 +150,12 @@ def verify_once(props: dict[str, str], dry_run: bool = False) -> int:
         return 0
 
     handled = 0
+    seen: set[str] = set()
     for task in pending:
         task_id = task["task_id"]
+        if task_id in seen:      # 同一次运行里不重复提交同一个任务
+            continue
+        seen.add(task_id)
         created = dt.datetime.fromisoformat(task["created_at"].replace("Z", "+00:00")).astimezone()
         day = created.date()
         not_before = int(created.timestamp()) - 600
@@ -187,11 +203,21 @@ def main(argv: list[str]) -> int:
         while True:
             try:
                 verify_once(props, args.dry_run)
+            except CliAuthError as exc:
+                # 授权失效不是「没打卡」：明确告警并退避，等人重新登录
+                print(f"【需要人工处理】{exc}", file=sys.stderr)
+                time.sleep(max(args.loop, 600))
+                continue
+            except urllib.error.URLError as exc:
+                print(f"VPS 不可达，稍后重试：{exc}", file=sys.stderr)
             except Exception as exc:
                 print(f"核验循环异常：{exc}", file=sys.stderr)
             time.sleep(args.loop)
     try:
         verify_once(props, args.dry_run)
+    except CliAuthError as exc:
+        print(f"【需要人工处理】{exc}", file=sys.stderr)
+        return 3
     except urllib.error.URLError as exc:
         print(f"无法连接 VPS：{exc}", file=sys.stderr)
         return 2

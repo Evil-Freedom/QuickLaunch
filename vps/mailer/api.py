@@ -18,12 +18,22 @@ from typing import Any
 from . import render
 from . import repository as R
 from .actions import ActionStore
+from .alerts import AlertStore
 from .config import Config
 from .dispatcher import Dispatcher
 
 log = logging.getLogger("qlmail.api")
 
 MAX_BODY = 64 * 1024
+
+
+def _looks_like_date(value: str) -> bool:
+    try:
+        import datetime as _dt
+        _dt.date.fromisoformat(value)
+        return True
+    except ValueError:
+        return False
 SUCCESS_TYPES = ("launch_success", "checkin_success", "cleanup_success")
 REQUIRED_EVIDENCE = ("task_id", "device_id", "attendance_date", "evidence_source", "evidence_time")
 
@@ -33,6 +43,7 @@ class Handler(BaseHTTPRequestHandler):
     cfg: Config
     repo: R.Repository
     store: ActionStore
+    alerts: AlertStore
     dispatcher: Dispatcher
 
     # ── 基础 ────────────────────────────────────────────────────────
@@ -196,6 +207,21 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         event_id = body.get("event_id")
+        if event_type == "checkin_unknown":
+            # 日期必须是 yyyy-MM-dd：payload 里的 actual_time 是「MM-dd HH:mm:ss」，
+            # 直接截前 10 位会得到 "11-24 12:4" 这种非法日期，提醒窗口就永远匹配不上。
+            import datetime as _dt
+            raw_date = str(payload.get("attendance_date") or "")
+            date = raw_date if _looks_like_date(raw_date) else _dt.datetime.now().strftime("%Y-%m-%d")
+            task_id = str(payload.get("task_id") or "")
+            decision, dedupe_id = self.alerts.observe(device_id, date, task_id)
+            log.info("待确认提醒 device=%s date=%s decision=%s", device_id, date, decision)
+            if decision in ("suppress", "closed"):
+                self._send(202, {"ok": True, "event_id": None, "status": "SUPPRESSED",
+                                 "duplicate": True, "reason": decision})
+                return
+            event_id = dedupe_id
+
         created, row = self.repo.enqueue(
             notification_type=event_type, device_id=device_id, payload=payload,
             subject=subject, body=text, primary=self.cfg.primary,
@@ -223,6 +249,16 @@ class Handler(BaseHTTPRequestHandler):
 
         task_id = str(body["task_id"])
         device_id = str(body["device_id"])
+
+        owner = self.repo._conn.execute(
+            """SELECT device_id FROM notifications
+               WHERE event_id=? OR json_extract(payload,'$.task_id')=?
+               LIMIT 1""",
+            (task_id, task_id),
+        ).fetchone()
+        if owner is not None and owner["device_id"] != device_id:
+            self._send(409, {"ok": False, "error": "task_device_mismatch"})
+            return
         result = str(body.get("result") or "success")
         created = self.store.record_attendance(
             task_id=task_id, device_id=device_id,
@@ -246,6 +282,9 @@ class Handler(BaseHTTPRequestHandler):
             "evidence_ref": str(body.get("evidence_ref") or ""),
             "task_id": task_id,
         })
+
+        # 真实考勤成功 = 关闭待确认窗口，后续不再提醒
+        self.alerts.close(device_id, str(body["attendance_date"]), "checkin_success")
 
         action_created, action = self.store.create_action(
             device_id=device_id, task_id=task_id,
@@ -291,6 +330,9 @@ class Handler(BaseHTTPRequestHandler):
             ok, reason, action = self.store.finish(
                 action_id, device_id, status, str(body.get("detail") or "")
             )
+            if ok and action is not None and action.status == "CLEANUP_SUCCESS":
+                date = str(body.get("attendance_date") or action.created_at[:10])
+                self.alerts.close(device_id, date, "cleanup_success")
             if ok and action is not None and action.status in ("CLEANUP_SUCCESS", "CLEANUP_FAILED"):
                 type_ = "cleanup_success" if action.status == "CLEANUP_SUCCESS" else "cleanup_failed"
                 self._notify(f"cleanup-{action.action_id}", type_, device_id, {
@@ -308,9 +350,10 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def build_server(cfg: Config, repo: R.Repository, store: ActionStore,
-                 dispatcher: Dispatcher) -> ThreadingHTTPServer:
+                 alerts: AlertStore, dispatcher: Dispatcher) -> ThreadingHTTPServer:
     handler = type("BoundHandler", (Handler,),
-                   {"cfg": cfg, "repo": repo, "store": store, "dispatcher": dispatcher})
+                   {"cfg": cfg, "repo": repo, "store": store, "alerts": alerts,
+                    "dispatcher": dispatcher})
     try:
         return ThreadingHTTPServer((cfg.bind_host, cfg.port), handler)
     except OSError as exc:

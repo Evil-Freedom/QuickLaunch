@@ -37,15 +37,16 @@ class ActionStoreTest(unittest.TestCase):
         self.assertFalse(self.store.record_attendance(result="success", **args))
         self.assertEqual("r1", self.store.attendance("t1")["evidence_ref"])
 
-    def test_pending_checkins_skips_verified(self):
+    def test_pending_checkins_merges_same_day_and_skips_verified(self):
         self._launch("task-1", "evt-1")
         self._launch("task-2", "evt-2")
-        self.assertEqual(2, len(self.store.pending_checkins()))
-        self.store.record_attendance(task_id="task-1", device_id="dev_1",
+        # 同设备同一天只保留最早的一次启动，避免反复启动撑大待核验列表
+        pending = self.store.pending_checkins()
+        self.assertEqual(1, len(pending))
+        self.store.record_attendance(task_id=pending[0]["task_id"], device_id="dev_1",
                                      attendance_date="2026-11-24", evidence_source="lark-cli",
                                      evidence_time="08:55", evidence_ref="", result="success")
-        pending = self.store.pending_checkins()
-        self.assertEqual(["task-2"], [t["task_id"] for t in pending])
+        self.assertEqual([], self.store.pending_checkins())
 
     # ── 动作 ────────────────────────────────────────────────────────
 
