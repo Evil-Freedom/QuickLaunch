@@ -38,6 +38,9 @@ android {
                 "\"${notifyProps.getProperty('ql.notify.base', '')}\""
         buildConfigField "String", "QL_NOTIFY_TOKEN",
                 "\"${notifyProps.getProperty('ql.notify.token', '')}\""
+        // 真机诊断开关：默认 false；只在本地进程生命周期测试时临时置 true 并重装
+        buildConfigField "boolean", "QL_DIAG",
+                "${notifyProps.getProperty('ql.diag', 'false') == 'true'}"
     }
 
     signingConfigs {

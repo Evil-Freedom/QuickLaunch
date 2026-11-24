@@ -154,6 +154,11 @@
             android:theme="@style/Theme.QuickLaunch.Dark" />
 
         <!-- 定时触发（显式 PendingIntent，无需导出） -->
+        <!-- 真机诊断入口：BuildConfig.QL_DIAG=false 时是空实现，只用于进程生命周期测试 -->
+        <receiver
+            android:name=".receiver.DiagReceiver"
+            android:exported="false" />
+
         <receiver
             android:name=".receiver.AlarmReceiver"
             android:exported="false" />

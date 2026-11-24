@@ -40,6 +40,8 @@ class ApiTest(unittest.TestCase):
             minute_limit=10,
             dry_run=False,
             log_path=os.path.join(self.tmp, "mailer.log"),
+            verifier_token="verify-token",
+            action_ttl_s=1800,
         )
         self.repo = R.Repository(self.cfg.db_path)
         self.client = AgentMailClient([sys.executable, FAKE_CLI], self.tmp, self.tmp)
@@ -118,6 +120,52 @@ class ApiTest(unittest.TestCase):
         payload = json.loads(resp.read())
         conn.close()
         self.assertEqual("PENDING", payload["status"])
+
+    def verify(self, body, token="verify-token"):
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
+        conn.request("POST", "/v1/attendance/verify", json.dumps(body),
+                     {"Content-Type": "application/json", "Authorization": f"Bearer {token}"})
+        resp = conn.getresponse()
+        data = json.loads(resp.read() or b"{}")
+        conn.close()
+        return resp.status, data
+
+    def _evidence(self, **kw):
+        base = {
+            "task_id": "t-1", "device_id": "dev_ok", "attendance_date": "2026-11-24",
+            "evidence_source": "lark-cli", "evidence_time": "2026-11-24 08:55:12",
+            "evidence_ref": "r-1", "result": "success",
+        }
+        base.update(kw)
+        return base
+
+    def test_verify_requires_evidence(self):
+        status, data = self.verify({"task_id": "t-1"})
+        self.assertEqual(400, status)
+        self.assertEqual("missing_evidence", data["error"])
+
+    def test_verify_requires_verifier_token(self):
+        status, _ = self.verify(self._evidence(), token="wrong")
+        self.assertEqual(401, status)
+
+    def test_pending_result_does_not_create_action(self):
+        status, data = self.verify(self._evidence(result="pending"))
+        self.assertEqual(202, status)
+        self.assertFalse(data["verified"])
+        self.assertEqual({}, self.store.stats())
+
+    def test_success_creates_one_action_and_is_idempotent(self):
+        status, first = self.verify(self._evidence())
+        self.assertEqual(202, status)
+        self.assertTrue(first["verified"])
+        status, second = self.verify(self._evidence())
+        self.assertEqual(202, status)
+        self.assertEqual(first["action_id"], second["action_id"])
+        self.assertEqual({"PENDING": 1}, self.store.stats())
+        # 只产生一封考勤成功邮件与一封清理待执行邮件（重复核验不再新增）
+        self.assertEqual({"PENDING": 2}, self.repo.stats())
+        types = sorted(r[0] for r in self.repo._conn.execute("select notification_type from notifications"))
+        self.assertEqual(["checkin_success", "cleanup_pending"], types)
 
     def test_healthz(self):
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
