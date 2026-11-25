@@ -123,6 +123,40 @@ ql-mailer 的 `QL_BOARD_URL` 同步改为 `http://172.18.0.1:8900`。
 | `/api/todos?open_id=他人` | 200 | **403** | 401 |
 | `/board.db` `/config.json` | 302 | 302 | 302 |
 
+## 4.3 OAuth 重定向白名单（当前唯一阻塞）
+
+飞书应用的 `redirect_urls` 实测只有两条内网地址：
+
+```
+http://192.168.110.203:8900/oauth/callback
+http://127.0.0.1:8900/oauth/callback
+```
+
+**没有** `https://xbyyb.duckdns.org/oauth/callback`。后果是：新用户点登录、
+或现有成员需要重新授权时，飞书会在回调阶段拒绝（redirect_uri 不匹配）。
+
+现有 7 名成员不受影响：他们的会话 Cookie 已在有效期内（30 天），
+服务端已自动把旧的明文 Cookie 换成签名 Cookie，无需重新登录。
+
+需要做（二选一）：
+
+1. **推荐**：飞书开放平台 → 应用 `cli_aa1b95d2143adcd4` → 安全设置 →
+   重定向 URL → 追加 `https://xbyyb.duckdns.org/oauth/callback` → 保存
+2. 临时：用 SSH 隧道从 `127.0.0.1:8900` 登录（该地址已在白名单），
+   登录后再用公网域名访问
+
+## 4.4 会话安全
+
+Cookie 形态：`uid=<open_id>.<签发时间>.<hmac-sha256>`，`HttpOnly; SameSite=Lax`，
+HTTPS 下带 `Secure`。密钥取 `BOARD_SESSION_SECRET`，未配置时退回 `QL_INTERNAL_TOKEN`；
+两者都没有则拒绝一切 Cookie（fail-closed）。
+
+为什么要签名：原来 Cookie 只存明文 open_id，而 `/api/board` 会把全员 open_id
+发给每个登录成员——任何成员都能把管理员的 open_id 填进 Cookie 冒充。
+现在签名覆盖 open_id + 时间戳，改一个字符即失效。
+
+旧明文 Cookie 的处理：下次请求放行一次，同时回发签名 Cookie，之后旧格式失效。
+
 ## 5. 回滚
 
 见 `docs/rollback.md`。
