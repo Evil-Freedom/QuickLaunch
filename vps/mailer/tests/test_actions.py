@@ -44,7 +44,8 @@ class ActionStoreTest(unittest.TestCase):
         pending = self.store.pending_checkins()
         self.assertEqual(1, len(pending))
         self.store.record_attendance(task_id=pending[0]["task_id"], device_id="dev_1",
-                                     attendance_date="2026-11-24", evidence_source="lark-cli",
+                                     attendance_date=pending[0]["created_at"][:10],
+                                     evidence_source="lark-cli",
                                      evidence_time="08:55", evidence_ref="", result="success")
         self.assertEqual([], self.store.pending_checkins())
 

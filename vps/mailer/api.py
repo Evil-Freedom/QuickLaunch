@@ -81,13 +81,21 @@ class Handler(BaseHTTPRequestHandler):
             return None
         return data if isinstance(data, dict) else None
 
-    def _notify(self, event_id: str, type_: str, device_id: str, payload: dict[str, Any]) -> None:
+    def _type_allowed(self, type_: str) -> bool:
+        """邮件类型白名单：为空表示全发；非空时只发列出的类型。"""
+        return not self.cfg.enabled_types or type_ in self.cfg.enabled_types
+
+    def _notify(self, event_id: str, type_: str, device_id: str, payload: dict[str, Any]) -> bool:
+        if not self._type_allowed(type_):
+            log.info("类型 %s 不在白名单，跳过邮件 event=%s", type_, event_id)
+            return False
         subject, body = render.render(type_, payload)
         self.repo.enqueue(
             notification_type=type_, device_id=device_id, payload=payload,
             subject=subject, body=body, primary=self.cfg.primary,
             fallback=self.cfg.fallback, event_id=event_id,
         )
+        return True
 
     # ── GET ─────────────────────────────────────────────────────────
 
@@ -194,6 +202,10 @@ class Handler(BaseHTTPRequestHandler):
         payload = body.get("data") or {}
         if not isinstance(payload, dict):
             self._send(400, {"ok": False, "error": "invalid_data"})
+            return
+
+        if not self._type_allowed(event_type):
+            self._send(202, {"ok": True, "accepted": False, "reason": "type_disabled"})
             return
 
         if self.cfg.success_mode == "off" and event_type in SUCCESS_TYPES:

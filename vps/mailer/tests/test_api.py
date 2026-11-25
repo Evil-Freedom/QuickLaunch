@@ -139,6 +139,27 @@ class ApiTest(unittest.TestCase):
         for row in rows:
             self.assertRegex(row["attendance_date"], r"^\d{4}-\d{2}-\d{2}$")
 
+    def test_type_whitelist_blocks_other_mails(self):
+        # 只允许打卡类邮件时，launch_success 必须被静默丢弃（202 type_disabled）
+        self.cfg = Config(**{**self.cfg.__dict__, "enabled_types": ("checkin_success", "checkin_unknown")})
+        self.server.shutdown()
+        self.server = build_server(self.cfg, self.repo, self.store, self.alerts, self.dispatcher)
+        self.port = self.server.server_address[1]
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+        status, data = self.post(self.event(type="launch_success", event_id="evt-launch-1"))
+        self.assertEqual(202, status)
+        self.assertFalse(data["accepted"])
+        self.assertEqual("type_disabled", data["reason"])
+        self.assertEqual({}, self.repo.stats())
+
+        status, data = self.post(self.event(type="checkin_unknown",
+                                            data={"task_id": "t-11", "device_name": "R",
+                                                  "attendance_date": "2026-11-20"}))
+        self.assertEqual(202, status)
+        self.assertTrue(data["ok"])
+        self.assertEqual({"PENDING": 1}, self.repo.stats())
+
     def test_status_endpoint(self):
         _, data = self.post(self.event())
         conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)

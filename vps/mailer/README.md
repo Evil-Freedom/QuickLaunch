@@ -188,3 +188,11 @@ Android 两个开关（设置页 → 远程同步 → 飞书进程清理）：
 
 待核验列表按「设备+日期」合并，只保留当天最早那次启动；某天一旦有真实考勤证据，
 该日后续启动不再进入待核验（避免十几次 lark-cli 调用）。
+
+## 11. 发信范围与收件人（按需调整）
+
+- `QLMAIL_PRIMARY` / `QLMAIL_FALLBACK`：主备顺序。当前主 = `evilFreedom2@gmail.com`，备用 = `Evil_Freedom@hotmail.com`；
+  只有主收件人**明确失败**才切备用，仍保持串行。
+- `QLMAIL_TYPES`：邮件类型白名单，逗号分隔；为空 = 全发。
+  当前 `checkin_success,checkin_unknown` —— 只推送打卡相关，`launch_* / cleanup_* / unlock_alert` 不再发信
+  （事件仍写库，只是不发邮件）。要恢复全部通知，删掉该行并 `systemctl restart ql-mailer` 即可。
