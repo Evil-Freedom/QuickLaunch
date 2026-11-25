@@ -9,7 +9,7 @@
 | 主机 | 阿里云上海 VPS，Debian 12.10，x86_64 |
 | 连接 | `xbyyb.duckdns.org`（仅作 SSH 地址，**不是**看板访问域名） |
 | 服务 | `team-desk-board.service`（systemd，User=statusboard） |
-| 监听 | `127.0.0.1:8900`（不暴露公网） |
+| 监听 | `172.18.0.1:8900`（docker 网桥网关，仅宿主与容器可达，不暴露公网） |
 | 代码 | `/opt/team-desk-board`（root:statusboard，只读） |
 | 数据 | `/var/lib/team-desk-board/board.db`（600，可写） |
 | 配置 | `/etc/team-desk-board/config.json`（root:statusboard 640） |
@@ -75,27 +75,53 @@ install -o root -g statusboard -m 640 config.json /etc/team-desk-board/config.js
 | 日报不重复 | `digest_status` | `skipped`（迁移日旧机制已推送） |
 | 服务间签名 | `BoardClient.self_evidence()` | 返回真实记录；错 token → 401 |
 
-## 4. HTTPS 入口（待定项）
+## 4. HTTPS 入口（已完成）
 
-当前**没有**配公网入口，原因：`xbyyb.duckdns.org` 只是 SSH 地址；
-`qlhub.duckdns.org` 已被 QuickLaunch 管理面板占用，且其 Caddy 用路径前缀
-路由（`/notify/*`）——给看板加 `/board/*` 需要前端全部改为相对路径，
-属于会动到已验收前端的改动，不擅自做。
-
-三条可选路径（都需要一个明确决定）：
-
-1. **新 duckdns 子域**（推荐）：注册 `xxx.duckdns.org` → Caddy 加一个 site block
-   → 看板 `HOST=172.18.0.1`（docker 网桥，与 ql-mailer 同模式）
-2. **路径前缀 `/board/`**：Caddy `handle /board/*` + 看板加前缀剥离 + 前端 7 处 fetch 改造
-3. **SSH 隧道**（现在就能用，无需改任何配置）：
-
-```bash
-ssh -N -L 8900:127.0.0.1:8900 -i ~/.ssh/ql-vps.pem root@xbyyb.duckdns.org
-# 浏览器打开 http://127.0.0.1:8900 （OAuth 回调需在飞书后台登记该地址）
+```caddyfile
+xbyyb.duckdns.org {
+	encode zstd gzip
+	reverse_proxy 172.18.0.1:8900
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+		-Server
+	}
+}
 ```
 
-现有 `users` 表里的授权在迁移后仍然有效（`expires_at` / `refresh_expires_at`
-都在有效期内），日常查看不需要重新登录。
+- 域名：`xbyyb.duckdns.org`（与 SSH 共用同一域名，不同端口，互不影响）
+- 证书：Let's Encrypt 自动签发，`ssl_verify_result=0`
+- 与 `qlhub.duckdns.org` 完全独立：不同站点块、不同后端、不同权限体系
+- Caddyfile 备份：`/opt/quicklaunch-vps/Caddyfile.bak-20261125-2204`
+
+验收：
+
+```
+xbyyb.duckdns.org/api/health   → 200，证书校验通过
+xbyyb.duckdns.org/             → 302 跳飞书登录
+qlhub.duckdns.org/devices      → 302，原有功能未受影响
+ssh xbyyb.duckdns.org          → 正常
+```
+
+## 4.1 为什么要听网桥地址
+
+看板必须让 Caddy 容器访问到，而 `127.0.0.1` 在容器内指向容器自己。
+改用 `172.18.0.1`（docker 网桥网关）后：宿主机与 docker 网络可达，
+公网不可达——与 `ql-mailer` 绑 `172.18.0.1:8780` 是同一套做法，不新增公网端口。
+
+ql-mailer 的 `QL_BOARD_URL` 同步改为 `http://172.18.0.1:8900`。
+
+## 4.2 权限隔离验收（真实角色实测）
+
+| 请求 | 管理员 | 普通成员 | 未登录 |
+|---|---|---|---|
+| `/api/board` | 200 | 200 | 401 |
+| `/api/users` | 200 | **403** | 401 |
+| `/api/config` | 200 | **403** | 401 |
+| `/api/absences` | 200 | **403** | 401 |
+| `/api/todos?open_id=他人` | 200 | **403** | 401 |
+| `/board.db` `/config.json` | 302 | 302 | 302 |
 
 ## 5. 回滚
 

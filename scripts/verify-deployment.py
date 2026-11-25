@@ -40,8 +40,8 @@ def main():
     out, err, rc = ssh(args.host, args.key,
                       "systemctl is-active team-desk-board; "
                       "systemctl is-enabled team-desk-board; "
-                      "ss -tlnp | grep -c '127.0.0.1:8900'; "
-                      "curl -s --max-time 6 http://127.0.0.1:8900/api/health")
+                      "ss -tlnp | grep -c ':8900'; "
+                      "curl -s --max-time 6 http://172.18.0.1:8900/api/health")
     if rc != 0 or not out:
         print(f"无法连接或命令失败：{err or out}")
         return 2
@@ -54,7 +54,7 @@ def main():
 
     check("systemd active", active == "active", active)
     check("开机自启", enabled == "enabled", enabled)
-    check("监听 127.0.0.1:8900", listen.strip() not in ("0", ""), listen.strip())
+    check("监听 8900（网桥地址，未公网暴露）", listen.strip() not in ("0", ""), listen.strip())
 
     try:
         health = json.loads(health_raw)
@@ -90,14 +90,30 @@ PY""")
 
     # 访问控制
     ac_out, _, _ = ssh(args.host, args.key,
-                       "curl -s -o /dev/null -w '%{http_code} ' --max-time 5 "
-                       "http://127.0.0.1:8900/api/board; "
-                       "curl -s -o /dev/null -w '%{http_code}' --max-time 5 "
-                       "http://127.0.0.1:8900/board.db")
+                       "curl -s -o /dev/null -w '%{http_code} ' --max-time 8 "
+                       "https://xbyyb.duckdns.org/api/board; "
+                       "curl -s -o /dev/null -w '%{http_code}' --max-time 8 "
+                       "https://xbyyb.duckdns.org/board.db")
     codes = ac_out.split()
     check("未登录拒绝访问", codes and codes[0] == "401", codes[0] if codes else "")
     check("数据库不可下载", len(codes) > 1 and codes[1] in ("302", "404"),
           codes[1] if len(codes) > 1 else "")
+
+    # HTTPS 双站点与证书
+    tls_out, _, _ = ssh(args.host, args.key,
+                        "curl -s -o /dev/null -w '%{http_code}/%{ssl_verify_result} ' "
+                        "--max-time 15 https://xbyyb.duckdns.org/api/health; "
+                        "curl -s -o /dev/null -w '%{http_code}/%{ssl_verify_result}' "
+                        "--max-time 15 https://qlhub.duckdns.org/devices")
+    tls = tls_out.split()
+    def _ok(pair, code):
+        try:
+            c, v = pair.split("/")
+            return c == code and v == "0"
+        except Exception:
+            return False
+    check("看板 HTTPS + 证书有效", len(tls) > 0 and _ok(tls[0], "200"), tls[0] if tls else "")
+    check("QuickLaunch HTTPS 未受影响", len(tls) > 1 and _ok(tls[1], "302"), tls[1] if len(tls) > 1 else "")
 
     # ql-mailer 与看板的连接
     mail_out, _, _ = ssh(args.host, args.key,
