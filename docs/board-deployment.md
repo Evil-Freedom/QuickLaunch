@@ -157,6 +157,29 @@ HTTPS 下带 `Secure`。密钥取 `BOARD_SESSION_SECRET`，未配置时退回 `Q
 
 旧明文 Cookie 的处理：下次请求放行一次，同时回发签名 Cookie，之后旧格式失效。
 
+## 4.5 上线公告（已就绪，未发送）
+
+看板内置一次性公告模块 `app/announce.py`，幂等键 `team-desk-board-public-launch-v1`，
+状态落 `announcements` 表（主键唯一约束，不是「先查再插」）。
+
+发送前强制 preflight，全部为真才允许：
+
+| 条件 | 含义 | 2026-11-25 实测 |
+|---|---|---|
+| `target_chat` | 配置了运营部群 | True |
+| `allow_departments` | 部门白名单存在 | True |
+| `attendance_full` | 考勤**真的覆盖全员** | **False（1/11）** |
+| `attendance_mode` | 取数走批量而非逐人 | True |
+| `morning_ran` | 当天跑过晨间统采 | True |
+| `morning_attendance_ok` | 采集状态 ok/partial | True |
+| `digest_due_now_disabled` | 09:00 固定推送已停用 | True |
+
+实测调用 `send_launch()` 返回 `preflight_failed`，**一条消息都没发**。
+解除条件：`attendance_full=True`（即拿到 `contact:user.employee_id:readonly` 后切到全员覆盖）。
+
+状态机 `PENDING → SENDING → SENT/FAILED`。`SENDING` 悬挂时不自动重发——
+进程中途挂掉时结果不确定，必须先核对群消息再改状态。
+
 ## 5. 回滚
 
 见 `docs/rollback.md`。
