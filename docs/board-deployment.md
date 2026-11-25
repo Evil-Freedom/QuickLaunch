@@ -157,7 +157,7 @@ HTTPS 下带 `Secure`。密钥取 `BOARD_SESSION_SECRET`，未配置时退回 `Q
 
 旧明文 Cookie 的处理：下次请求放行一次，同时回发签名 Cookie，之后旧格式失效。
 
-## 4.5 上线公告（已就绪，未发送）
+## 4.5 公告：外网访问通知已发送 / 业务上线公告仍待条件
 
 看板内置一次性公告模块 `app/announce.py`，幂等键 `team-desk-board-public-launch-v1`，
 状态落 `announcements` 表（主键唯一约束，不是「先查再插」）。
@@ -174,8 +174,23 @@ HTTPS 下带 `Secure`。密钥取 `BOARD_SESSION_SECRET`，未配置时退回 `Q
 | `morning_attendance_ok` | 采集状态 ok/partial | True |
 | `digest_due_now_disabled` | 09:00 固定推送已停用 | True |
 
-实测调用 `send_launch()` 返回 `preflight_failed`，**一条消息都没发**。
-解除条件：`attendance_full=True`（即拿到 `contact:user.employee_id:readonly` 后切到全员覆盖）。
+**业务上线公告**（`team-desk-board-public-launch-v1`）：实测 `send_launch()` 返回
+`preflight_failed`，一条未发。解除条件是全员采集能力到位（11 人各自授权，或管理员批工号权限）。
+
+**外网访问通知**（`team-desk-board-external-access-notice-v1`）：已发送。
+这条只看「公网能不能用 + 权限隔离有没有被放开」，与考勤业务是否跑通无关——
+否则会出现「外网明明能用，却因为有人没授权所以不能通知大家去用」。
+
+```
+status   = SENT
+message_id = om_x100b7f5b3b3b54a4dd18f9b43ce0765
+chat_id  = oc_5f8c7d397f057fc33fda3bccffdf9a4c
+sent_at  = 2026-11-25 22:57:35
+body_version = v1
+```
+
+已用飞书 API 反查该 message_id 确认消息真实存在于目标群；二次调用返回
+「已发送过，不再重复」。
 
 状态机 `PENDING → SENDING → SENT/FAILED`。`SENDING` 悬挂时不自动重发——
 进程中途挂掉时结果不确定，必须先核对群消息再改状态。
