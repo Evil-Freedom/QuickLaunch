@@ -44,6 +44,14 @@ class Config:
     lark_cmd: str = "/usr/local/bin/lark-cli"
     lark_timeout_s: int = 15
     action_ttl_s: int = 1800
+    # ── 统一考勤数据源（2026-11-25） ────────────────────────────────
+    # 指向运营部看板的内部接口。为空 = 该能力关闭（不猜地址）。
+    board_url: str = ""
+    board_token: str = ""
+    board_timeout_s: int = 8
+    # 看板不可达时是否退回「自己查飞书」。默认关：
+    # 两个数据源同时存在就会得出两种结论，那正是本次要消掉的不一致。
+    board_fallback_lark: bool = False
 
     @staticmethod
     def from_env() -> "Config":
@@ -65,6 +73,10 @@ class Config:
             lark_cmd=_env("QLMAIL_LARK_CMD", "/usr/local/bin/lark-cli"),
             lark_timeout_s=_env_int("QLMAIL_LARK_TIMEOUT", 15),
             action_ttl_s=_env_int("QLMAIL_ACTION_TTL", 1800),
+            board_url=_env("QL_BOARD_URL", ""),
+            board_token=_env("QL_BOARD_TOKEN", ""),
+            board_timeout_s=_env_int("QL_BOARD_TIMEOUT", 8),
+            board_fallback_lark=_env("QL_BOARD_FALLBACK_LARK", "0") == "1",
             bind_host=_env("QLMAIL_BIND", "127.0.0.1"),
             port=_env_int("QLMAIL_PORT", 8780),
             primary=primary,

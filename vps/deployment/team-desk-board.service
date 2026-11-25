@@ -1,0 +1,33 @@
+[Unit]
+Description=Team Desk Board - 运营部状态看板（统一考勤采集 + 晨间日报）
+Documentation=file:///opt/team-desk-board/docs/AI-CONTEXT.md
+After=network-online.target
+Wants=network-online.target
+# 刻意不写 Requires=ql-mailer：邮件通道挂了，看板仍要能显示状态；
+# 反过来也一样，两个服务互不为单点。
+
+[Service]
+Type=simple
+User=statusboard
+Group=statusboard
+WorkingDirectory=/opt/team-desk-board
+EnvironmentFile=/etc/team-desk-board/board.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /opt/team-desk-board/server.py
+# 崩溃自动回来：调度线程和刷新令牌都靠进程活着才有意义
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=0
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+# 加固：代码目录只读，只有数据与日志可写
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/team-desk-board /var/log/team-desk-board
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

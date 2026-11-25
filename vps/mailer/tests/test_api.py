@@ -12,13 +12,29 @@ from mailer import repository as R
 from mailer.agent_mail import AgentMailClient
 from mailer.actions import ActionStore
 from mailer.alerts import AlertStore
-from mailer.lark import LarkClient
+from mailer.board_bridge import BoardClient
+from mailer.lark import Evidence, LarkClient
 from mailer.api import build_server
 from mailer.config import Config
 from mailer.dispatcher import Dispatcher
 
 FAKE_CLI = os.path.join(os.path.dirname(__file__), "fake_cli.py")
 FAKE_LARK = os.path.join(os.path.dirname(__file__), "fake_lark.py")
+
+
+class FakeBoard:
+    """替身：只实现被调用到的两个方法，不碰网络。"""
+
+    def __init__(self, evidence=None):
+        self.evidence = evidence
+        self.planned = []
+
+    def self_evidence(self, day, not_before_ts, device_id):
+        return self.evidence
+
+    def plan_morning(self, event_time, type_, device_id):
+        self.planned.append((type_, device_id, event_time))
+        return {"ok": True}
 
 
 class ApiTest(unittest.TestCase):
@@ -162,18 +178,24 @@ class ApiTest(unittest.TestCase):
         self.assertTrue(data["ok"])
         self.assertEqual({"PENDING": 1}, self.repo.stats())
 
-    def _restart(self, cfg, lark=None):
+    def _restart(self, cfg, lark=None, board=None):
         self.server.shutdown()
-        self.server = build_server(cfg, self.repo, self.store, self.alerts, self.dispatcher, lark)
+        self.server = build_server(cfg, self.repo, self.store, self.alerts, self.dispatcher,
+                                   lark, board)
         self.port = self.server.server_address[1]
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
-    def test_unknown_auto_verifies_when_vps_reads_attendance(self):
-        os.environ["FAKE_LARK_MODE"] = "ok"
-        cfg = Config(**{**self.cfg.__dict__, "lark_enabled": True})
-        self._restart(cfg, LarkClient([sys.executable, FAKE_LARK], timeout_s=5, home="."))
+    def test_unknown_auto_verifies_when_board_has_evidence(self):
+        """证据来自看板统一采集，而不是本服务自己查飞书。"""
         import datetime as dt
+        import time as _t
         today = dt.datetime.now().strftime("%Y-%m-%d")
+        board = FakeBoard(Evidence(date=today, record_id="rec-board-1",
+                                   check_time=int(_t.time()) - 60, result="Normal",
+                                   location="", employee_name=""))
+        cfg = Config(**{**self.cfg.__dict__, "board_url": "http://127.0.0.1:1",
+                        "board_token": "x"})
+        self._restart(cfg, None, board)
         status, data = self.post({
             "type": "checkin_unknown", "device_id": "dev_ok",
             "data": {"task_id": "t-auto", "device_name": "Razr", "target_app": "Feishu",
@@ -188,9 +210,11 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(["checkin_success"], types)
 
     def test_unknown_stays_unknown_when_no_record(self):
+        """看板没有记录时必须保持待核验，不能凭「查不到」判任何结论。"""
         os.environ["FAKE_LARK_MODE"] = "empty"
-        cfg = Config(**{**self.cfg.__dict__, "lark_enabled": True})
-        self._restart(cfg, LarkClient([sys.executable, FAKE_LARK], timeout_s=5, home="."))
+        cfg = Config(**{**self.cfg.__dict__, "board_url": "http://127.0.0.1:1",
+                        "board_token": "x"})
+        self._restart(cfg, None, FakeBoard(None))
         import datetime as dt
         today = dt.datetime.now().strftime("%Y-%m-%d")
         status, data = self.post({

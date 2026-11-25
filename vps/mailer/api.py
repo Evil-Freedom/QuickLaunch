@@ -19,6 +19,7 @@ from . import render
 from . import repository as R
 from .actions import ActionStore
 from .alerts import AlertStore
+from .board_bridge import BoardClient
 from .lark import LarkClient
 from .config import Config
 from .dispatcher import Dispatcher
@@ -45,7 +46,8 @@ class Handler(BaseHTTPRequestHandler):
     repo: R.Repository
     store: ActionStore
     alerts: AlertStore
-    lark: LarkClient | None
+    lark: LarkClient | None = None
+    board: BoardClient | None = None
     dispatcher: Dispatcher
 
     # ── 基础 ────────────────────────────────────────────────────────
@@ -230,42 +232,58 @@ class Handler(BaseHTTPRequestHandler):
             date = raw_date if _looks_like_date(raw_date) else _dt.datetime.now().strftime("%Y-%m-%d")
             task_id = str(payload.get("task_id") or event_id or "")
 
-            # VPS 自己查一次飞书考勤：查到真实记录就直接按「打卡成功」走完整闭环，
-            # 查不到才进入「待确认」。这样不依赖 Windows 也能闭环。
-            if self.cfg.lark_enabled and self.lark is not None:
+            # 先告诉看板「今天已经有待核验任务」：它据此登记晨间统采（同日幂等），
+            # 失败不影响本次上报——采集早晚会由看板自己的轮询补上，
+            # 但绝不能因为通知失败就把这次打卡判成别的结果。
+            if self.board is not None:
+                try:
+                    self.board.plan_morning(event_time=_time.time(), type_=event_type,
+                                            device_id=device_id)
+                except Exception as exc:            # noqa: BLE001
+                    log.warning("通知看板登记统采失败：%s", exc)
+
+            # 考勤证据只从看板要（一次采集、多处消费）。
+            # 直查飞书的旧通道默认关闭：两个数据源并存会出现两套结论。
+            evidence, source = None, ""
+            if self.board is not None:
+                evidence = self.board.self_evidence(date, int(_time.time()) - 600, device_id)
+                source = "board:internal/attendance/self"
+            elif self.cfg.board_fallback_lark and self.cfg.lark_enabled and self.lark is not None:
                 evidence = self.lark.lookup(date, int(_time.time()) - 600)
-                if evidence is not None:
-                    self.store.record_attendance(
-                        task_id=task_id, device_id=device_id, attendance_date=evidence.date,
-                        evidence_source="vps-lark-cli:attendance.user_tasks.query",
-                        evidence_time=evidence.check_time_text,
-                        evidence_ref=evidence.record_id, result="success",
-                    )
-                    self.alerts.close(device_id, evidence.date, "checkin_success")
-                    self._notify("checkin-" + task_id, "checkin_success", device_id, {
-                        "device_name": payload.get("device_name") or "QuickLaunch 设备",
-                        "target_app": payload.get("target_app") or "飞书",
-                        "attendance_date": evidence.date,
-                        "evidence_time": evidence.check_time_text,
-                        "evidence_source": "vps-lark-cli",
-                        "evidence_ref": evidence.record_id,
-                        "checkin_result": evidence.result,
-                        "location": evidence.location,
-                        "employee_name": evidence.employee_name,
-                        "verified_at": _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "task_id": task_id,
-                    })
-                    action_created, action = self.store.create_action(
-                        device_id=device_id, task_id=task_id,
-                        action_type="FORCE_STOP_FEISHU", ttl_s=self.cfg.action_ttl_s,
-                    )
-                    log.info("VPS 直查命中 task=%s record=%s action=%s",
-                             task_id, evidence.record_id, action.action_id)
-                    self._send(202, {"ok": True, "verified": True, "auto": True,
-                                     "record_id": evidence.record_id,
-                                     "action_id": action.action_id,
-                                     "action_created": action_created})
-                    return
+                source = "vps-lark-cli:attendance.user_tasks.query"
+
+            if evidence is not None:
+                self.store.record_attendance(
+                    task_id=task_id, device_id=device_id, attendance_date=evidence.date,
+                    evidence_source=source,
+                    evidence_time=evidence.check_time_text,
+                    evidence_ref=evidence.record_id, result="success",
+                )
+                self.alerts.close(device_id, evidence.date, "checkin_success")
+                self._notify("checkin-" + task_id, "checkin_success", device_id, {
+                    "device_name": payload.get("device_name") or "QuickLaunch 设备",
+                    "target_app": payload.get("target_app") or "飞书",
+                    "attendance_date": evidence.date,
+                    "evidence_time": evidence.check_time_text,
+                    "evidence_source": source.split(":")[0],
+                    "evidence_ref": evidence.record_id,
+                    "checkin_result": evidence.result,
+                    "location": evidence.location,
+                    "employee_name": evidence.employee_name,
+                    "verified_at": _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "task_id": task_id,
+                })
+                action_created, action = self.store.create_action(
+                    device_id=device_id, task_id=task_id,
+                    action_type="FORCE_STOP_FEISHU", ttl_s=self.cfg.action_ttl_s,
+                )
+                log.info("统一采集命中 task=%s record=%s action=%s source=%s",
+                         task_id, evidence.record_id, action.action_id, source)
+                self._send(202, {"ok": True, "verified": True, "auto": True,
+                                 "record_id": evidence.record_id,
+                                 "action_id": action.action_id,
+                                 "action_created": action_created})
+                return
 
             decision, dedupe_id = self.alerts.observe(device_id, date, task_id)
             log.info("待确认提醒 device=%s date=%s decision=%s", device_id, date, decision)
@@ -404,10 +422,11 @@ class Handler(BaseHTTPRequestHandler):
 
 def build_server(cfg: Config, repo: R.Repository, store: ActionStore,
                  alerts: AlertStore, dispatcher: Dispatcher,
-                 lark: LarkClient | None = None) -> ThreadingHTTPServer:
+                 lark: LarkClient | None = None,
+                 board: BoardClient | None = None) -> ThreadingHTTPServer:
     handler = type("BoundHandler", (Handler,),
                    {"cfg": cfg, "repo": repo, "store": store, "alerts": alerts,
-                    "lark": lark, "dispatcher": dispatcher})
+                    "lark": lark, "board": board, "dispatcher": dispatcher})
     try:
         return ThreadingHTTPServer((cfg.bind_host, cfg.port), handler)
     except OSError as exc:

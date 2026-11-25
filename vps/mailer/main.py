@@ -17,6 +17,7 @@ from .actions import ActionStore
 from .alerts import AlertStore
 from .lark import LarkClient
 from .agent_mail import AgentMailClient
+from .board_bridge import BoardClient
 from .api import build_server
 from .config import Config
 from .dispatcher import Dispatcher
@@ -83,7 +84,14 @@ def main() -> int:
     repo = Repository(cfg.db_path)
     store = ActionStore(cfg.db_path)
     alerts = AlertStore(cfg.db_path)
-    lark = LarkClient([cfg.lark_cmd], cfg.lark_timeout_s, cfg.cli_home) if cfg.lark_enabled else None
+    # 考勤证据的唯一来源是看板统一采集服务。只有显式要求回退（默认关）时
+    # 才启用旧的直查飞书通道，避免两个数据源给出两种结论。
+    lark = (LarkClient([cfg.lark_cmd], cfg.lark_timeout_s, cfg.cli_home)
+            if cfg.lark_enabled else None)
+    board = (BoardClient(cfg.board_url, cfg.board_token, cfg.board_timeout_s)
+             if cfg.board_url and cfg.board_token else None)
+    if cfg.board_url and not cfg.board_token:
+        log.warning("QL_BOARD_URL 已配置但 QL_BOARD_TOKEN 为空，内部接口调用会被拒绝")
     client = AgentMailClient(cfg.cli_path, cfg.cli_config_dir, cfg.cli_home, cfg.send_timeout_s)
     dispatcher = Dispatcher(cfg, repo, client, on_sent=alerts.on_sent)
 
@@ -95,7 +103,7 @@ def main() -> int:
         email = aliases[0].get("email") if aliases else "?"
         log.info("发件身份：%s（授权正常）", email)
 
-    server = build_server(cfg, repo, store, alerts, dispatcher, lark)
+    server = build_server(cfg, repo, store, alerts, dispatcher, lark, board)
     dispatcher.start()
     log.info("ql-mailer 监听 %s:%s，DB=%s", cfg.bind_host, cfg.port, cfg.db_path)
 
