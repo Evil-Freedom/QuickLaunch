@@ -15,6 +15,7 @@ from dataclasses import replace
 
 from .actions import ActionStore
 from .alerts import AlertStore
+from .lark import LarkClient
 from .agent_mail import AgentMailClient
 from .api import build_server
 from .config import Config
@@ -82,6 +83,7 @@ def main() -> int:
     repo = Repository(cfg.db_path)
     store = ActionStore(cfg.db_path)
     alerts = AlertStore(cfg.db_path)
+    lark = LarkClient([cfg.lark_cmd], cfg.lark_timeout_s, cfg.cli_home) if cfg.lark_enabled else None
     client = AgentMailClient(cfg.cli_path, cfg.cli_config_dir, cfg.cli_home, cfg.send_timeout_s)
     dispatcher = Dispatcher(cfg, repo, client, on_sent=alerts.on_sent)
 
@@ -93,7 +95,7 @@ def main() -> int:
         email = aliases[0].get("email") if aliases else "?"
         log.info("发件身份：%s（授权正常）", email)
 
-    server = build_server(cfg, repo, store, alerts, dispatcher)
+    server = build_server(cfg, repo, store, alerts, dispatcher, lark)
     dispatcher.start()
     log.info("ql-mailer 监听 %s:%s，DB=%s", cfg.bind_host, cfg.port, cfg.db_path)
 

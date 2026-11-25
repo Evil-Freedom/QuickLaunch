@@ -95,7 +95,7 @@ class AgentMailClient:
                 "--to", to,
                 "--subject", subject,
                 "--body", body,
-                "--body-format", "plain",
+                "--body-format", "html",
                 "--confirmed",          # 服务里没有第二个人点确认
             ]
         )

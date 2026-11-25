@@ -177,6 +177,10 @@ def verify_once(props: dict[str, str], dry_run: bool = False) -> int:
             "evidence_source": "lark-cli:attendance.user_tasks.query",
             "evidence_time": dt.datetime.fromtimestamp(int(evidence["check_time"])).strftime("%Y-%m-%d %H:%M:%S"),
             "evidence_ref": evidence["record_id"],
+            "checkin_result": evidence.get("result") or "",
+            "location": evidence.get("location") or "",
+            "employee_name": evidence.get("employee_name") or "",
+            "verified_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "device_name": os.environ.get("COMPUTERNAME", "Windows"),
             "result": "success",
         }

@@ -19,6 +19,7 @@ from . import render
 from . import repository as R
 from .actions import ActionStore
 from .alerts import AlertStore
+from .lark import LarkClient
 from .config import Config
 from .dispatcher import Dispatcher
 
@@ -44,6 +45,7 @@ class Handler(BaseHTTPRequestHandler):
     repo: R.Repository
     store: ActionStore
     alerts: AlertStore
+    lark: LarkClient | None
     dispatcher: Dispatcher
 
     # ── 基础 ────────────────────────────────────────────────────────
@@ -223,9 +225,48 @@ class Handler(BaseHTTPRequestHandler):
             # 日期必须是 yyyy-MM-dd：payload 里的 actual_time 是「MM-dd HH:mm:ss」，
             # 直接截前 10 位会得到 "11-24 12:4" 这种非法日期，提醒窗口就永远匹配不上。
             import datetime as _dt
+            import time as _time
             raw_date = str(payload.get("attendance_date") or "")
             date = raw_date if _looks_like_date(raw_date) else _dt.datetime.now().strftime("%Y-%m-%d")
-            task_id = str(payload.get("task_id") or "")
+            task_id = str(payload.get("task_id") or event_id or "")
+
+            # VPS 自己查一次飞书考勤：查到真实记录就直接按「打卡成功」走完整闭环，
+            # 查不到才进入「待确认」。这样不依赖 Windows 也能闭环。
+            if self.cfg.lark_enabled and self.lark is not None:
+                evidence = self.lark.lookup(date, int(_time.time()) - 600)
+                if evidence is not None:
+                    self.store.record_attendance(
+                        task_id=task_id, device_id=device_id, attendance_date=evidence.date,
+                        evidence_source="vps-lark-cli:attendance.user_tasks.query",
+                        evidence_time=evidence.check_time_text,
+                        evidence_ref=evidence.record_id, result="success",
+                    )
+                    self.alerts.close(device_id, evidence.date, "checkin_success")
+                    self._notify("checkin-" + task_id, "checkin_success", device_id, {
+                        "device_name": payload.get("device_name") or "QuickLaunch 设备",
+                        "target_app": payload.get("target_app") or "飞书",
+                        "attendance_date": evidence.date,
+                        "evidence_time": evidence.check_time_text,
+                        "evidence_source": "vps-lark-cli",
+                        "evidence_ref": evidence.record_id,
+                        "checkin_result": evidence.result,
+                        "location": evidence.location,
+                        "employee_name": evidence.employee_name,
+                        "verified_at": _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "task_id": task_id,
+                    })
+                    action_created, action = self.store.create_action(
+                        device_id=device_id, task_id=task_id,
+                        action_type="FORCE_STOP_FEISHU", ttl_s=self.cfg.action_ttl_s,
+                    )
+                    log.info("VPS 直查命中 task=%s record=%s action=%s",
+                             task_id, evidence.record_id, action.action_id)
+                    self._send(202, {"ok": True, "verified": True, "auto": True,
+                                     "record_id": evidence.record_id,
+                                     "action_id": action.action_id,
+                                     "action_created": action_created})
+                    return
+
             decision, dedupe_id = self.alerts.observe(device_id, date, task_id)
             log.info("待确认提醒 device=%s date=%s decision=%s", device_id, date, decision)
             if decision in ("suppress", "closed"):
@@ -362,10 +403,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def build_server(cfg: Config, repo: R.Repository, store: ActionStore,
-                 alerts: AlertStore, dispatcher: Dispatcher) -> ThreadingHTTPServer:
+                 alerts: AlertStore, dispatcher: Dispatcher,
+                 lark: LarkClient | None = None) -> ThreadingHTTPServer:
     handler = type("BoundHandler", (Handler,),
                    {"cfg": cfg, "repo": repo, "store": store, "alerts": alerts,
-                    "dispatcher": dispatcher})
+                    "lark": lark, "dispatcher": dispatcher})
     try:
         return ThreadingHTTPServer((cfg.bind_host, cfg.port), handler)
     except OSError as exc:

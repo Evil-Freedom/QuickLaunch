@@ -196,3 +196,24 @@ Android 两个开关（设置页 → 远程同步 → 飞书进程清理）：
 - `QLMAIL_TYPES`：邮件类型白名单，逗号分隔；为空 = 全发。
   当前 `checkin_success,checkin_unknown` —— 只推送打卡相关，`launch_* / cleanup_* / unlock_alert` 不再发信
   （事件仍写库，只是不发邮件）。要恢复全部通知，删掉该行并 `systemctl restart ql-mailer` 即可。
+
+## 12. VPS 侧直查飞书考勤（不再依赖 Windows）
+
+`QLMAIL_LARK=1` 时，收到 `checkin_unknown` 会先在 VPS 上用 `lark-cli` 查当天考勤：
+
+- **查到真实记录** → 直接按「打卡成功」走完整闭环：写 `attendance` → 建 `FORCE_STOP_FEISHU` → 发「打卡成功」邮件；
+- **查不到 / CLI 失败 / 超时** → 保持原语义，进入「待确认」窗口（30 分钟一条提醒）；
+- 判据与 Windows 核验端完全一致：`check_in_record_id` 非空、结果非 Todo/Absent、打卡时间不早于任务时间-10 分钟。
+
+前置条件（一次性）：
+
+```bash
+apt-get install -y nodejs npm && npm i -g @larksuite/cli
+sudo -u qlmail env HOME=/var/lib/qlmail lark-cli config init --new   # 扫码绑定应用
+sudo -u qlmail env HOME=/var/lib/qlmail lark-cli auth login          # 设备码授权（用户身份）
+sudo -u qlmail env HOME=/var/lib/qlmail lark-cli attendance user_tasks query \
+  --params '{"employee_type":"employee_no"}' \
+  --data   '{"user_ids":[],"check_date_from":20261125,"check_date_to":20261125}'
+```
+
+Windows 的 `tools/attendance_verifier.py` 保留为备份通道（VPS 挂了/CLI 掉授权时仍可人工跑一次）。

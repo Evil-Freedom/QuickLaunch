@@ -12,11 +12,13 @@ from mailer import repository as R
 from mailer.agent_mail import AgentMailClient
 from mailer.actions import ActionStore
 from mailer.alerts import AlertStore
+from mailer.lark import LarkClient
 from mailer.api import build_server
 from mailer.config import Config
 from mailer.dispatcher import Dispatcher
 
 FAKE_CLI = os.path.join(os.path.dirname(__file__), "fake_cli.py")
+FAKE_LARK = os.path.join(os.path.dirname(__file__), "fake_lark.py")
 
 
 class ApiTest(unittest.TestCase):
@@ -159,6 +161,47 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(202, status)
         self.assertTrue(data["ok"])
         self.assertEqual({"PENDING": 1}, self.repo.stats())
+
+    def _restart(self, cfg, lark=None):
+        self.server.shutdown()
+        self.server = build_server(cfg, self.repo, self.store, self.alerts, self.dispatcher, lark)
+        self.port = self.server.server_address[1]
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def test_unknown_auto_verifies_when_vps_reads_attendance(self):
+        os.environ["FAKE_LARK_MODE"] = "ok"
+        cfg = Config(**{**self.cfg.__dict__, "lark_enabled": True})
+        self._restart(cfg, LarkClient([sys.executable, FAKE_LARK], timeout_s=5, home="."))
+        import datetime as dt
+        today = dt.datetime.now().strftime("%Y-%m-%d")
+        status, data = self.post({
+            "type": "checkin_unknown", "device_id": "dev_ok",
+            "data": {"task_id": "t-auto", "device_name": "Razr", "target_app": "Feishu",
+                     "attendance_date": today, "actual_time": "08:40:00"},
+        })
+        self.assertEqual(202, status)
+        self.assertTrue(data.get("verified"))
+        self.assertTrue(data.get("auto"))
+        self.assertEqual({"PENDING": 1}, self.store.stats())
+        types = sorted(r[0] for r in self.repo._conn.execute(
+            "select notification_type from notifications"))
+        self.assertEqual(["checkin_success"], types)
+
+    def test_unknown_stays_unknown_when_no_record(self):
+        os.environ["FAKE_LARK_MODE"] = "empty"
+        cfg = Config(**{**self.cfg.__dict__, "lark_enabled": True})
+        self._restart(cfg, LarkClient([sys.executable, FAKE_LARK], timeout_s=5, home="."))
+        import datetime as dt
+        today = dt.datetime.now().strftime("%Y-%m-%d")
+        status, data = self.post({
+            "type": "checkin_unknown", "device_id": "dev_ok",
+            "data": {"task_id": "t-stay", "device_name": "Razr", "attendance_date": today},
+        })
+        self.assertEqual(202, status)
+        self.assertFalse(data.get("verified", False))
+        types = sorted(r[0] for r in self.repo._conn.execute(
+            "select notification_type from notifications"))
+        self.assertEqual(["checkin_unknown"], types)
 
     def test_status_endpoint(self):
         _, data = self.post(self.event())

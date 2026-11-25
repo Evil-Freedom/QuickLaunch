@@ -40,6 +40,9 @@ class Config:
     log_path: str
     verifier_token: str = ""
     enabled_types: tuple[str, ...] = ()
+    lark_enabled: bool = False
+    lark_cmd: str = "/usr/local/bin/lark-cli"
+    lark_timeout_s: int = 15
     action_ttl_s: int = 1800
 
     @staticmethod
@@ -58,6 +61,9 @@ class Config:
             ingest_token=_env("QLMAIL_INGEST_TOKEN"),
             verifier_token=_env("QLMAIL_VERIFIER_TOKEN"),
             enabled_types=tuple(t.strip() for t in _env("QLMAIL_TYPES").split(",") if t.strip()),
+            lark_enabled=_env("QLMAIL_LARK", "0") == "1",
+            lark_cmd=_env("QLMAIL_LARK_CMD", "/usr/local/bin/lark-cli"),
+            lark_timeout_s=_env_int("QLMAIL_LARK_TIMEOUT", 15),
             action_ttl_s=_env_int("QLMAIL_ACTION_TTL", 1800),
             bind_host=_env("QLMAIL_BIND", "127.0.0.1"),
             port=_env_int("QLMAIL_PORT", 8780),
